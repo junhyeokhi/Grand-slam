@@ -13,9 +13,9 @@ erDiagram
         string kakao_id "카카오ID"
         string email "이메일"
         string pw "비밀번호"
-        int number "전화번호"
+        string number "전화번호"
         string birth_date "생년월일"
-        string adress "주소"
+        string address "주소"
     }
     TICKET {
         int id PK "티켓번호"

@@ -1,0 +1,90 @@
+@charset "uft-8";
+
+header {
+    width: 1275px;
+    height: 115px;
+    margin: 0 auto;
+    background-color: aqua;
+}
+
+/* main */
+main {
+    width: 1275px;
+    /* height: 1280px;  */
+    margin: 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+#my {
+    width: 100%;
+    height: 160px;
+    display: flex;
+    align-items: center;
+    padding: 35px;
+    background-color: beige;
+}
+
+#my a {
+    font-size: 35px;
+}
+
+aside {
+    width: 265px;
+    height: 940px;
+    background-color: yellowgreen;
+    display: flex;
+}
+
+aside ul li.big{
+    font-size: 20px;
+    margin-top: 30px;
+}
+
+#welcome {
+    width: 955px;
+    height: 70px;
+    background-color: rgba(240, 238, 238, 0.61);
+    border-radius: 10px;
+    margin-left: 10px;
+}
+
+#recent {
+    width: 955px;
+    height: 137px;
+    background-color: blueviolet;
+    border-radius: 10px;
+    margin-left: 10px;
+    margin-top: 15px;
+}
+
+#banner {
+    width: 955px;
+    height: 130px;
+    border-radius: 10px;
+    margin-left: 10px;
+    margin-top: 15px;
+}
+
+#history {
+    width: 955px;
+    height: 170px;
+    margin-left: 10px;
+    margin-top: 15px;
+    background-color: brown;
+}
+
+#message {
+    width: 955px;
+    height: 155px;
+    margin-left: 10px;
+    background-color: gold;
+}
+
+#review {
+    width: 955px;
+    height: 155px;
+    margin-left: 10px;
+    background-color: chartreuse;
+}
+

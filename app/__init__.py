@@ -1,10 +1,14 @@
 from flask import Flask, render_template
-
+import config  # config.py 임포트
 from constants import KBO_TEAMS
+
+db = SQLAlchemy()
+migrate = Migrate()
 
 
 def create_app():
     app = Flask(__name__)
+    app.config.from_object(config)
 
     # 블루프린트 등록
     from .views import main_views

@@ -1,14 +1,16 @@
 {% extends "base.html" %}
 {% block title %}마이페이지{% endblock %}
 {% block styles %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/mypage.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/mypage.css') }}">
 {% endblock %}
 {% block content %}
-<main>
-        <div id="my">
-            <a href="#">MY티켓베이</a>
-        </div>
-        <aside>
+<div class="container">
+    <div id="my" class="row">
+        <a href="#">MY티켓베이</a>
+    </div>
+
+    <div class="row">
+        <aside class="col-md-2">
             <ul>
                 <li class="big">내가 구매한 상품</li>
                 <li><a href="#">구매 이력 관리</a></li>
@@ -36,27 +38,49 @@
                 <li><a href="#">SNS 연결</a></li>
             </ul>
         </aside>
-        <div>
-            <div id="welcome">{{ g.user.username }}님, 오늘도 좋은 티켓 되세요!</div>
-            <div id="recent"></div>
-            <div id="banner">
-                <img src="./img/banner.png" alt="배너">
-            </div>
-            <div id="history">
-                <ul>
-                    <li>구매 이력 관리</li>
-                    <li>판매 이력 관리</li>
-                </ul>
-                <div id="buy"></div>
-                <div id="sell"></div>
-            </div>
-            <div id="message">
-                <h4>알림메시지</h4>
-            </div>
-            <div id="review">
-                <h4>최근 작성 후기</h4>
+
+        <div class="col-md-10">
+            <div>
+                <div id="welcome" class="row">님, 오늘도 좋은 티켓 되세요!</div>
+                <div id="recent" class="row">
+                    <div class="recent_buy text-center col-md-6">
+                        <span>최근 구매 현황</span>
+                        <div class="row">
+                            <div class="col">결제완료</div>
+                            <div class="col">전달완료</div>
+                            <div class="col">거래완료</div>
+                            <div class="col">거래취소</div>
+                        </div>
+                    </div>
+                    <div class="recent_sell text-center col-md-6">
+                        <span>최근 판매 현황</span>
+                        <div class="row">
+                            <div class="col">결제완료</div>
+                            <div class="col">전달완료</div>
+                            <div class="col">거래완료</div>
+                            <div class="col">판매완료</div>
+                        </div>
+                    </div>
+                </div>
+                <div id="banner" class="row">
+                    <img src="./img/banner.png" alt="배너">
+                </div>
+                <div id="history">
+                    <ul id="tab">
+                        <li>구매 이력 관리</li>
+                        <li>판매 이력 관리</li>
+                    </ul>
+                    <div id="buy"></div>
+                    <div id="sell"></div>
+                </div>
+                <div id="message" class="row">
+                    <h4>알림메시지</h4>
+                </div>
+                <div id="review" class="row">
+                    <h4>최근 작성 후기</h4>
+                </div>
             </div>
         </div>
-
-      </main>
+    </div>
+</div>
 {% endblock %}

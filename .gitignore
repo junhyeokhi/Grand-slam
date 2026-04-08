@@ -1,6 +1,7 @@
 .idea/
 .venv/
-_pycahe_/
+__pycache__/
 migrations/
+.DS_Store
 
 *db

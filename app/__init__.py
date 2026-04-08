@@ -1,6 +1,9 @@
+from flask_migrate import Migrate
+
 from flask import Flask, render_template
 import config  # config.py 임포트
 from constants import KBO_TEAMS
+from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 migrate = Migrate()

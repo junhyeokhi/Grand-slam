@@ -1,7 +1,7 @@
 @charset "uft-8";
 
 header {
-    width: 1275px;
+    width: 100%;
     height: 115px;
     margin: 0 auto;
     background-color: aqua;
@@ -9,11 +9,16 @@ header {
 
 /* main */
 main {
-    width: 1275px;
+    width: 100%;
     /* height: 1280px;  */
     margin: 0 auto;
     display: flex;
     flex-wrap: wrap;
+}
+
+#container {
+    width: 1275px;
+    height: 100%;
 }
 
 #my {
@@ -30,7 +35,7 @@ main {
 }
 
 aside {
-    width: 265px;
+    /* width: 25%; */
     height: 940px;
     background-color: yellowgreen;
     display: flex;
@@ -41,8 +46,12 @@ aside ul li.big{
     margin-top: 30px;
 }
 
+#container2 {
+    width: (100%-25%);
+}
+
 #welcome {
-    width: 955px;
+    /* width: 955px; */
     height: 70px;
     background-color: rgba(240, 238, 238, 0.61);
     border-radius: 10px;
@@ -50,7 +59,7 @@ aside ul li.big{
 }
 
 #recent {
-    width: 955px;
+    /* width: 955px; */
     height: 137px;
     background-color: blueviolet;
     border-radius: 10px;
@@ -59,7 +68,7 @@ aside ul li.big{
 }
 
 #banner {
-    width: 955px;
+    /* width: 955px; */
     height: 130px;
     border-radius: 10px;
     margin-left: 10px;
@@ -67,22 +76,30 @@ aside ul li.big{
 }
 
 #history {
-    width: 955px;
+    /* width: 955px; */
     height: 170px;
     margin-left: 10px;
     margin-top: 15px;
     background-color: brown;
 }
 
+#tab {
+    width: 415px;
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    background-color: aqua;
+}
+
 #message {
-    width: 955px;
+    /* width: 955px; */
     height: 155px;
     margin-left: 10px;
     background-color: gold;
 }
 
 #review {
-    width: 955px;
+    /* width: 955px; */
     height: 155px;
     margin-left: 10px;
     background-color: chartreuse;

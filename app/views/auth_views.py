@@ -29,5 +29,3 @@ def mypage():
 @bp.route('/ticket_create/')
 def ticket_create():
     return render_template('auth/ticket_create.html')
-
-

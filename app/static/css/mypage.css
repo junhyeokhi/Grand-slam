@@ -1,107 +1,144 @@
-@charset "uft-8";
+@charset "utf-8";
 
-header {
-    width: 100%;
-    height: 115px;
-    margin: 0 auto;
-    background-color: aqua;
+body {
+    margin: 0;
+    padding: 0;
 }
 
-/* main */
-main {
-    width: 100%;
-    /* height: 1280px;  */
-    margin: 0 auto;
-    display: flex;
-    flex-wrap: wrap;
+ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
 }
 
-#container {
-    width: 1275px;
-    height: 100%;
+a {
+    text-decoration: none;
+    color: inherit;
 }
 
+/* MY티켓베이 타이틀 섹션 */
 #my {
-    width: 100%;
-    height: 160px;
-    display: flex;
-    align-items: center;
-    padding: 35px;
-    background-color: beige;
+    min-height: 120px; /* 최소 높이만 지정 */
+    border-radius: 10px;
 }
 
 #my a {
-    font-size: 35px;
+    font-size: 30px;
+    font-weight: bold;
+    color: #333;
 }
 
 aside {
-    /* width: 25%; */
-    height: 940px;
-    background-color: yellowgreen;
-    display: flex;
-}
-
-aside ul li.big{
-    font-size: 20px;
-    margin-top: 30px;
-}
-
-#container2 {
-    width: (100%-25%);
-}
-
-#welcome {
-    /* width: 955px; */
-    height: 70px;
-    background-color: rgba(240, 238, 238, 0.61);
+    padding: 20px;
     border-radius: 10px;
-    margin-left: 10px;
+    /* 만약 콘텐츠가 적어도 높이를 꽉 채우고 싶다면 flex 사용 */
+    display: flex;
+    flex-direction: column;
+}
+
+aside ul li.big {
+    font-size: 18px;
+    font-weight: bold;
+    margin-top: 25px;
+    margin-bottom: 10px;
+}
+
+aside ul li:not(.big) {
+    margin-bottom: 8px;
+    padding-left: 10px;
+}
+
+aside ul li a:hover {
+    text-decoration: underline;
+}
+
+/* 오른쪽 메인 콘텐츠 영역  */
+.main-content {
+}
+
+/* 메인 콘텐츠 블록들의 공통 스타일 */
+.main-content .row {
+    margin-left: 0; /* 부트스트랩 row의 기본 음수 마진 제거 */
+    margin-right: 0;
+    border-radius: 10px;
+}
+
+/* 각 블록별 스타일 (너비 고정값 다 제거) */
+#welcome {
+    background-color: rgba(240, 238, 238, 0.8);
+    font-size: 18px;
 }
 
 #recent {
-    /* width: 955px; */
-    height: 137px;
     background-color: blueviolet;
-    border-radius: 10px;
-    margin-left: 10px;
-    margin-top: 15px;
+}
+
+/* 최근 현황 내부 row 스타일 */
+#recent .row .col {
+    padding: 10px;
+    font-size: 14px;
 }
 
 #banner {
-    /* width: 955px; */
-    height: 130px;
-    border-radius: 10px;
-    margin-left: 10px;
-    margin-top: 15px;
+    /* 이미지 자체가 튀어나가지 않게 img-fluid 클래스를 HTML에 추가했습니다. */
 }
 
-#history {
-    /* width: 955px; */
-    height: 170px;
-    margin-left: 10px;
-    margin-top: 15px;
-    background-color: brown;
+#banner img {
+    width: 100%; /* 부모 너비에 맞춤 */
+    height: auto;
 }
 
-#tab {
-    width: 415px;
-    height: 50px;
-    display: flex;
-    justify-content: center;
-    background-color: aqua;
+#history, #message, #review {
+    background-color: transparent !important; /* 배경색 제거 */
+    height: auto !important; /* 고정 높이 제거 */
+    margin-left: 0 !important;
 }
 
-#message {
-    /* width: 955px; */
-    height: 155px;
-    margin-left: 10px;
-    background-color: gold;
+/* 탭 버튼 기본 스타일 (선택되지 않았을 때) */
+#tab .nav-link {
+    font-size: 16px;
+    color: #6c757d !important; /* 회색 계열 */
+    font-weight: normal;
+    border: none;
+    background: transparent;
+    padding: 10px 20px;
+    margin-bottom: -2px; /* 밑줄이 경계선과 겹치게 조정 */
+    transition: all 0.2s ease-in-out;
 }
 
-#review {
-    /* width: 955px; */
-    height: 155px;
-    margin-left: 10px;
-    background-color: chartreuse;
+/* 탭 버튼이 클릭되어 활성화되었을 때 (.active) */
+#tab .nav-link.active {
+    color: #000 !important; /* 진한 검은색 */
+    font-weight: bold !important;
+    border-bottom: 3px solid #000 !important; /* 검은색 밑줄 강조 */
 }
 
+/* 마우스를 올렸을 때 살짝 진해지는 효과 */
+#tab .nav-link:hover {
+    color: #333 !important;
+}
+
+/* '자세히 보기' 링크 스타일 */
+.text-danger {
+    color: #e91e63 !important;
+    font-weight: bold;
+}
+
+
+.text-muted {
+    font-size: 15px;
+    color: #999 !important;
+}
+
+/* aside ul li.big {
+    font-size: 15px;
+    font-weight: bold;
+    color: #333;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+aside ul li a {
+    font-size: 14px;
+    color: #666;
+} /*

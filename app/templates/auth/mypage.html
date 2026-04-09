@@ -4,14 +4,13 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/mypage.css') }}">
 {% endblock %}
 {% block content %}
-<div class="container">
-    <div id="my" class="row">
-        <a href="#">MY티켓베이</a>
+<div class="container my-5"> <div id="my" class="row mb-4 p-4 align-items-center"> <div class="col">
+            <a href="#">MY티켓관리</a>
+        </div>
     </div>
 
     <div class="row">
-        <aside class="col-md-2">
-            <ul>
+        <aside class="col-md-3 col-lg-2"> <ul>
                 <li class="big">내가 구매한 상품</li>
                 <li><a href="#">구매 이력 관리</a></li>
                 <li class="big">내가 판매한 상품</li>
@@ -39,45 +38,89 @@
             </ul>
         </aside>
 
-        <div class="col-md-10">
-            <div>
-                <div id="welcome" class="row">님, 오늘도 좋은 티켓 되세요!</div>
-                <div id="recent" class="row">
-                    <div class="recent_buy text-center col-md-6">
-                        <span>최근 구매 현황</span>
-                        <div class="row">
-                            <div class="col">결제완료</div>
-                            <div class="col">전달완료</div>
-                            <div class="col">거래완료</div>
-                            <div class="col">거래취소</div>
-                        </div>
-                    </div>
-                    <div class="recent_sell text-center col-md-6">
-                        <span>최근 판매 현황</span>
-                        <div class="row">
-                            <div class="col">결제완료</div>
-                            <div class="col">전달완료</div>
-                            <div class="col">거래완료</div>
-                            <div class="col">판매완료</div>
-                        </div>
+        <div class="col-md-9 col-lg-10 main-content">
+            <div id="welcome" class="row mb-3 p-3 align-items-center">
+                    {# {{ g.user.nickname }} #}
+                <div class="col"> 님, 오늘도 좋은 티켓 되세요!</div>
+            </div>
+
+            <div id="recent" class="row mb-3 p-3 text-white"> <div class="recent_buy text-center col-md-6 border-end"> <span class="fw-bold mb-3 d-block">최근 구매 현황</span>
+                    <div class="row text-center">
+                        <div class="col">결제완료</div>
+                        <div class="col">전달완료</div>
+                        <div class="col">거래완료</div>
+                        <div class="col">거래취소</div>
                     </div>
                 </div>
-                <div id="banner" class="row">
-                    <img src="./img/banner.png" alt="배너">
+                <div class="recent_sell text-center col-md-6">
+                    <span class="fw-bold mb-3 d-block">최근 판매 현황</span>
+                    <div class="row text-center">
+                        <div class="col">결제완료</div>
+                        <div class="col">전달완료</div>
+                        <div class="col">거래완료</div>
+                        <div class="col">판매완료</div>
+                    </div>
                 </div>
-                <div id="history">
-                    <ul id="tab">
-                        <li>구매 이력 관리</li>
-                        <li>판매 이력 관리</li>
+            </div>
+
+            <div id="banner" class="row mb-3">
+                <div class="col p-0">
+                    <img src="{{ url_for('static', filename='img/banner.png') }}" alt="배너" class="img-fluid rounded">
+                </div>
+            </div>
+
+            <div id="history" class="mb-5">
+                <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
+                    <ul id="tab" class="nav" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active"
+                                    id="buy-tab" data-bs-toggle="tab" data-bs-target="#buy-content"
+                                    type="button" role="tab" aria-controls="buy-content" aria-selected="true">
+                                구매 이력 관리
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link"
+                                    id="sell-tab" data-bs-toggle="tab" data-bs-target="#sell-content"
+                                    type="button" role="tab" aria-controls="sell-content" aria-selected="false">
+                                판매 이력 관리
+                            </button>
+                        </li>
                     </ul>
-                    <div id="buy"></div>
-                    <div id="sell"></div>
+                    <a href="#" class="text-danger small text-decoration-none">자세히 보기 <i class="bi bi-chevron-right"></i></a>
                 </div>
-                <div id="message" class="row">
-                    <h4>알림메시지</h4>
+
+                <div class="tab-content" id="myTabContent">
+                    <div class="tab-pane fade show active" id="buy-content" role="tabpanel" aria-labelledby="buy-tab">
+                        <div class="py-5 text-center text-muted border rounded-3 bg-light">
+                            구매 이력이 없습니다.
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="sell-content" role="tabpanel" aria-labelledby="sell-tab">
+                        <div class="py-5 text-center text-muted border rounded-3 bg-light">
+                            판매 이력이 없습니다.
+                        </div>
+                    </div>
                 </div>
-                <div id="review" class="row">
-                    <h4>최근 작성 후기</h4>
+            </div>
+
+            <div id="message" class="mb-5">
+                <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
+                    <h5 class="fw-bold mb-0">알림메시지</h5>
+                    <a href="#" class="text-danger small text-decoration-none">자세히 보기 <i class="bi bi-chevron-right"></i></a>
+                </div>
+                <div class="py-5 text-center text-muted">
+                    알림메시지 내역이 없습니다.
+                </div>
+            </div>
+
+            <div id="review" class="mb-5">
+                <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
+                    <h5 class="fw-bold mb-0">최근 작성 후기</h5>
+                    <a href="#" class="text-danger small text-decoration-none">자세히 보기 <i class="bi bi-chevron-right"></i></a>
+                </div>
+                <div class="py-5 text-center text-muted">
+                    작성한 거래 후기가 없습니다.
                 </div>
             </div>
         </div>

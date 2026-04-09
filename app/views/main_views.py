@@ -7,5 +7,4 @@ bp = Blueprint('main', __name__, url_prefix='/')
 
 @bp.route('/')
 def index():
-    # 메인 페이지에 구단 리스트를 던져줍니다.
-    return render_template('index.html', teams=KBO_TEAMS)
+    return render_template('index.html')

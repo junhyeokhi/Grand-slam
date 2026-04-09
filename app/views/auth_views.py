@@ -24,3 +24,8 @@ def signup():
 @bp.route('/mypage/')
 def mypage():
     return render_template('auth/mypage.html')
+
+# 5. 상품등록페이지 연결 (주소: /auth/ticket_creat)
+@bp.route('/ticket_create/')
+def ticket_create():
+    return render_template('auth/ticket_create.html')

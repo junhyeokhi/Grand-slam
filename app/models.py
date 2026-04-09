@@ -28,3 +28,5 @@ class Order(db.Model):
     ticket_id = db.Column(db.Integer, db.ForeignKey('ticket.id'), nullable=False)
     buyer_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+

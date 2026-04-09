@@ -24,3 +24,5 @@ def signup():
 @bp.route('/mypage/')
 def mypage():
     return render_template('auth/mypage.html')
+
+

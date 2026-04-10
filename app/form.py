@@ -8,6 +8,7 @@ class UserCreateForm(FlaskForm):
         DataRequired('이메일은 필수 항목입니다.'),
         Email()
     ])
+    username = StringField('이름', validators=[DataRequired('이름은 필수 항목입니다.'), Length(min=2, max=50)])
     nickname = StringField('닉네임', validators=[
         DataRequired('닉네임은 필수 항목입니다.'),
         Length(min=2, max=50)

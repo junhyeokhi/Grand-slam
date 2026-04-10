@@ -10,6 +10,8 @@ from flask_sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
 migrate = Migrate()
 
+from . import models
+
 
 def create_app():
     app = Flask(__name__)

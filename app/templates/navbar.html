@@ -1,47 +1,78 @@
 <div class="bg-white border-bottom py-3">
-    <div class="container d-flex align-items-center">
-        <a class="navbar-brand fw-bold fs-3 me-4" href="{{ url_for('main.index') }}"
-           style="letter-spacing: -2px; color: #000;">만루홈런</a>
+  <div class="container d-flex align-items-center">
+    <a
+      class="navbar-brand fw-bold fs-3 me-4"
+      href="{{ url_for('main.index') }}"
+      style="letter-spacing: -2px; color: #000"
+      >만루홈런</a
+    >
 
-        <form class="flex-grow-1 mx-5" style="max-width: 600px;">
-            <div class="input-group">
-                <input type="text" class="form-control rounded-pill-start border-dark-subtle bg-light ps-4"
-                       placeholder="경기명, 구단명 등 검색">
-                <button class="btn btn-dark rounded-pill-end px-4" type="submit">🔍</button>
-            </div>
-        </form>
+    <form class="flex-grow-1 mx-5" style="max-width: 600px">
+      <div class="input-group">
+        <input
+          type="text"
+          class="form-control rounded-pill-start border-dark-subtle bg-light ps-4"
+          placeholder="경기명, 구단명 등 검색"
+        />
+        <button class="btn btn-dark rounded-pill-end px-4" type="submit">
+          🔍
+        </button>
+      </div>
+    </form>
 
-        <div class="ms-auto d-flex align-items-center gap-4">
-            <a href="{{ url_for('auth.login') }}" class="text-dark fw-bold text-decoration-none">로그인</a>
-            <a href="#" class="text-dark fw-bold text-decoration-none">이용가이드</a>
-            <a href="#" class="btn btn-dark rounded-pill px-4 fw-bold">판매등록</a>
-        </div>
+    <div class="ms-auto d-flex align-items-center gap-4">
+      <a
+        href="{{ url_for('auth.login') }}"
+        class="text-dark fw-bold text-decoration-none"
+        >로그인</a
+      >
+      <a href="#" class="text-dark fw-bold text-decoration-none">이용가이드</a>
+      <a
+        href="{{url_for('auth.ticket_create')}}"
+        class="btn btn-dark rounded-pill px-4 fw-bold"
+        >판매등록</a
+      >
     </div>
+  </div>
 </div>
 
-<nav class="navbar navbar-expand-lg bg-white border-bottom py-1 shadow-sm sticky-top">
-    <div class="container">
-        <button class="navbar-toggler w-100 border-0 py-2" type="button" data-bs-toggle="collapse"
-                data-bs-target="#teamNavbar">
-            <span class="small fw-bold">전체 구단 보기 ▾</span>
-        </button>
+<nav
+  class="navbar navbar-expand-lg bg-white border-bottom py-1 shadow-sm sticky-top"
+>
+  <div class="container">
+    <button
+      class="navbar-toggler w-100 border-0 py-2"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#teamNavbar"
+    >
+      <span class="small fw-bold">전체 구단 보기 ▾</span>
+    </button>
 
-        <div class="collapse navbar-collapse justify-content-center" id="teamNavbar">
-            <ul class="navbar-nav gap-lg-4">
-                {% for team in teams %}
-                <li class="nav-item dropdown">
-                    <a class="nav-link text-dark fw-medium py-2 px-2" href="#" role="button" data-bs-toggle="dropdown"
-                       style="font-size: 0.95rem;">
-                        {{ team.name }}
-                    </a>
-                    <ul class="dropdown-menu rounded-0 border-dark shadow-sm">
-                        {% for option in team.sub_options %}
-                        <li><a class="dropdown-item small" href="#">{{ option }}</a></li>
-                        {% endfor %}
-                    </ul>
-                </li>
-                {% endfor %}
-            </ul>
-        </div>
+    <div
+      class="collapse navbar-collapse justify-content-center"
+      id="teamNavbar"
+    >
+      <ul class="navbar-nav gap-lg-4">
+        {% for team in teams %}
+        <li class="nav-item dropdown">
+          <a
+            class="nav-link text-dark fw-medium py-2 px-2"
+            href="#"
+            role="button"
+            data-bs-toggle="dropdown"
+            style="font-size: 0.95rem"
+          >
+            {{ team.name }}
+          </a>
+          <ul class="dropdown-menu rounded-0 border-dark shadow-sm">
+            {% for option in team.sub_options %}
+            <li><a class="dropdown-item small" href="#">{{ option }}</a></li>
+            {% endfor %}
+          </ul>
+        </li>
+        {% endfor %}
+      </ul>
     </div>
+  </div>
 </nav>

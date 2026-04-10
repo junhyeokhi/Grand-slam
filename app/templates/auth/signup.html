@@ -1,68 +1,86 @@
-{% extends "base.html" %}
+{% extends "base.html" %} {% block content %}
+<div class="container my-5" style="max-width: 600px">
+  <h3 class="fw-bold mb-4 text-center">회원가입</h3>
 
-{% block content %}
-<div class="container my-5" style="max-width: 600px;">
-    <h3 class="fw-bold mb-4 text-center">회원가입</h3>
+  <form method="post" class="p-4 border rounded-0 shadow-sm bg-white">
+    {{ form.csrf_token }} {% if form.errors %}
+    <div class="alert alert-danger rounded-0">
+      <ul class="mb-0">
+        {% for field, errors in form.errors.items() %} {% for error in errors %}
+        <li><strong>{{ form[field].label }}</strong>: {{ error }}</li>
+        {% endfor %} {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+    <div class="mb-3">
+      <label class="form-label fw-bold small">이메일</label>
+      {{ form.email(class="form-control rounded-0", placeholder="example@mail.com") }}
+    </div>
 
-    <form method="post" class="p-4 border rounded-0 shadow-sm bg-white">
-        {{ form.csrf_token }}
+    <div class="mb-3">
+      <label class="form-label fw-bold small">이름</label>
+      {{ form.username(class="form-control rounded-0", placeholder="성함을 입력하세요") }}
+    </div>
 
-        <div class="mb-3">
-            <label class="form-label fw-bold small">이메일</label>
-            {{ form.email(class="form-control rounded-0", placeholder="example@mail.com") }}
-        </div>
+    <div class="mb-3">
+      <label class="form-label fw-bold small">닉네임</label>
+      {{ form.nickname(class="form-control rounded-0", placeholder="사용하실 닉네임을 입력하세요") }}
+    </div>
 
-        <div class="mb-3">
-            <label class="form-label fw-bold small">닉네임</label>
-            {{ form.nickname(class="form-control rounded-0", placeholder="사용하실 닉네임을 입력하세요") }}
-        </div>
+    <div class="mb-3">
+      <label class="form-label fw-bold small">비밀번호</label>
+      {{ form.password1(class="form-control rounded-0", placeholder="비밀번호 입력") }}
+    </div>
 
-        <div class="mb-3">
-            <label class="form-label fw-bold small">비밀번호</label>
-            {{ form.password1(class="form-control rounded-0", placeholder="비밀번호 입력") }}
-        </div>
+    <div class="mb-3">
+      <label class="form-label fw-bold small">비밀번호 확인</label>
+      {{ form.password2(class="form-control rounded-0", placeholder="비밀번호 재입력") }}
+    </div>
 
-        <div class="mb-3">
-            <label class="form-label fw-bold small">비밀번호 확인</label>
-            {{ form.password2(class="form-control rounded-0", placeholder="비밀번호 재입력") }}
-        </div>
+    <div class="mb-3">
+      <label class="form-label fw-bold small">전화번호</label>
+      {{ form.phone(class="form-control rounded-0", placeholder="010-0000-0000") }}
+    </div>
 
-        <div class="mb-3">
-            <label class="form-label fw-bold small">전화번호</label>
-            {{ form.phone(class="form-control rounded-0", placeholder="010-0000-0000") }}
-        </div>
+    <div class="mb-3">
+      <label class="form-label fw-bold small">주소</label>
+      <div class="input-group mb-2">
+        <input type="text" id="postcode" class="form-control rounded-0 bg-light" placeholder="우편번호" readonly />
+        <button class="btn btn-dark rounded-0 px-3" type="button" onclick="execDaumPostcode()">주소 검색</button>
+      </div>
+      {{ form.address(id="address", class="form-control rounded-0 bg-light mb-2", placeholder="기본 주소",
+      readonly=True) }}
+      <input
+        type="text"
+        id="detailAddress"
+        name="detailAddress"
+        class="form-control rounded-0"
+        placeholder="상세 주소를 입력하세요 (동, 호수 등)"
+      />
+    </div>
 
-        <div class="mb-3">
-            <label class="form-label fw-bold small">주소</label>
-            <div class="input-group mb-2">
-                <input type="text" id="postcode" class="form-control rounded-0 bg-light" placeholder="우편번호" readonly>
-                <button class="btn btn-dark rounded-0 px-3" type="button" onclick="execDaumPostcode()">주소 검색</button>
-            </div>
-            {{ form.address(id="address", class="form-control rounded-0 bg-light mb-2", placeholder="기본 주소",
-            readonly=True) }}
-            <input type="text" id="detailAddress" name="detailAddress" class="form-control rounded-0"
-                   placeholder="상세 주소를 입력하세요 (동, 호수 등)">
-        </div>
-
-        <div class="mt-4">
-            <button type="submit" class="btn btn-black w-100 rounded-0 fw-bold py-2"
-                    style="background-color: #000; color: #fff;">
-                가입하기
-            </button>
-        </div>
-    </form>
+    <div class="mt-4">
+      <button
+        type="submit"
+        class="btn btn-black w-100 rounded-0 fw-bold py-2"
+        style="background-color: #000; color: #fff"
+      >
+        가입하기
+      </button>
+    </div>
+  </form>
 </div>
 
 <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 <script>
-    function execDaumPostcode() {
-        new daum.Postcode({
-            oncomplete: function (data) {
-                document.getElementById('postcode').value = data.zonecode;
-                document.getElementById('address').value = data.address;
-                document.getElementById('detailAddress').focus();
-            }
-        }).open();
-    }
+  function execDaumPostcode() {
+    new daum.Postcode({
+      oncomplete: function (data) {
+        document.getElementById("postcode").value = data.zonecode;
+        document.getElementById("address").value = data.address;
+        document.getElementById("detailAddress").focus();
+      },
+    }).open();
+  }
 </script>
 {% endblock %}

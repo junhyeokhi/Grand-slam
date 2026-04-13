@@ -40,72 +40,76 @@
 
         <div class="col-md-9 col-lg-10 main-content">
             <div id="welcome" class="row mb-3 p-3 align-items-center">
-                    {# {{ g.user.nickname }} #}
-                <div class="col"> 님, 오늘도 좋은 티켓 되세요!</div>
+                {% if g.user %}
+                    {{ g.user.nickname }}님, 오늘도 좋은 티켓 되세요!
+                {% else %}
+                    로그인이 필요합니다.
+                {% endif %}
             </div>
 
             <div id="recent" class="row mb-3">
-        <div class="col-md-6 mb-3 mb-md-0">
-            <div class="card h-100 shadow-sm border-0">
-                <div class="card-header bg-white border-bottom-0 pt-4 pb-0">
-                    <h5 class="card-title fw-bold text-dark mb-1">최근 구매 현황 <span class="text-muted fw-normal fs-6">(최근 1개월 기준)</span></h5>
-                </div>
-                <div class="card-body">
-                    <div class="row text-center">
-                        <div class="col">
-                            <div class="status-value fs-2 fw-bold text-dark">0</div>
-                            <div class="status-label text-muted small">결제완료</div>
+                <div class="col-md-6 mb-3 mb-md-0">
+                    <div class="card h-100 shadow-sm border-0">
+                        <div class="card-header bg-white border-bottom-0 pt-4 pb-0">
+                            <h5 class="card-title fw-bold text-dark mb-1">최근 구매 현황 <span class="text-muted fw-normal fs-6">(전체 기준)</span></h5>
                         </div>
-                        <div class="col">
-                            <div class="status-value fs-2 fw-bold text-dark">0</div>
-                            <div class="status-label text-muted small">전달완료</div>
+                        <div class="card-body">
+                            <div class="row text-center">
+                                <div class="col">
+                                    <div class="status-value fs-2 fw-bold text-dark">{{ g.user.order_set|length }}</div>
+                                    <div class="status-label text-muted small">결제완료</div>
+                                </div>
+                                <div class="col">
+                                    <div class="status-value fs-2 fw-bold text-dark">0</div>
+                                    <div class="status-label text-muted small">전달완료</div>
+                                </div>
+                                <div class="col">
+                                    <div class="status-value fs-2 fw-bold text-dark">0</div>
+                                    <div class="status-label text-muted small">거래완료</div>
+                                </div>
+                                <div class="col">
+                                    <div class="status-value fs-2 fw-bold text-dark">0</div>
+                                    <div class="status-label text-muted small">거래취소</div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="col">
-                            <div class="status-value fs-2 fw-bold text-dark">0</div>
-                            <div class="status-label text-muted small">거래완료</div>
-                        </div>
-                        <div class="col">
-                            <div class="status-value fs-2 fw-bold text-dark">0</div>
-                            <div class="status-label text-muted small">거래취소</div>
+                        <div class="card-footer bg-white border-top-0 pt-0 pb-3 text-center">
+                            <a href="#" class="text-danger small text-decoration-none">결제대기 <span class="fw-bold">0</span> 건</a>
                         </div>
                     </div>
                 </div>
-                <div class="card-footer bg-white border-top-0 pt-0 pb-3 text-center">
-                    <a href="#" class="text-danger small text-decoration-none">결제대기 <span class="fw-bold">0</span> 건</a>
-                </div>
-            </div>
-        </div>
 
-        <div class="col-md-6">
-            <div class="card h-100 shadow-sm border-0">
-                <div class="card-header bg-white border-bottom-0 pt-4 pb-0">
-                    <h5 class="card-title fw-bold text-dark mb-1">최근 판매 현황 <span class="text-muted fw-normal fs-6">(최근 1개월 기준)</span></h5>
-                </div>
-                <div class="card-body">
-                    <div class="row text-center">
-                        <div class="col">
-                            <div class="status-value fs-2 fw-bold text-dark">0</div>
-                            <div class="status-label text-muted small">결제완료</div>
-                        </div>
-                        <div class="col">
-                            <div class="status-value fs-2 fw-bold text-dark">0</div>
-                            <div class="status-label text-muted small">전달완료</div>
-                        </div>
-                        <div class="col">
-                            <div class="status-value fs-2 fw-bold text-dark">0</div>
-                            <div class="status-label text-muted small">거래완료</div>
-                        </div>
-                        <div class="col">
-                            <div class="status-value fs-2 fw-bold text-dark">0</div>
-                            <div class="status-label text-muted small">판매완료</div>
-                        </div>
+    <div class="col-md-6">
+        <div class="card h-100 shadow-sm border-0">
+            <div class="card-header bg-white border-bottom-0 pt-4 pb-0">
+                <h5 class="card-title fw-bold text-dark mb-1">최근 판매 현황 <span class="text-muted fw-normal fs-6">(전체 기준)</span></h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col">
+                        <div class="status-value fs-2 fw-bold text-dark">{{ g.user.ticket_set|length }}</div>
+                        <div class="status-label text-muted small">결제완료</div>
+                    </div>
+                    <div class="col">
+                        <div class="status-value fs-2 fw-bold text-dark">0</div>
+                        <div class="status-label text-muted small">전달완료</div>
+                    </div>
+                    <div class="col">
+                        <div class="status-value fs-2 fw-bold text-dark">0</div>
+                        <div class="status-label text-muted small">거래완료</div>
+                    </div>
+                    <div class="col">
+                        <div class="status-value fs-2 fw-bold text-dark">0</div>
+                        <div class="status-label text-muted small">판매완료</div>
                     </div>
                 </div>
-                <div class="card-footer bg-white border-top-0 pt-0 pb-3 text-center">
-                    <a href="#" class="text-danger small text-decoration-none">결제대기 <span class="fw-bold">0</span> 건</a>
-                </div>
+            </div>
+            <div class="card-footer bg-white border-top-0 pt-0 pb-3 text-center">
+                <a href="#" class="text-danger small text-decoration-none">결제대기 <span class="fw-bold">0</span> 건</a>
             </div>
         </div>
+    </div>
+</div>
 
             <div id="banner" class="row mb-3">
                 <div class="col p-0">
@@ -117,33 +121,50 @@
                 <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
                     <ul id="tab" class="nav" role="tablist">
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link active"
-                                    id="buy-tab" data-bs-toggle="tab" data-bs-target="#buy-content"
-                                    type="button" role="tab" aria-controls="buy-content" aria-selected="true">
-                                구매 이력 관리
-                            </button>
+                            <button class="nav-link active" id="buy-tab" data-bs-toggle="tab" data-bs-target="#buy-content" type="button" role="tab">구매 이력 관리</button>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link"
-                                    id="sell-tab" data-bs-toggle="tab" data-bs-target="#sell-content"
-                                    type="button" role="tab" aria-controls="sell-content" aria-selected="false">
-                                판매 이력 관리
-                            </button>
+                            <button class="nav-link" id="sell-tab" data-bs-toggle="tab" data-bs-target="#sell-content" type="button" role="tab">판매 이력 관리</button>
                         </li>
                     </ul>
                     <a href="#" class="text-danger small text-decoration-none">자세히 보기 <i class="bi bi-chevron-right"></i></a>
                 </div>
 
                 <div class="tab-content" id="myTabContent">
-                    <div class="tab-pane fade show active" id="buy-content" role="tabpanel" aria-labelledby="buy-tab">
-                        <div class="py-5 text-center text-muted border rounded-3 bg-light">
-                            구매 이력이 없습니다.
-                        </div>
+                    <div class="tab-pane fade show active" id="buy-content" role="tabpanel">
+                        {% if g.user.order_set %}
+                            <div class="list-group list-group-flush">
+                                {% for order in g.user.order_set %}
+                                <div class="list-group-item d-flex justify-content-between align-items-center py-3">
+                                    <div>
+                                        <div class="fw-bold">{{ order.ticket.Hometeam_name }} vs {{ order.ticket.awayteam_name }}</div>
+                                        <small class="text-muted">{{ order.order_date.strftime('%Y-%m-%d') }} | {{ order.ticket.price }}원</small>
+                                    </div>
+                                    <span class="badge bg-info rounded-pill">결제완료</span>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="py-5 text-center text-muted border rounded-3 bg-light">구매 이력이 없습니다.</div>
+                        {% endif %}
                     </div>
-                    <div class="tab-pane fade" id="sell-content" role="tabpanel" aria-labelledby="sell-tab">
-                        <div class="py-5 text-center text-muted border rounded-3 bg-light">
-                            판매 이력이 없습니다.
-                        </div>
+
+                    <div class="tab-pane fade" id="sell-content" role="tabpanel">
+                        {% if g.user.ticket_set %}
+                            <div class="list-group list-group-flush">
+                                {% for ticket in g.user.ticket_set %}
+                                <div class="list-group-item d-flex justify-content-between align-items-center py-3">
+                                    <div>
+                                        <div class="fw-bold">{{ ticket.Hometeam_name }} vs {{ ticket.awayteam_name }}</div>
+                                        <small class="text-muted">{{ ticket.game_date.strftime('%Y-%m-%d') }} | {{ ticket.price }}원</small>
+                                    </div>
+                                    <span class="badge bg-primary rounded-pill">{{ ticket.status }}</span>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="py-5 text-center text-muted border rounded-3 bg-light">판매 이력이 없습니다.</div>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -153,9 +174,18 @@
                     <h5 class="fw-bold mb-0">알림메시지</h5>
                     <a href="#" class="text-danger small text-decoration-none">자세히 보기 <i class="bi bi-chevron-right"></i></a>
                 </div>
-                <div class="py-5 text-center text-muted">
-                    알림메시지 내역이 없습니다.
-                </div>
+                {% if g.user.notification_set %}
+                    <div class="list-group list-group-flush">
+                        {% for note in g.user.notification_set %}
+                        <div class="list-group-item py-3">
+                            <div class="small text-primary mb-1">{{ note.created_at.strftime('%Y-%m-%d') }}</div>
+                            <div>{{ note.content }}</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="py-5 text-center text-muted">알림메시지 내역이 없습니다.</div>
+                {% endif %}
             </div>
 
             <div id="review" class="mb-5">
@@ -163,9 +193,24 @@
                     <h5 class="fw-bold mb-0">최근 작성 후기</h5>
                     <a href="#" class="text-danger small text-decoration-none">자세히 보기 <i class="bi bi-chevron-right"></i></a>
                 </div>
-                <div class="py-5 text-center text-muted">
-                    작성한 거래 후기가 없습니다.
-                </div>
+                {% if g.user.review_set %}
+                    <div class="row row-cols-1 row-cols-md-2 g-3">
+                        {% for review in g.user.review_set %}
+                        <div class="col">
+                            <div class="card h-100 border-light shadow-sm">
+                                <div class="card-body">
+                                    <div class="text-warning mb-2">
+                                        {% for i in range(review.rating) %}★{% endfor %}
+                                    </div>
+                                    <p class="card-text small">{{ review.content }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="py-5 text-center text-muted">작성한 거래 후기가 없습니다.</div>
+                {% endif %}
             </div>
         </div>
     </div>

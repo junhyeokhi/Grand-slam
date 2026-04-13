@@ -1,12 +1,16 @@
 from flask import Blueprint, flash, redirect, render_template, request, url_for
+import requests
+from flask import current_app
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask import session
 from app.form import UserLoginForm
 from app.models import User
 
+
 from app import db
 
 from app.form import UserCreateForm
+from config import CLIENT_ID, CLIENT_SECRET, REDIRECT_URI
 
 # 블루프린트 생성.
 # url_prefix='/auth를 설정하면 모든 주소 앞에 /auth가 자동
@@ -89,3 +93,79 @@ def ticket_create():
 @bp.route('/subpage/')
 def subpage():
     return render_template('auth/subpage.html')
+
+# 카카오 로그인 구현
+@bp.route('/kakao/login')
+def kakao_login():
+    # 카카오 인증 서버로 사용자를 보냅니다.
+    kakao_auth_url = f"https://kauth.kakao.com/oauth/authorize?client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&response_type=code"
+    return redirect(kakao_auth_url)
+
+@bp.route('/kakao/callback')
+def kakao_callback():
+    code = request.args.get("code")
+    
+    # 1. 토큰 요청
+    token_url = "https://kauth.kakao.com/oauth/token"
+    headers = {'Content-type': 'application/x-www-form-urlencoded;charset=utf-8'}
+    data = {
+        "grant_type": "authorization_code",
+        "client_id": CLIENT_ID,
+        "redirect_uri": REDIRECT_URI,
+        "code": code,
+        "client_secret": CLIENT_SECRET  
+    }
+    
+    token_res = requests.post(token_url, data=data, headers=headers).json()
+        
+    access_token = token_res.get("access_token")
+
+    if not access_token:
+        return f"토큰 발급 실패: {token_res.get('error_description', '알 수 없는 오류')}"
+
+    # 2. 유저 정보 요청
+    user_info_url = "https://kapi.kakao.com/v2/user/me"
+    user_headers = {"Authorization": f"Bearer {access_token}"}
+    user_res = requests.get(user_info_url, headers=user_headers).json()
+
+    # 카카오가 준 정보 추출
+    kakao_id = str(user_res.get("id")) 
+    kakao_email = user_res.get("kakao_account", {}).get("email")
+    kakao_nickname = user_res.get("properties", {}).get("nickname", "카카오유저")
+
+    # 세션 비우고 시작
+    session.clear()
+    # DB에서 'kakao_id'로 사용자 찾기
+    user = User.query.filter_by(kakao_id=kakao_id).first()
+
+    if not user:
+        # 같은 이메일로 이미 가입한 일반 회원이 있는지 (계정 통합용)
+        user = User.query.filter_by(email=kakao_email).first()
+        
+        if user:
+            # 이미 이메일로 가입한 사람이면 kakao_id만 업데이트해서 연결
+            user.kakao_id = kakao_id
+            db.session.commit()
+            flash(f"{user.nickname}님의 기존 계정에 카카오 로그인이 연결되었습니다.")
+        else:
+            # 처음 온 사람이면 새로 가입 DB추가
+            user = User(
+                username=kakao_nickname,
+                nickname=kakao_nickname,
+                email=kakao_email,
+                kakao_id=kakao_id,  # 새로 만든 컬럼에 저장!
+                password=generate_password_hash(f"kakao_{kakao_id}"),
+                phone="010-0000-0000",
+                address="카카오 로그인 유저"
+            )
+            db.session.add(user)
+            db.session.commit()
+            flash(f"{kakao_nickname}님, 카카오 계정으로 첫 가입을 축하합니다!")
+    else:
+        flash(f"{user.nickname}님, 환영합니다!")
+
+    # 4. 세션에 로그인 정보 저장
+    session['user_id'] = user.id
+
+    # 5. 메인 페이지로 이동!
+    return redirect(url_for('main.index'))

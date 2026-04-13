@@ -12,7 +12,6 @@ def insert_all_test_data():
         user_list = []
         for i in range(1, 11):
             email = f'user{i}@test.com'
-            # 중복 체크 (이미 있으면 스킵)
             existing_user = User.query.filter_by(email=email).first()
             if not existing_user:
                 user = User(
@@ -28,28 +27,33 @@ def insert_all_test_data():
             else:
                 user_list.append(existing_user)
         
-        db.session.commit() # 유저 먼저 저장 (ID 생성을 위해)
+        db.session.commit()
 
         print("2. 티켓 랜덤 데이터 300개 생성 중...")
-        sub_categories = ['중앙지정석', '1루 내야석', '3루 내야석', '외야 자유석', '테이블석', '블루석']
+        # 불필요한 sub_categories 리스트 삭제 완료!
         
         for i in range(300):
-            # 1. 딕셔너리 리스트에서 랜덤하게 2팀을 뽑습니다.
             selected_teams = random.sample(KBO_TEAMS, 2)
+            home_team_dict = selected_teams[0]
             
-            # 2. 각 딕셔너리에서 'name' 키에 해당하는 글자만 추출합니다.
-            home_team_name = selected_teams[0]['name']
-            away_team_name = selected_teams[1]['name']
+            # 홈팀의 실제 sub_options 데이터를 활용
+            detailed_category = random.choice(home_team_dict.get('sub_options', ['기타 구역']))
+
+            # 사용자가 직접 입력한 듯한 좌석 상세 정보 생성
+            block = random.randint(101, 315)
+            row = random.randint(1, 20)
+            num = random.randint(1, 25)
+            seat_detail = f"{block}블록 {row}열 {num}번"
 
             ticket = Ticket(
                 seller_id=random.choice(user_list).id,
-                Hometeam_name=home_team_name, # '한화 이글스' 같은 글자만 들어감
-                awayteam_name=away_team_name, # 'KIA 타이거즈' 같은 글자만 들어감
-                sub_category=random.choice(sub_categories),
-                seat=f"{random.randint(1, 20)}구역 {random.randint(1, 15)}열",
+                Hometeam_name=home_team_dict['name'],
+                awayteam_name=selected_teams[1]['name'],
+                sub_category=detailed_category, # 구단-구장 정보가 들어감
+                seat=seat_detail,               # 상세 좌석 번호가 들어감
                 quantity=random.randint(1, 4),
-                price=random.choice([12000, 15000, 25000, 35000, 50000]),
-                pin=f"PIN-{random.randint(1000, 9999)}-{random.randint(1000, 9999)}",
+                price=random.choice([12000, 15000, 25000, 35000]),
+                pin=f"PIN-{random.randint(1000, 9999)}",
                 status='판매중',
                 game_date=datetime.now() + timedelta(days=random.randint(1, 30))
             )

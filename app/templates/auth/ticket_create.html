@@ -16,6 +16,13 @@
           </div>
 
           <div class="mb-3">
+            <label class="form-label fw-bold small">경기 정보 (장소 및 요일)</label>
+            <select name="sub_category" id="sub_category" class="form-select rounded-0" required disabled>
+              <option value="">구단을 먼저 선택하세요</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
             <label class="form-label fw-bold small">상대팀</label>
             <select name="awayteam" id="awayteam" class="form-select rounded-0" required>
               <option value="">구단 선택</option>
@@ -26,9 +33,32 @@
           </div>
 
           <div class="mb-3">
+            <label class="form-label fw-bold small">경기 일자</label>
+            <input type="date" name="game_date" id="game_date" class="form-control rounded-0" required />
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-bold small">경기 시간</label>
+            <div class="d-flex gap-2">
+              <select name="game_time_hour" id="game_time_hour" class="form-select rounded-0" required>
+                <option value="">시</option>
+                {% for h in range(24) %}
+                <option value="{{ '%02d' | format(h) }}">{{ '%02d' | format(h) }}</option>
+                {% endfor %}
+              </select>
+              <select name="game_time_minute" id="game_time_minute" class="form-select rounded-0" required>
+                <option value="">분</option>
+                {% for m in [0, 10, 20, 30, 40, 50] %}
+                <option value="{{ '%02d' | format(m) }}">{{ '%02d' | format(m) }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+
+          <div class="mb-3">
             <label class="form-label fw-bold small">좌석 등급</label>
             <select name="seat_grade" id="seat_grade" class="form-select rounded-0" required disabled>
-              <option value="">구단을 먼저 선택하세요</option>
+              <option value="">경기 정보를 먼저 선택하세요</option>
             </select>
           </div>
 
@@ -71,14 +101,21 @@
               <span class="text-muted small">vs</span>
               <span id="pv-away">AWAY</span>
             </div>
-            <div class="text-muted small mb-3" id="pv-date">2026.04.09 (KST)</div>
+            <div class="text-muted small mb-3">
+              <span id="pv-date">경기 일자 선택 전</span>
+              <span id="pv-time" class="ms-2"></span>
+            </div>
             <hr />
             <div class="row">
               <div class="col-8">
-                <div class="small text-muted">SEAT INFO</div>
-                <div class="fw-bold h5 mb-0">
-                  <span id="pv-grade">좌석등급</span> /
-                  <span id="pv-seat">상세위치</span>
+                <div class="small text-muted mb-1">SEAT INFO</div>
+                <div class="text-primary fw-bold mb-1" id="pv-sub" style="font-size: 0.9rem; letter-spacing: -0.5px">
+                  경기정보
+                </div>
+                <div class="fw-bold h4 mb-0">
+                  <span id="pv-grade">좌석등급</span>
+                  <span class="text-muted mx-2 fw-light">|</span>
+                  <span id="pv-seat" class="h5 mb-0">상세위치</span>
                 </div>
               </div>
               <div class="col-4 text-end">
@@ -102,61 +139,137 @@
 </div>
 
 <script>
-    // 구단별 좌석 등급 데이터 불러와서 정의
-    const teamData = {{ teams | tojson }};
+  // 구단별 좌석 등급 데이터 불러와서 정의
+  const teamData = {{ teams | tojson }};
 
-    const homeSelect = document.getElementById('hometeam');
-    const awaySelect = document.getElementById('awayteam');
-    const gradeSelect = document.getElementById('seat_grade');
+  // DOM 요소 선택
+  const homeSelect = document.getElementById('hometeam');
+  const subSelect = document.getElementById('sub_category');
+  const awaySelect = document.getElementById('awayteam');
+  const dateInput = document.getElementById('game_date');
+  const hourSelect = document.getElementById('game_time_hour'); // 경기 시간 시 input 추가
+  const minuteSelect = document.getElementById('game_time_minute'); // 경기 시간 분 input 추가
+  const gradeSelect = document.getElementById('seat_grade');
+  const ticketForm = document.getElementById('ticketForm');
 
-    //  홈팀 선택 시 좌석 등급 업데이트
-    homeSelect.addEventListener('change', function() {
+  // 홈팀 선택 시 좌석 등급 업데이트
+  homeSelect.addEventListener('change', function() {
       const selectedHome = this.value; // 선택된 홈팀 이름
       const selectedTeam = teamData.find(t => t.name === selectedHome);
 
-          // 좌석 등급 업데이트 로직
-        gradeSelect.innerHTML = '<option value="">좌석 선택</option>';
+      // 좌석 등급 업데이트 로직 (초기화)
+      subSelect.innerHTML = '<option value="">경기 정보 선택</option>';
+      gradeSelect.innerHTML = '<option value="">좌석 선택</option>';
+      gradeSelect.disabled = true;
 
-        if (selectedTeam) {
-            selectedTeam.seat_grades.forEach(grade => {
-                const opt = document.createElement('option');
-                opt.value = grade;
-                opt.textContent = grade;
-                gradeSelect.appendChild(opt);
-            });
-            gradeSelect.disabled = false;
-            document.getElementById('pv-home').textContent = this.value;
-        } else {
-            gradeSelect.disabled = true;
-        }
+      // 프리뷰 초기화
+      document.getElementById('pv-home').textContent = selectedHome || "HOME";
+      document.getElementById('pv-sub').textContent = "경기정보";
+      document.getElementById('pv-grade').textContent = "좌석등급";
 
-      //상대팀 선택시 홈팀 선택팀 제외 로직
-          Array.from(awaySelect.options).forEach(option => {
-              if (option.value === selectedHome) {
-                  option.disabled = true;
-                  option.selected = false;
-              } else {
-                  option.disabled = false;
-              }
+      if (selectedTeam) {
+          // constants.py 데이터 기반 경기장/요일 정보 생성
+          selectedTeam.sub_options.forEach(opt => {
+              const option = document.createElement('option');
+              option.value = opt;
+              option.textContent = opt;
+              subSelect.appendChild(option);
           });
-    });
-    // 입력폼 업데이트시 티켓 프리뷰 업데이트
-    document.getElementById('ticketForm').addEventListener('input', function(e) {
-          if(e.target.id === 'seat_grade') document.getElementById('pv-grade').textContent = e.target.value;
-          if(e.target.id === 'seat_detail') document.getElementById('pv-seat').textContent = e.target.value;
-          if(e.target.id === 'quantity') document.getElementById('pv-qty').textContent = e.target.value + '매';
-          if(e.target.id === 'price') document.getElementById('pv-price').textContent = Number(e.target.value ).toLocaleString() + '원';
+          subSelect.disabled = false;
+      } else {
+          subSelect.disabled = true;
+      }
 
-          // 총 가격 계산 로직 (수량 * 가격)
+      // 상대팀 선택시 홈팀 선택팀 제외 로직
+      Array.from(awaySelect.options).forEach(option => {
+          if (option.value === selectedHome) {
+              option.disabled = true;
+              option.selected = false;
+          } else {
+              option.disabled = false;
+          }
+      });
+  });
+
+  // 경기 정보 선택 시 좌석 등급 업데이트
+  subSelect.addEventListener('change', function() {
+      const selectedHome = homeSelect.value;
+      const selectedTeam = teamData.find(t => t.name === selectedHome);
+
+      // 프리뷰 업데이트 (1층)
+      document.getElementById('pv-sub').textContent = this.value || "경기정보";
+      document.getElementById('pv-grade').textContent = "좌석등급"; // 좌석정보 초기화
+
+      if (this.value && selectedTeam) {
+          gradeSelect.innerHTML = '<option value="">좌석 선택</option>';
+          selectedTeam.seat_grades.forEach(grade => {
+              const opt = document.createElement('option');
+              opt.value = grade;
+              opt.textContent = opt;
+              gradeSelect.appendChild(opt);
+          });
+          gradeSelect.disabled = false;
+      } else {
+          gradeSelect.disabled = true;
+      }
+  });
+
+  // 3. 상대팀 및 좌석등급, 날짜 선택 (change 이벤트)
+  awaySelect.addEventListener('change', function() {
+      document.getElementById('pv-away').textContent = this.value || "AWAY";
+  });
+
+  gradeSelect.addEventListener('change', function() {
+      document.getElementById('pv-grade').textContent = this.value || "좌석등급";
+  });
+
+  dateInput.addEventListener('change', function() {
+      const val = this.value; // yyyy-mm-dd 형식
+      if(val) {
+          const formattedDate = val.replace(/-/g, '.'); // 2026.04.13 형식으로 변환
+          document.getElementById('pv-date').textContent = formattedDate + " (KST)";
+      } else {
+          document.getElementById('pv-date').textContent = "경기 일자 선택 전";
+      }
+  });
+
+  // 경기 시간 (시/분) 선택 시 프리뷰 업데이트
+  function updateTimePreview() {
+      const hour = hourSelect.value;
+      const minute = minuteSelect.value;
+      const pvTimeElement = document.getElementById('pv-time');
+
+      if (hour && minute) {
+          pvTimeElement.textContent = `${hour}:${minute}`;
+      } else {
+          pvTimeElement.textContent = ""; // 시 또는 분이 선택되지 않으면 비움
+      }
+  }
+
+  hourSelect.addEventListener('change', updateTimePreview);
+  minuteSelect.addEventListener('change', updateTimePreview);
+  // 4. 입력창들 (input 이벤트 - 타이핑 시 즉각 반영)
+
+  // 경기 일자 최소값을 오늘 날짜로 설정 (과거 날짜 선택 방지)
+  document.addEventListener('DOMContentLoaded', function() {
+      const today = new Date();
+      const year = today.getFullYear();
+      const month = String(today.getMonth() + 1).padStart(2, '0');
+      const day = String(today.getDate()).padStart(2, '0');
+      dateInput.min = `${year}-${month}-${day}`;
+  });
+
+  ticketForm.addEventListener('input', function(e) {
+      if(e.target.id === 'seat_detail') document.getElementById('pv-seat').textContent = e.target.value || "상세위치";
+      if(e.target.id === 'quantity') document.getElementById('pv-qty').textContent = e.target.value + '매';
+
+      // 가격 계산 (수량 * 가격)
+      if(e.target.id === 'price' || e.target.id === 'quantity') {
           const qty = document.getElementById('quantity').value || 0;
           const price = document.getElementById('price').value || 0;
           const totalPrice = qty * price;
           document.getElementById('pv-price').textContent = totalPrice.toLocaleString() + '원';
-
-      });
-      // 상대팀 선택시 프리뷰 업데이트
-      awaySelect.addEventListener('change', function() {
-      document.getElementById('pv-away').textContent = this.value || "AWAY";
+      }
   });
 </script>
 {% endblock %}

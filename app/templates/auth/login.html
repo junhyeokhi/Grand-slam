@@ -42,7 +42,9 @@
         </div>
 
         <button type="submit" class="btn btn-login">로그인</button>
-        <button type="button" class="btn btn-kakao">카카오 1초로그인/회원가입</button>
+        <a href="{{ url_for('auth.kakao_login') }}" style="text-decoration: none">
+          <button type="button" class="btn btn-kakao">카카오 1초로그인/회원가입</button>
+        </a>
         <a href="{{ url_for('auth.signup') }}" class="btn btn-email">이메일로 회원가입</a>
 
         <div class="social-login">

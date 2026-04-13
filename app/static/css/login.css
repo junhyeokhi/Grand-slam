@@ -149,7 +149,7 @@ body {
   font-size: 20px;
   cursor: pointer;
   margin-bottom: 14px;
-  padding:12px;
+  padding: 12px;
 }
 
 .btn-login {
@@ -190,7 +190,7 @@ body {
 }
 
 .btn-kakao {
-  background-color: #FEE500;
+  background-color: #fee500;
   color: #111;
   position: relative;
   display: flex;
@@ -216,7 +216,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-
+}
 .btn-email {
   width: 100%;
   height: 44px;
@@ -226,5 +226,5 @@ body {
   font-size: 20px;
   cursor: pointer;
   margin-bottom: 14px;
-  padding:12px;
+  padding: 12px;
 }

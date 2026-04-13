@@ -1,60 +1,68 @@
-{% extends "base.html" %} {% block content %}
+{% extends "base.html" %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+
+{% endblock %}
+
+{% block content %}
 <div class="login-page">
-  <div class="login-container">
-    <!-- 왼쪽 영역 -->
-    <section class="left-section">
-      <div class="image-box">
-        <img src="https://cdn.ticketbay.co.kr/images/login/img_intro_01.png" alt="이미지" />
-      </div>
+    <div class="login-container">
+        <!-- 왼쪽 영역 -->
+        <section class="left-section">
+            <div class="image-box">
+              <img src="{{ url_for('static', filename='img/handshake.svg') }}" alt="악수 아이콘" class="trust-icon">
+            </div>
 
-      <h1 class="main-title">
-        거래 수수료<br />
-        완전 무료
-      </h1>
+            <h1 class="main-title">
+              안전한 거래 보장
+            </h1>
 
-      <p class="sub-text">
-        정가 이하 티켓 거래의 경우<br />
-        구매자와 판매자 모두 수수료를 면제해요
-      </p>
-    </section>
+            <p class="sub-text">
+               모든 거래는 인증된 사용자끼리 진행되고<br>
+                문제가 생기면 빠르게 도와드려요
+            </p>
+        </section>
 
-    <!-- 가운데 구분선 -->
-    <div class="divider"></div>
+        <!-- 가운데 구분선 -->
+        <div class="divider"></div>
 
-    <!-- 오른쪽 영역 -->
-    <section class="right-section">
-      <h2 class="logo-text">Grand Slam</h2>
+        <!-- 오른쪽 영역 -->
+        <section class="right-section">
+            <h2 class="logo-text">Grand Slam</h2>
 
-      <form class="login-form" method="post" action="">
-        <div class="input-group">
-          <label for="email">아이디(이메일)</label>
-          <input type="email" id="email" name="email" placeholder="아이디(이메일) 입력" />
-        </div>
+            <form class="login-form" method="post" action="">
+                <div class="input-group">
+                    <label for="email">아이디(이메일)</label>
+                    <input type="email" id="email" name="email" placeholder="아이디(이메일) 입력">
+                </div>
 
-        <div class="input-group">
-          <label for="password">비밀번호</label>
-          <input type="password" id="password" name="password" placeholder="비밀번호 입력" />
-        </div>
+                <div class="input-group">
+                    <label for="password">비밀번호</label>
+                    <input type="password" id="password" name="password" placeholder="비밀번호 입력">
+                </div>
 
-        <div class="save-id">
-          <input type="checkbox" id="saveId" name="saveId" />
-          <label for="saveId">아이디 저장</label>
-        </div>
+                <div class="save-id">
+                    <input type="checkbox" id="saveId" name="saveId">
+                    <label for="saveId">아이디 저장</label>
+                </div>
 
-        <button type="submit" class="btn btn-login">로그인</button>
-        <a href="{{ url_for('auth.kakao_login') }}" style="text-decoration: none">
-          <button type="button" class="btn btn-kakao">카카오 1초로그인/회원가입</button>
-        </a>
-        <a href="{{ url_for('auth.signup') }}" class="btn btn-email">이메일로 회원가입</a>
+                <button type="submit" class="btn-login">로그인</button>
 
-        <div class="social-login">
-          <a href="#" class="social-btn">N</a>
-          <a href="#" class="social-btn">G</a>
-          <a href="#" class="social-btn">A</a>
-        </div>
-      </form>
-    </section>
-  </div>
+                <div class="divider-line"></div>
+
+                <button type="button" class="btn-kakao">
+                    <img src="{{ url_for('static', filename='img/kakao.svg') }}" alt="카카오">
+                    카카오 1초 로그인/회원가입
+                </button>
+
+                <button type="button" class="btn-email">이메일로 회원가입</button>
+
+            </form>
+        </section>
+
+    </div>
 </div>
+
 
 {% endblock %}

@@ -37,6 +37,10 @@ def create_app():
     from .views import auth_views
     app.register_blueprint(auth_views.bp)
 
+    # 티켓 페이지(구단 선택 → 리스트 페이지) 라우트 연결
+    from .views import ticket_views
+    app.register_blueprint(ticket_views.bp)
+
     # 모든 HTML 파일에서 KBO_TEAMS 불러오기
     @app.context_processor
     def inject_teams():

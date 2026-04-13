@@ -1,0 +1,17 @@
+@charset "utf-8";
+
+.product-img-container {
+        background-color: #f8f9fa;
+        border-radius: 15px;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 400px;
+}
+
+.ticket-info-badge {
+        font-size: 0.85rem;
+        padding: 5px 12px;
+        border-radius: 50px;
+}

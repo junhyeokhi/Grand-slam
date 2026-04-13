@@ -10,6 +10,8 @@ from flask_sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
 migrate = Migrate()
 
+from . import models
+
 
 def create_app():
     app = Flask(__name__)
@@ -18,6 +20,7 @@ def create_app():
     # ORM 초기화
     db.init_app(app)
     migrate.init_app(app, db)
+
 
     # 블루프린트 등록
     from .views import main_views

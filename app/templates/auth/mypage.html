@@ -44,24 +44,68 @@
                 <div class="col"> 님, 오늘도 좋은 티켓 되세요!</div>
             </div>
 
-            <div id="recent" class="row mb-3 p-3 text-white"> <div class="recent_buy text-center col-md-6 border-end"> <span class="fw-bold mb-3 d-block">최근 구매 현황</span>
+            <div id="recent" class="row mb-3">
+        <div class="col-md-6 mb-3 mb-md-0">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-header bg-white border-bottom-0 pt-4 pb-0">
+                    <h5 class="card-title fw-bold text-dark mb-1">최근 구매 현황 <span class="text-muted fw-normal fs-6">(최근 1개월 기준)</span></h5>
+                </div>
+                <div class="card-body">
                     <div class="row text-center">
-                        <div class="col">결제완료</div>
-                        <div class="col">전달완료</div>
-                        <div class="col">거래완료</div>
-                        <div class="col">거래취소</div>
+                        <div class="col">
+                            <div class="status-value fs-2 fw-bold text-dark">0</div>
+                            <div class="status-label text-muted small">결제완료</div>
+                        </div>
+                        <div class="col">
+                            <div class="status-value fs-2 fw-bold text-dark">0</div>
+                            <div class="status-label text-muted small">전달완료</div>
+                        </div>
+                        <div class="col">
+                            <div class="status-value fs-2 fw-bold text-dark">0</div>
+                            <div class="status-label text-muted small">거래완료</div>
+                        </div>
+                        <div class="col">
+                            <div class="status-value fs-2 fw-bold text-dark">0</div>
+                            <div class="status-label text-muted small">거래취소</div>
+                        </div>
                     </div>
                 </div>
-                <div class="recent_sell text-center col-md-6">
-                    <span class="fw-bold mb-3 d-block">최근 판매 현황</span>
-                    <div class="row text-center">
-                        <div class="col">결제완료</div>
-                        <div class="col">전달완료</div>
-                        <div class="col">거래완료</div>
-                        <div class="col">판매완료</div>
-                    </div>
+                <div class="card-footer bg-white border-top-0 pt-0 pb-3 text-center">
+                    <a href="#" class="text-danger small text-decoration-none">결제대기 <span class="fw-bold">0</span> 건</a>
                 </div>
             </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-header bg-white border-bottom-0 pt-4 pb-0">
+                    <h5 class="card-title fw-bold text-dark mb-1">최근 판매 현황 <span class="text-muted fw-normal fs-6">(최근 1개월 기준)</span></h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col">
+                            <div class="status-value fs-2 fw-bold text-dark">0</div>
+                            <div class="status-label text-muted small">결제완료</div>
+                        </div>
+                        <div class="col">
+                            <div class="status-value fs-2 fw-bold text-dark">0</div>
+                            <div class="status-label text-muted small">전달완료</div>
+                        </div>
+                        <div class="col">
+                            <div class="status-value fs-2 fw-bold text-dark">0</div>
+                            <div class="status-label text-muted small">거래완료</div>
+                        </div>
+                        <div class="col">
+                            <div class="status-value fs-2 fw-bold text-dark">0</div>
+                            <div class="status-label text-muted small">판매완료</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-white border-top-0 pt-0 pb-3 text-center">
+                    <a href="#" class="text-danger small text-decoration-none">결제대기 <span class="fw-bold">0</span> 건</a>
+                </div>
+            </div>
+        </div>
 
             <div id="banner" class="row mb-3">
                 <div class="col p-0">

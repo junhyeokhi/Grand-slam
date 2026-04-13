@@ -1,6 +1,7 @@
-.idea/
-.venv/
 __pycache__/
+*.pyc
+.venv/
+.idea/
 migrations/
 .DS_Store
 

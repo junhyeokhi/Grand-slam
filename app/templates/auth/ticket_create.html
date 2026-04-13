@@ -7,12 +7,7 @@
         <form method="post" id="ticketForm">
           <div class="mb-3">
             <label class="form-label fw-bold small">홈팀 (장소)</label>
-            <select
-              name="hometeam"
-              id="hometeam"
-              class="form-select rounded-0"
-              required
-            >
+            <select name="hometeam" id="hometeam" class="form-select rounded-0" required>
               <option value="">구단 선택</option>
               {% for team in teams %}
               <option value="{{ team.name }}">{{ team.name }}</option>
@@ -22,12 +17,7 @@
 
           <div class="mb-3">
             <label class="form-label fw-bold small">상대팀</label>
-            <select
-              name="awayteam"
-              id="awayteam"
-              class="form-select rounded-0"
-              required
-            >
+            <select name="awayteam" id="awayteam" class="form-select rounded-0" required>
               <option value="">구단 선택</option>
               {% for team in teams %}
               <option value="{{ team.name }}">{{ team.name }}</option>
@@ -37,13 +27,7 @@
 
           <div class="mb-3">
             <label class="form-label fw-bold small">좌석 등급</label>
-            <select
-              name="seat_grade"
-              id="seat_grade"
-              class="form-select rounded-0"
-              required
-              disabled
-            >
+            <select name="seat_grade" id="seat_grade" class="form-select rounded-0" required disabled>
               <option value="">구단을 먼저 선택하세요</option>
             </select>
           </div>
@@ -62,58 +46,32 @@
           <div class="row">
             <div class="col-6 mb-3">
               <label class="form-label fw-bold small">수량</label>
-              <input
-                type="number"
-                name="quantity"
-                id="quantity"
-                class="form-control rounded-0"
-                value="1"
-              />
+              <input type="number" name="quantity" id="quantity" class="form-control rounded-0" value="1" />
             </div>
             <div class="col-6 mb-3">
               <label class="form-label fw-bold small">가격 (1매당)</label>
-              <input
-                type="number"
-                name="price"
-                id="price"
-                class="form-control rounded-0"
-                placeholder="0"
-              />
+              <input type="number" name="price" id="price" class="form-control rounded-0" placeholder="0" />
             </div>
           </div>
 
-          <button
-            type="submit"
-            class="btn btn-dark w-100 rounded-0 mt-3 py-3 fw-bold"
-          >
-            판매 등록하기
-          </button>
+          <button type="submit" class="btn btn-dark w-100 rounded-0 mt-3 py-3 fw-bold">판매 등록하기</button>
         </form>
       </div>
     </div>
 
     <div class="col-lg-7 d-none d-lg-block">
       <div class="sticky-top" style="top: 100px">
-        <p class="text-muted small fw-bold mb-3">
-          <i class="bi bi-eye"></i> 티켓 프리뷰
-        </p>
+        <p class="text-muted small fw-bold mb-3"><i class="bi bi-eye"></i> 티켓 프리뷰</p>
 
-        <div
-          class="d-flex shadow-lg overflow-hidden"
-          style="min-height: 200px; border-radius: 4px"
-        >
-          <div
-            class="bg-white p-4 flex-grow-1 border-end border-dashed position-relative"
-          >
+        <div class="d-flex shadow-lg overflow-hidden" style="min-height: 200px; border-radius: 4px">
+          <div class="bg-white p-4 flex-grow-1 border-end border-dashed position-relative">
             <div class="badge bg-danger rounded-0 mb-2">MATCH DAY</div>
             <div class="h3 fw-bold mb-1">
               <span id="pv-home">HOME</span>
               <span class="text-muted small">vs</span>
               <span id="pv-away">AWAY</span>
             </div>
-            <div class="text-muted small mb-3" id="pv-date">
-              2026.04.09 (KST)
-            </div>
+            <div class="text-muted small mb-3" id="pv-date">2026.04.09 (KST)</div>
             <hr />
             <div class="row">
               <div class="col-8">
@@ -135,11 +93,7 @@
           >
             <div class="small opacity-50 mb-1">QUANTITY</div>
             <div class="h4 fw-bold" id="pv-qty">1매</div>
-            <div
-              class="mt-4 border border-secondary px-2 py-1 small opacity-50"
-            >
-              GrandSlam
-            </div>
+            <div class="mt-4 border border-secondary px-2 py-1 small opacity-50">GrandSlam</div>
           </div>
         </div>
       </div>
@@ -193,6 +147,11 @@
           if(e.target.id === 'quantity') document.getElementById('pv-qty').textContent = e.target.value + '매';
           if(e.target.id === 'price') document.getElementById('pv-price').textContent = Number(e.target.value ).toLocaleString() + '원';
 
+          // 총 가격 계산 로직 (수량 * 가격)
+          const qty = document.getElementById('quantity').value || 0;
+          const price = document.getElementById('price').value || 0;
+          const totalPrice = qty * price;
+          document.getElementById('pv-price').textContent = totalPrice.toLocaleString() + '원';
 
       });
       // 상대팀 선택시 프리뷰 업데이트

@@ -4,10 +4,7 @@
     <!-- 왼쪽 영역 -->
     <section class="left-section">
       <div class="image-box">
-        <img
-          src="https://cdn.ticketbay.co.kr/images/login/img_intro_01.png"
-          alt="이미지"
-        />
+        <img src="https://cdn.ticketbay.co.kr/images/login/img_intro_01.png" alt="이미지" />
       </div>
 
       <h1 class="main-title">
@@ -31,22 +28,12 @@
       <form class="login-form" method="post" action="">
         <div class="input-group">
           <label for="email">아이디(이메일)</label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            placeholder="아이디(이메일) 입력"
-          />
+          <input type="email" id="email" name="email" placeholder="아이디(이메일) 입력" />
         </div>
 
         <div class="input-group">
           <label for="password">비밀번호</label>
-          <input
-            type="password"
-            id="password"
-            name="password"
-            placeholder="비밀번호 입력"
-          />
+          <input type="password" id="password" name="password" placeholder="비밀번호 입력" />
         </div>
 
         <div class="save-id">
@@ -55,10 +42,8 @@
         </div>
 
         <button type="submit" class="btn btn-login">로그인</button>
-        <button type="button" class="btn btn-kakao">
-          카카오 1초로그인/회원가입
-        </button>
-        <button type="button" class="btn btn-email">이메일로 회원가입</button>
+        <button type="button" class="btn btn-kakao">카카오 1초로그인/회원가입</button>
+        <a href="{{ url_for('auth.signup') }}" class="btn btn-email">이메일로 회원가입</a>
 
         <div class="social-login">
           <a href="#" class="social-btn">N</a>

@@ -18,7 +18,8 @@ a {
 
 /* MY티켓베이 타이틀 섹션 */
 #my {
-    min-height: 120px; /* 최소 높이만 지정 */
+    min-height: 120px;
+    /* 최소 높이만 지정 */
     border-radius: 10px;
 }
 
@@ -53,12 +54,12 @@ aside ul li a:hover {
 }
 
 /* 오른쪽 메인 콘텐츠 영역  */
-.main-content {
-}
+.main-content {}
 
 /* 메인 콘텐츠 블록들의 공통 스타일 */
 .main-content .row {
-    margin-left: 0; /* 부트스트랩 row의 기본 음수 마진 제거 */
+    margin-left: 0;
+    /* 부트스트랩 row의 기본 음수 마진 제거 */
     margin-right: 0;
     border-radius: 10px;
 }
@@ -69,9 +70,22 @@ aside ul li a:hover {
     font-size: 18px;
 }
 
-#recent {
-    background-color: blueviolet;
+#recent .card {
+    border: 1px solid #eee !important;
+    /* 아주 연한 테두리 */
+    border-radius: 15px;
+    /* 사진처럼 둥글게 */
 }
+
+#recent .status-value {
+    margin-bottom: 5px;
+}
+
+#recent .card-footer a.text-danger {
+    color: #e91e63 !important;
+    /* '결제대기 0건' 색상 */
+}
+
 
 /* 최근 현황 내부 row 스타일 */
 #recent .row .col {
@@ -84,33 +98,42 @@ aside ul li a:hover {
 }
 
 #banner img {
-    width: 100%; /* 부모 너비에 맞춤 */
+    width: 100%;
+    /* 부모 너비에 맞춤 */
     height: auto;
 }
 
-#history, #message, #review {
-    background-color: transparent !important; /* 배경색 제거 */
-    height: auto !important; /* 고정 높이 제거 */
+#history,
+#message,
+#review {
+    background-color: transparent !important;
+    /* 배경색 제거 */
+    height: auto !important;
+    /* 고정 높이 제거 */
     margin-left: 0 !important;
 }
 
 /* 탭 버튼 기본 스타일 (선택되지 않았을 때) */
 #tab .nav-link {
     font-size: 16px;
-    color: #6c757d !important; /* 회색 계열 */
+    color: #6c757d !important;
+    /* 회색 계열 */
     font-weight: normal;
     border: none;
     background: transparent;
     padding: 10px 20px;
-    margin-bottom: -2px; /* 밑줄이 경계선과 겹치게 조정 */
+    margin-bottom: -2px;
+    /* 밑줄이 경계선과 겹치게 조정 */
     transition: all 0.2s ease-in-out;
 }
 
 /* 탭 버튼이 클릭되어 활성화되었을 때 (.active) */
 #tab .nav-link.active {
-    color: #000 !important; /* 진한 검은색 */
+    color: #000 !important;
+    /* 진한 검은색 */
     font-weight: bold !important;
-    border-bottom: 3px solid #000 !important; /* 검은색 밑줄 강조 */
+    border-bottom: 3px solid #000 !important;
+    /* 검은색 밑줄 강조 */
 }
 
 /* 마우스를 올렸을 때 살짝 진해지는 효과 */

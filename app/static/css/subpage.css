@@ -1,17 +1,30 @@
 @charset "utf-8";
 
 .product-img-container {
-        background-color: #f8f9fa;
+        background-color: #ffffff;
         border-radius: 15px;
-        overflow: hidden;
+        min-height: 400px;
         display: flex;
         align-items: center;
-        justify-content: center;
-        min-height: 400px;
-}
-
-.ticket-info-badge {
-        font-size: 0.85rem;
-        padding: 5px 12px;
-        border-radius: 50px;
-}
+        justify-content: space-around;
+        border: 1px solid #dee2e6;
+    }
+    .team-logo-box { text-align: center; flex: 1; }
+    .team-logo-box img {
+        max-height: 180px;
+        width: auto;
+        object-fit: contain;
+        margin-bottom: 15px;
+    }
+    .vs-text {
+        font-size: 3rem;
+        font-weight: 900;
+        color: #ddd;
+        font-style: italic;
+    }
+    .ticket-info-card {
+        background-color: #f8f9fa;
+        border: none;
+        border-radius: 10px;
+        padding: 20px;
+    }

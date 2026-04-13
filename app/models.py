@@ -41,3 +41,8 @@ class Order(db.Model):
 
     ticket = db.relationship('Ticket', backref=db.backref('order', uselist=False))
     buyer = db.relationship('User', backref=db.backref('order_set'))
+
+class Team(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    team_name = db.Column(db.String(50), unique=True, nullable=False)
+    logo_image = db.Column(db.String(100), nullable=False)

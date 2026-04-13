@@ -1,10 +1,11 @@
-from flask import Blueprint, flash, redirect, render_template, request, url_for
 import requests
 from flask import current_app
+from flask import Blueprint, flash, redirect, render_template, request, url_for, g
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask import session
 from app.form import UserLoginForm
-from app.models import User
+from app.models import User, Ticket
+import functools
 
 
 from app import db
@@ -90,6 +91,7 @@ def mypage():
 def ticket_create():
     return render_template('auth/ticket_create.html')
 
+
 @bp.route('/subpage/')
 def subpage():
     return render_template('auth/subpage.html')
@@ -169,3 +171,27 @@ def kakao_callback():
 
     # 5. 메인 페이지로 이동!
     return redirect(url_for('main.index'))
+  
+# 모든 요청 전에 실행되어 g.user를 세팅하는 함수
+@bp.before_app_request
+def load_logged_in_user():
+    user_id = session.get('user_id')
+    if user_id is None:
+        g.user = None
+    else:
+        g.user = User.query.get(user_id)
+
+# 로그인이 필요한 페이지에 적용할 데코레이터
+def login_required(view):
+    @functools.wraps(view)
+    def wrapped_view(**kwargs):
+        if g.user is None:
+            flash('로그인이 필요합니다.')
+            return redirect(url_for('auth.login'))
+        return view(**kwargs)
+    return wrapped_view
+
+@bp.route('/ticket/<int:ticket_id>/')
+def detail(ticket_id):
+    ticket = Ticket.query.get_or_404(ticket_id)
+    return render_template('auth/subpage.html', ticket=ticket)

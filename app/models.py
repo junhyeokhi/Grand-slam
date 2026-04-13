@@ -8,6 +8,7 @@ from app import db
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    kakao_id = db.Column(db.String(100), unique=True, nullable=True)
     username = db.Column(db.String(50), unique=True, nullable=False)
     nickname = db.Column(db.String(50), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
@@ -40,3 +41,8 @@ class Order(db.Model):
 
     ticket = db.relationship('Ticket', backref=db.backref('order', uselist=False))
     buyer = db.relationship('User', backref=db.backref('order_set'))
+
+class Team(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    team_name = db.Column(db.String(50), unique=True, nullable=False)
+    logo_image = db.Column(db.String(100), nullable=False)

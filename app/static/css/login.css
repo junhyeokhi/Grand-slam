@@ -1,29 +1,9 @@
-/* 기본 초기화 */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-/* 페이지 기본 스타일 */
-body {
-  background-color: #efefefef;
-  font-family: Arial, sans-serif;
-  color: #111;
-}
-
-/* 로그인 페이지 전체 레이아웃 */
 .login-page {
   width: 100%;
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 30px;
+  padding: 60px 0;
 }
 
-/* 로그인 컨테이너 박스 */
-.login-container {
+.login-page .login-container {
   width: 1100px;
   max-width: 100%;
   min-height: 620px;
@@ -34,10 +14,10 @@ body {
   align-items: center;
   padding: 50px 70px;
   gap: 50px;
+  margin: 0 auto;
 }
 
-/* 왼쪽 영역 */
-.left-section {
+.login-page .left-section {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -45,8 +25,7 @@ body {
   text-align: center;
 }
 
-/* 왼쪽 이미지 박스 */
-.image-box {
+.login-page .image-box {
   width: 180px;
   height: 180px;
   display: flex;
@@ -55,68 +34,58 @@ body {
   margin-bottom: 28px;
 }
 
-/* 이미지 크기 */
-.image-box img {
+.login-page .image-box img {
   width: 180px;
   height: auto;
 }
 
-/* 메인 타이틀 */
-.main-title {
+.login-page .main-title {
   font-size: 34px;
   font-weight: 800;
   line-height: 1.2;
   margin-bottom: 28px;
 }
 
-/* 설명 텍스트 */
-.sub-text {
+.login-page .sub-text {
   font-size: 18px;
   line-height: 1.6;
   color: #333;
 }
 
-/* 가운데 구분선 */
-.divider {
+.login-page .divider {
   width: 1px;
   height: 470px;
   background-color: #d8d8d8;
 }
 
-/* 오른쪽 영역 */
-.right-section {
+.login-page .right-section {
   flex: 1;
   max-width: 420px;
 }
 
-/* 로고 텍스트 */
-.logo-text {
+.login-page .logo-text {
   text-align: center;
   font-size: 56px;
   font-weight: 700;
   margin-bottom: 40px;
 }
 
-/* 로그인 폼 */
-.login-form {
+.login-page .login-form {
   width: 100%;
 }
 
-/* 입력 그룹 */
-.input-group {
+.login-page .input-group {
   margin-bottom: 28px;
 }
 
-/* 입력 라벨 */
-.input-group label {
+.login-page .input-group label {
   display: block;
   font-size: 20px;
   font-weight: 700;
   margin-bottom: 10px;
 }
 
-/* 입력 필드 */
-.input-group input {
+.login-page .input-group input {
   width: 100%;
   border: none;
   border-bottom: 1px solid #bbb;
@@ -126,13 +95,11 @@ body {
   outline: none;
 }
 
-/* placeholder 스타일 */
-.input-group input::placeholder {
+.login-page .input-group input::placeholder {
   color: #777;
 }
 
-/* 아이디 저장 영역 */
-.save-id {
+.login-page .save-id {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -141,23 +108,14 @@ body {
   color: #333;
 }
 
-/* 체크박스 크기 */
-.save-id input[type="checkbox"] {
+.login-page .save-id input[type="checkbox"] {
   width: 16px;
   height: 16px;
 }
 
-/* 버튼 그룹 */
-.btn-group {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-/* 공통 버튼 스타일 */
-.btn-login,
-.btn-kakao,
-.btn-email {
+.login-page .btn-login,
+.login-page .btn-kakao,
+.login-page .btn-email {
   width: 100%;
   height: 52px;
   border-radius: 10px;
@@ -170,30 +128,27 @@ body {
   justify-content: center;
 }
 
-/* 로그인 버튼 */
-.btn-login {
+.login-page .btn-login {
   background-color: #000;
   color: #fff;
   border: none;
 }
 
-/* 구분선 */
-.divider-line {
+.login-page .divider-line {
   height: 1px;
   background: #ddd;
   margin: 20px 0;
 }
 
-/* 카카오 버튼 */
-.btn-kakao {
+.login-page .btn-kakao {
   background-color: #FEE500;
   color: #111;
   position: relative;
   border: none;
+  text-decoration: none;
 }
 
-/* 카카오 아이콘 위치 */
-.btn-kakao img {
+.login-page .btn-kakao img {
   width: 18px;
   height: 18px;
   position: absolute;
@@ -202,9 +157,9 @@ body {
   transform: translateY(-50%);
 }
 
-/* 이메일 가입 버튼 */
-.btn-email {
+.login-page .btn-email {
   background-color: #fff;
   color: #111;
   border: 1px solid #d9d9d9;
+  text-decoration: none;
 }

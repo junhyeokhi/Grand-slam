@@ -112,24 +112,159 @@
         </form>
       </div>
     </div>
+    
+<!-- 가운데 티켓 리스트 -->
+<div class="col-lg-6">
+    {% for ticket in tickets.items %}
+    <div class="ticket-card">
+        <div class="ticket-card-top">
+            <div class="ticket-date">
+                경기 일시
+                <span>
+                    {{ ticket.game_date.strftime('%Y.%m.%d %H:%M') if ticket.game_date else '일시 미정' }}
+                </span>
+            </div>
 
-    <!-- 가운데 티켓 리스트 -->
-    <div class="col-lg-6">
-      {% for ticket in tickets %}
-      <div style="background: white; color: black; border: 2px solid red; padding: 12px; margin-bottom: 12px">
-        테스트 {{ ticket.id }} / {{ ticket.Hometeam_name }} vs {{ ticket.awayteam_name }}
-      </div>
-      {% endfor %}
+            <div class="ticket-badges">
+                {% if ticket.price %}
+                <span class="badge-price">정가 이하</span>
+                {% endif %}
+                <span class="badge-compare">비교담기</span>
+            </div>
+        </div>
+
+        <div class="ticket-card-body">
+            <div class="ticket-info">
+                <h3 class="ticket-title">
+                    VS {{ ticket.awayteam_name }} | {{ ticket.seat }} {{ ticket.row if ticket.row else '' }}열
+                </h3>
+
+                <p class="ticket-sub">
+                    {{ ticket.seat_grade if ticket.seat_grade else '' }}
+                    {% if ticket.delivery_method %}
+                    <span class="divider">|</span>
+                    {{ ticket.delivery_method }}
+                    {% endif %}
+                </p>
+
+                {% if ticket.trade_type %}
+                <div class="ticket-tag-wrap">
+                    <span class="ticket-tag">{{ ticket.trade_type }}</span>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="ticket-price-box">
+                <div class="ticket-qty">수량 <strong>{{ ticket.quantity }}매</strong></div>
+                <div class="ticket-price-label">한 매 가격</div>
+                <div class="ticket-price">
+                    {{ "{:,}".format(ticket.price) if ticket.price else 0 }}원
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <!-- 오른쪽 사이드 -->
     <div class="col-lg-3">
       <div class="side-box p-3 rounded-4 mb-3 text-center">상품 비교 <span class="text-danger">0</span></div>
+        <div class="side-box p-3 rounded-4 mb-3 text-center">
+            상품 비교 <span class="text-danger">0</span>
+        </div>
 
-      <div class="side-box p-3 rounded-4 mb-3 text-center">
-        최근 본 상품 <span class="text-danger">0</span>
-        <div class="mt-2 text-muted small">더보기</div>
-      </div>
+        <div class="side-box p-3 rounded-4 mb-3 text-center">
+            최근 본 상품 <span class="text-danger">0</span>
+            <div class="mt-2 text-muted small">더보기</div>
+        </div>
+
+      
+        </div>
+<nav aria-label="티켓 페이지 이동" class="mt-4">
+    <ul class="pagination custom-pagination justify-content-center">
+
+        <!-- 맨 처음 -->
+        <li class="page-item {% if tickets.page == 1 %}disabled{% endif %}">
+            <a class="page-link"
+               href="{{ url_for('ticket.ticket_list',
+                                page=1,
+                                awayteam=request.args.get('awayteam', ''),
+                                seat=request.args.get('seat', ''),
+                                quantity=request.args.get('quantity', ''),
+                                team=team,
+                                option=option) }}">
+                &laquo;
+            </a>
+        </li>
+
+        <!-- 이전 -->
+        <li class="page-item {% if not tickets.has_prev %}disabled{% endif %}">
+            <a class="page-link"
+               href="{{ url_for('ticket.ticket_list',
+                                page=tickets.prev_num if tickets.has_prev else 1,
+                                awayteam=request.args.get('awayteam', ''),
+                                seat=request.args.get('seat', ''),
+                                quantity=request.args.get('quantity', ''),
+                                team=team,
+                                option=option) }}">
+                &lsaquo;
+            </a>
+        </li>
+
+        <!-- 현재 페이지 주변 숫자만 표시 -->
+        {% set start_page = tickets.page - 2 if tickets.page - 2 > 0 else 1 %}
+        {% set end_page = tickets.page + 2 if tickets.page + 2 <= tickets.pages else tickets.pages %}
+
+        {% for page_num in range(start_page, end_page + 1) %}
+            {% if page_num == tickets.page %}
+            <li class="page-item active">
+                <span class="page-link">{{ page_num }}</span>
+            </li>
+            {% else %}
+            <li class="page-item">
+                <a class="page-link"
+                   href="{{ url_for('ticket.ticket_list',
+                                    page=page_num,
+                                    awayteam=request.args.get('awayteam', ''),
+                                    seat=request.args.get('seat', ''),
+                                    quantity=request.args.get('quantity', ''),
+                                    team=team,
+                                    option=option) }}">
+                    {{ page_num }}
+                </a>
+            </li>
+            {% endif %}
+        {% endfor %}
+
+        <!-- 다음 -->
+        <li class="page-item {% if not tickets.has_next %}disabled{% endif %}">
+            <a class="page-link"
+               href="{{ url_for('ticket.ticket_list',
+                                page=tickets.next_num if tickets.has_next else tickets.pages,
+                                awayteam=request.args.get('awayteam', ''),
+                                seat=request.args.get('seat', ''),
+                                quantity=request.args.get('quantity', ''),
+                                team=team,
+                                option=option) }}">
+                &rsaquo;
+            </a>
+        </li>
+
+        <!-- 맨 끝 -->
+        <li class="page-item {% if tickets.page == tickets.pages %}disabled{% endif %}">
+            <a class="page-link"
+               href="{{ url_for('ticket.ticket_list',
+                                page=tickets.pages,
+                                awayteam=request.args.get('awayteam', ''),
+                                seat=request.args.get('seat', ''),
+                                quantity=request.args.get('quantity', ''),
+                                team=team,
+                                option=option) }}">
+                &raquo;
+            </a>
+        </li>
+
+    </ul>
+</nav>
     </div>
   </div>
 

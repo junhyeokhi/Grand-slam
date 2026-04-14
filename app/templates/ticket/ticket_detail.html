@@ -1,0 +1,100 @@
+{% extends "base.html" %} {% block title %}상품 상세 정보{% endblock %} {% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/subpage.css') }}" />
+{% endblock %} {% block content %}
+<div class="container my-5">
+  <nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="/" class="text-decoration-none text-muted">홈</a></li>
+      <li class="breadcrumb-item active">티켓 상세보기</li>
+    </ol>
+  </nav>
+
+  <div class="row">
+    <div class="col-md-6 mb-4">
+      <div class="product-img-container shadow-sm p-4">
+        <div class="team-logo-box">
+          <img src="{{ url_for('static', filename='img/' + ticket.Hometeam_name + '.jpg') }}" alt="{{ ticket.Hometeam_name }}" />
+          <div class="fw-bold fs-5 text-dark">{{ ticket.Hometeam_name }}</div>
+        </div>
+
+        <div class="vs-text">VS</div>
+
+        <div class="team-logo-box">
+          <img src="{{ url_for('static', filename='img/' + ticket.awayteam_name + '.jpg') }}" alt="{{ ticket.awayteam_name }}" />
+          <div class="fw-bold fs-5 text-dark">{{ ticket.awayteam_name }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="ps-md-4">
+        <span class="badge bg-primary mb-2">{{ ticket.status }}</span>
+        <h2 class="fw-bold mb-3">{{ ticket.Hometeam_name }} vs {{ ticket.awayteam_name }}</h2>
+        <h3 class="text-danger fw-bold mb-4">{{ "{:,}".format(ticket.price) }}원</h3>
+
+        <div class="ticket-info-card mb-4">
+          <div class="row mb-2">
+            <div class="col-4 text-muted">경기 일시</div>
+            <div class="col-8 fw-bold">{{ ticket.game_date.strftime('%Y-%m-%d %H:%M') }}</div>
+          </div>
+          <div class="row mb-2">
+            <div class="col-4 text-muted">좌석 정보</div>
+            <div class="col-8">{{ ticket.sub_category }} {{ ticket.seat }}</div>
+          </div>
+          <div class="row mb-2">
+            <div class="col-4 text-muted">수량</div>
+            <div class="col-8">{{ ticket.quantity }}매</div>
+          </div>
+          <div class="row">
+            <div class="col-4 text-muted">판매자</div>
+            <div class="col-8">{{ ticket.seller.nickname }}</div>
+          </div>
+        </div>
+        {# 만약 티켓의 상태가 판매중일경우에만 보이게하기 #} {% if ticket.status == '판매중' %}
+        <div class="card border-0 shadow-sm p-4 mt-4">
+          <h5 class="fw-bold mb-3">결제 수단 선택</h5>
+
+          <div id="payment-method"></div>
+
+          <div id="agreement"></div>
+
+          <button id="payment-button" class="btn btn-primary w-100 py-3 fw-bold mt-3 fs-5">{{ "{:,}".format(ticket.price) }}원 결제하기</button>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+<script src="https://js.tosspayments.com/v1/payment-widget"></script>
+<script>
+  // 2. 토스페이먼츠 공용 테스트 클라이언트 키 (회원가입 없이 바로 작동합니다)
+  const clientKey = "test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm";
+
+  // 3. 구매자 고유 키 (로그인한 유저의 ID를 사용합니다)
+  const customerKey = "USER_{{ session.get('user_id', 'GUEST') }}";
+
+  // 4. 결제 위젯 초기화
+  const paymentWidget = PaymentWidget(clientKey, customerKey);
+
+  // 5. 결제 금액 설정 및 위젯 렌더링
+  const price = {{ ticket.price }}; // 파이썬에서 넘어온 티켓 가격
+  paymentWidget.renderPaymentMethods("#payment-method", { value: price });
+  paymentWidget.renderAgreement("#agreement");
+
+  // 6. 결제하기 버튼 클릭 이벤트
+  const paymentButton = document.getElementById("payment-button");
+  paymentButton.addEventListener("click", function () {
+
+    // 고유 주문번호 생성 (실제로는 DB에서 생성된 주문번호를 써야 하지만, 테스트를 위해 임의 생성)
+    const generateOrderId = "ORDER_" + new Date().getTime() + "_" + "{{ ticket.id }}";
+
+    // 결제창 호출!
+    paymentWidget.requestPayment({
+      orderId: generateOrderId,
+      orderName: "{{ ticket.Hometeam_name }} vs {{ ticket.awayteam_name }} 티켓", // 예: 한화 vs 두산 티켓
+      successUrl: window.location.origin + "/ticket/pay/success?ticket_id={{ ticket.id }}", // 성공 시 이동할 주소
+      failUrl: window.location.origin + "/ticket/pay/fail",   // 실패 시 이동할 주소
+    });
+  });
+</script>
+{% endblock %}

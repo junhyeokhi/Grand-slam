@@ -16,4 +16,4 @@ def index():
 def detail(ticket_id):
     ticket = Ticket.query.get_or_404(ticket_id)
 
-    return render_template('subpage.html', ticket=ticket)
+    return render_template('ticket/ticket_detail.html', ticket=ticket)

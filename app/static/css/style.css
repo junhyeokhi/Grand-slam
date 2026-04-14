@@ -1,0 +1,13 @@
+/* 상단 네비바 화면 z인덱스로 제일앞으로 표출 */
+.navbar,
+nav {
+  position: sticky;
+  top: 0;
+  z-index: 1050;
+  background-color: white;
+}
+
+/* 아래로 떨어지는 메뉴 */
+.nav-dropdown {
+  z-index: 1100;
+}

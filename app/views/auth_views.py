@@ -9,7 +9,6 @@ from datetime import datetime
 from app.models import User, Ticket
 import functools
 
-
 from app import db
 
 from app.form import UserCreateForm
@@ -107,73 +106,79 @@ def signup():
 def mypage():
     return render_template('auth/mypage.html')
 
-# 5. 상품등록페이지 연결 (주소: /auth/ticket_create)
-@bp.route('/ticket_create/', methods=['GET', 'POST'])
-@login_required # 로그인 데코레이터 추가
-def ticket_create():
-    if request.method == 'POST':
-        # 폼 데이터 추출
-        hometeam_name = request.form.get('hometeam')
-        sub_category = request.form.get('sub_category') # 경기 정보 (장소 및 요일)
-        awayteam_name = request.form.get('awayteam')
-        game_date_str = request.form.get('game_date') # YYYY-MM-DD
-        game_time_hour = request.form.get('game_time_hour') # HH
-        game_time_minute = request.form.get('game_time_minute') # MM
-        seat_grade = request.form.get('seat_grade')
-        seat_detail = request.form.get('seat') # 'seat_detail' input의 name은 'seat' (상세 위치)
-        quantity = request.form.get('quantity', type=int)
-        price = request.form.get('price', type=int)
-        user_pin = request.form.get('pin') # 사용자가 입력한 PIN 번호
+# 6. 회원정보 수정 페이지 연결 (주소: /auth/edit_profile)
+@bp.route('/edit_profile/', methods=['GET', 'POST'])
+@login_required
+def edit_profile():
+    from app.form import UserEditForm # UserEditForm 임포트
+    form = UserEditForm()
+    
+    if request.method == 'GET':
+        # 현재 로그인된 사용자 정보로 폼 필드 미리 채우기
+        form.email.data = g.user.email
+        form.username.data = g.user.username
+        form.nickname.data = g.user.nickname
+        form.phone.data = g.user.phone
+        
+        # 저장된 주소를 기본 주소와 상세 주소로 분리하여 폼에 채움
+        # User.address는 "기본주소 상세주소" 형식으로 저장되어 있다고 가정
+        address_parts = g.user.address.split(' ', 1)
+        form.address.data = address_parts[0] if address_parts else ''
+        detail_address_value = address_parts[1] if len(address_parts) > 1 else ''
+        
+        return render_template('auth/edit_profile.html', form=form, detail_address_value=detail_address_value)
+    
+    elif request.method == 'POST' and form.validate_on_submit():
+        # 이메일 변경 시 중복 확인 (단, 본인의 이메일은 허용)
+        if form.email.data != g.user.email:
+            user_by_email = User.query.filter_by(email=form.email.data).first()
+            if user_by_email and user_by_email.id != g.user.id:
+                flash('이미 사용 중인 이메일입니다.', 'danger')
+                detail_address_value = request.form.get('detailAddress', '')
+                return render_template('auth/edit_profile.html', form=form, detail_address_value=detail_address_value)
+        
+        # 닉네임 변경 시 중복 확인 (단, 본인의 닉네임은 허용)
+        if form.nickname.data != g.user.nickname:
+            user_by_nick = User.query.filter_by(nickname=form.nickname.data).first()
+            if user_by_nick and user_by_nick.id != g.user.id:
+                flash('이미 사용 중인 닉네임입니다.', 'danger')
+                detail_address_value = request.form.get('detailAddress', '')
+                return render_template('auth/edit_profile.html', form=form, detail_address_value=detail_address_value)
 
-        # 필수 필드 검증
-        if not all([hometeam_name, sub_category, awayteam_name, game_date_str, game_time_hour,
-                    game_time_minute, seat_grade, seat_detail, quantity, price, user_pin]):
-            flash('모든 필수 필드를 입력해주세요.', 'danger')
-            return render_template('auth/ticket_create.html') 
-        # game_date와 game_time을 조합하여 datetime 객체 생성
-        try:
-            # YYYY-MM-DD HH:MM 형식의 문자열 생성
-            game_datetime_str = f"{game_date_str} {game_time_hour}:{game_time_minute}"
-            game_datetime = datetime.strptime(game_datetime_str, '%Y-%m-%d %H:%M')
-        except ValueError:
-            flash('유효하지 않은 날짜 또는 시간 형식입니다.', 'danger')
-            return render_template('auth/ticket_create.html')
+        # 사용자 정보 업데이트
+        g.user.email = form.email.data
+        g.user.username = form.username.data
+        g.user.nickname = form.nickname.data
+        g.user.phone = form.phone.data
+        
+        # 주소 업데이트 (기본 주소 + 상세 주소)
+        full_address = f"{form.address.data} {request.form.get('detailAddress', '')}".strip()
+        g.user.address = full_address
 
-        # 'seat' 필드에 좌석 등급과 상세 위치를 조합하여 저장
-        full_seat_info = f"{seat_grade} {seat_detail}".strip()
-
-        # 사용자가 입력한 PIN 번호를 암호화
-        hashed_pin = generate_password_hash(user_pin)
-        # Ticket 객체 생성
-        ticket = Ticket(
-            seller_id=g.user.id, # 현재 로그인된 사용자 ID
-            Hometeam_name=hometeam_name,
-            awayteam_name=awayteam_name,
-            sub_category=sub_category,
-            seat=full_seat_info,
-            quantity=quantity,
-            price=price, # 1매당 가격
-            pin=hashed_pin, # 암호화된 PIN 저장
-            game_date=game_datetime
-        )
-
-        # DB에 저장
-        db.session.add(ticket)
+        # 새 비밀번호가 입력된 경우에만 비밀번호 업데이트
+        if form.password.data:
+            g.user.password = generate_password_hash(form.password.data)
+        
         db.session.commit()
+        flash('회원 정보가 성공적으로 수정되었습니다!', 'success')
+        return redirect(url_for('auth.mypage')) # 수정 후 마이페이지로 리다이렉트
+    
+    # POST 요청에서 유효성 검사 실패 시, 입력된 값과 상세 주소를 다시 템플릿으로 전달
+    detail_address_value = request.form.get('detailAddress', '')
+    return render_template('auth/edit_profile.html', form=form, detail_address_value=detail_address_value)
 
-        flash('티켓이 성공적으로 등록되었습니다!', 'success')
-        return redirect(url_for('main.index')) # 등록 후 메인 페이지로 리다이렉트
 
-    # GET 요청 시 폼 렌더링
-    return render_template('auth/ticket_create.html')
-
-@bp.route('/subpage/<int:ticket_id>')
+@bp.route('/ticket_detail/<int:ticket_id>')
 def subpage(ticket_id):
     # DB에서 해당 티켓을 찾기
     ticket = Ticket.query.get_or_404(ticket_id)
     # 찾은 ticket 데이터를 HTML로 리턴
-    return render_template('auth/subpage.html', ticket=ticket)
+    return render_template('ticket/ticket_detail.html', ticket=ticket)
 
+@bp.route('/logout/')
+def logout():
+    session.clear()
+    return redirect(url_for('main.index'))
 
 # 카카오 로그인 구현
 @bp.route('/kakao/login')

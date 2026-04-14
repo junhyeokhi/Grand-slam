@@ -1,0 +1,92 @@
+{% extends "base.html" %} {% block content %}
+<div class="container my-5" style="max-width: 600px">
+  <h3 class="fw-bold mb-4 text-center">회원정보 수정</h3>
+
+  <form method="post" class="p-4 border rounded-0 shadow-sm bg-white">
+    {{ form.csrf_token }} {% if form.errors %}
+    <div class="alert alert-danger rounded-0">
+      <ul class="mb-0">
+        {% for field, errors in form.errors.items() %} {% for error in errors %}
+        <li><strong>{{ form[field].label }}</strong>: {{ error }}</li>
+        {% endfor %} {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+    <div class="mb-3">
+      <label class="form-label fw-bold small">이메일</label>
+      {{ form.email(class="form-control rounded-0", placeholder="example@mail.com", readonly=True) }}
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label fw-bold small">이름</label>
+      {{ form.username(class="form-control rounded-0", placeholder="성함을 입력하세요", readonly=True) }}
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label fw-bold small">닉네임</label>
+      {{ form.nickname(class="form-control rounded-0", placeholder="사용하실 닉네임을 입력하세요") }}
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label fw-bold small">새 비밀번호</label>
+      {{ form.password(class="form-control rounded-0", placeholder="새 비밀번호를 입력하세요 (변경하지 않으려면 비워두세요)") }}
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label fw-bold small">새 비밀번호 확인</label>
+      {{ form.password2(class="form-control rounded-0", placeholder="새 비밀번호를 다시 입력하세요") }}
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label fw-bold small">전화번호</label>
+      {{ form.phone(class="form-control rounded-0", placeholder="010-0000-0000") }}
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label fw-bold small">주소</label>
+      <div class="input-group mb-2">
+        <input type="text" id="postcode" class="form-control rounded-0 bg-light" placeholder="우편번호" readonly />
+        <button class="btn btn-dark rounded-0 px-3" type="button" onclick="execDaumPostcode()">주소 검색</button>
+      </div>
+      {{ form.address(id="address", class="form-control rounded-0 bg-light mb-2", placeholder="기본 주소", readonly=True) }}
+      <input
+        type="text"
+        id="detailAddress"
+        name="detailAddress"
+        class="form-control rounded-0"
+        placeholder="상세 주소를 입력하세요 (동, 호수 등)"
+        value="{{ detail_address_value if detail_address_value is not none else '' }}"
+      />
+    </div>
+
+    <div class="mt-4">
+      <button type="submit" class="btn btn-black w-100 rounded-0 fw-bold py-2" style="background-color: #000; color: #fff">정보 수정</button>
+    </div>
+  </form>
+</div>
+
+<script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+<script>
+  function execDaumPostcode() {
+    new daum.Postcode({
+      oncomplete: function (data) {
+        document.getElementById("postcode").value = data.zonecode;
+        document.getElementById("address").value = data.address;
+        document.getElementById("detailAddress").focus();
+      },
+    }).open();
+  }
+
+  // 페이지 로드 시 기존 주소 정보 미리 채우기
+  document.addEventListener("DOMContentLoaded", function () {
+    const fullAddress = "{{ g.user.address | e }}"; // g.user.address는 "기본주소 상세주소" 형식
+    if (fullAddress) {
+      const addressParts = fullAddress.split(" ", 1); // 첫 번째 공백 기준으로 분리
+      const baseAddress = addressParts[0];
+      // 우편번호는 User 모델에 저장되어 있지 않으므로, 기본 주소만 채움
+      document.getElementById("address").value = baseAddress;
+      // 상세 주소는 Flask 뷰에서 detail_address_value로 이미 전달되어 input의 value 속성으로 채워짐
+    }
+  });
+</script>
+{% endblock %}

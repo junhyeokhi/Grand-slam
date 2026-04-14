@@ -169,3 +169,11 @@ def ticket_create():
 
     # GET 요청 시 폼 렌더링
     return render_template('ticket/ticket_create.html')
+
+# 티켓 상세정보 페이지 연결 (주소: /ticket/ticket_detail/<int:ticket_id>)
+@bp.route('/ticket_detail/<int:ticket_id>/')
+def ticket_detail(ticket_id):
+    # DB에서 해당 티켓을 찾기
+    ticket = Ticket.query.get_or_404(ticket_id)
+    # 찾은 ticket 데이터를 HTML로 리턴
+    return render_template('ticket/ticket_detail.html', ticket=ticket)

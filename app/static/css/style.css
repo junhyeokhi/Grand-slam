@@ -1,6 +1,5 @@
 /* 상단 네비바 화면 z인덱스로 제일앞으로 표출 */
-.navbar,
-nav {
+.navbar {
   position: sticky;
   top: 0;
   z-index: 1050;

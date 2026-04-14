@@ -8,7 +8,6 @@ from datetime import datetime
 from app.models import User, Ticket
 import functools
 
-
 from app import db
 
 from app.form import UserCreateForm
@@ -106,13 +105,74 @@ def signup():
 def mypage():
     return render_template('auth/mypage.html')
 
+# 6. 회원정보 수정 페이지 연결 (주소: /auth/edit_profile)
+@bp.route('/edit_profile/', methods=['GET', 'POST'])
+@login_required
+def edit_profile():
+    from app.form import UserEditForm # UserEditForm 임포트
+    form = UserEditForm()
+    
+    if request.method == 'GET':
+        # 현재 로그인된 사용자 정보로 폼 필드 미리 채우기
+        form.email.data = g.user.email
+        form.username.data = g.user.username
+        form.nickname.data = g.user.nickname
+        form.phone.data = g.user.phone
+        
+        # 저장된 주소를 기본 주소와 상세 주소로 분리하여 폼에 채움
+        # User.address는 "기본주소 상세주소" 형식으로 저장되어 있다고 가정
+        address_parts = g.user.address.split(' ', 1)
+        form.address.data = address_parts[0] if address_parts else ''
+        detail_address_value = address_parts[1] if len(address_parts) > 1 else ''
+        
+        return render_template('auth/edit_profile.html', form=form, detail_address_value=detail_address_value)
+    
+    elif request.method == 'POST' and form.validate_on_submit():
+        # 이메일 변경 시 중복 확인 (단, 본인의 이메일은 허용)
+        if form.email.data != g.user.email:
+            user_by_email = User.query.filter_by(email=form.email.data).first()
+            if user_by_email and user_by_email.id != g.user.id:
+                flash('이미 사용 중인 이메일입니다.', 'danger')
+                detail_address_value = request.form.get('detailAddress', '')
+                return render_template('auth/edit_profile.html', form=form, detail_address_value=detail_address_value)
+        
+        # 닉네임 변경 시 중복 확인 (단, 본인의 닉네임은 허용)
+        if form.nickname.data != g.user.nickname:
+            user_by_nick = User.query.filter_by(nickname=form.nickname.data).first()
+            if user_by_nick and user_by_nick.id != g.user.id:
+                flash('이미 사용 중인 닉네임입니다.', 'danger')
+                detail_address_value = request.form.get('detailAddress', '')
+                return render_template('auth/edit_profile.html', form=form, detail_address_value=detail_address_value)
 
-@bp.route('/subpage/<int:ticket_id>')
+        # 사용자 정보 업데이트
+        g.user.email = form.email.data
+        g.user.username = form.username.data
+        g.user.nickname = form.nickname.data
+        g.user.phone = form.phone.data
+        
+        # 주소 업데이트 (기본 주소 + 상세 주소)
+        full_address = f"{form.address.data} {request.form.get('detailAddress', '')}".strip()
+        g.user.address = full_address
+
+        # 새 비밀번호가 입력된 경우에만 비밀번호 업데이트
+        if form.password.data:
+            g.user.password = generate_password_hash(form.password.data)
+        
+        db.session.commit()
+        flash('회원 정보가 성공적으로 수정되었습니다!', 'success')
+        return redirect(url_for('auth.mypage')) # 수정 후 마이페이지로 리다이렉트
+    
+    # POST 요청에서 유효성 검사 실패 시, 입력된 값과 상세 주소를 다시 템플릿으로 전달
+    detail_address_value = request.form.get('detailAddress', '')
+    return render_template('auth/edit_profile.html', form=form, detail_address_value=detail_address_value)
+
+
+@bp.route('/ticket_detail/<int:ticket_id>')
 def subpage(ticket_id):
     # DB에서 해당 티켓을 찾기
     ticket = Ticket.query.get_or_404(ticket_id)
     # 찾은 ticket 데이터를 HTML로 리턴
-    return render_template('auth/subpage.html', ticket=ticket)
+    return render_template('ticket/ticket_detail.html', ticket=ticket)
 
 @bp.route('/logout/')
 def logout():

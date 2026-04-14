@@ -1,77 +1,64 @@
-.filter-box {
-  background: #f8f9fa;
-  border-radius: 16px;
-  padding: 20px;
-}
-
-.filter-box label {
-  font-weight: 600;
-  margin-top: 10px;
-  display: block;
-}
-
-.filter-box select,
-.filter-box input {
-  width: 100%;
-  border: none;
-  border-bottom: 1px solid #ddd;
-  padding: 8px 0;
-  background: transparent;
-}
-
-.side-card {
-  background: #f5f6f8;
-  border-radius: 12px;
-  padding: 16px;
-  margin-bottom: 12px;
-  text-align: center;
-  font-weight: 600;
-}
-
-.alarm-box {
-  background: linear-gradient(135deg, #e8f0ff, #dce8ff);
-  border-radius: 16px;
-  padding: 16px;
-}
-
-/* 전체 배경 */
-body {
+/* =========================
+   전체 티켓 페이지 영역
+   배경색과 최대 너비를 잡는 기본 설정
+========================= */
+.ticket-page {
   background-color: #f7f8fa;
 }
 
-/* 공통 */
-.container {
+.ticket-page .container {
   max-width: 1280px;
 }
 
-label {
-  display: block;
+
+/* =========================
+   상단 제목 영역
+   "티켓 거래", 선택 팀/옵션 문구 스타일
+========================= */
+.ticket-page .mb-4 h3 {
+  font-size: 28px;
+  font-weight: 800;
+  color: #111;
 }
 
-/* 왼쪽 필터 박스 */
-.filter-panel,
-.bg-white.rounded-4.shadow-sm.p-4 {
+.ticket-page .mb-4 .text-muted {
+  font-size: 14px;
+}
+
+
+/* =========================
+   왼쪽 필터 박스 전체
+   검색 조건 영역 박스 스타일
+========================= */
+.filter-panel {
   border: 1px solid #eceef2;
-  border-radius: 18px !important;
+  border-radius: 18px;
   background: #fff;
 }
 
-.filter-panel h5,
-.bg-white.rounded-4.shadow-sm.p-4 h5 {
+.filter-panel h5 {
   font-size: 20px;
   font-weight: 700;
   color: #111;
 }
 
-.filter-label,
-.fw-semibold.mb-1 {
+
+/* =========================
+   필터 제목 라벨
+   경기 일시 / 상대팀 / 좌석 / 수량 등
+========================= */
+.filter-label {
   font-size: 14px;
   font-weight: 600;
   color: #222;
   margin-bottom: 8px;
 }
 
-/* 입력창 */
+
+/* =========================
+   필터 입력창 공통
+   select, input 깔끔하게 맞춤
+========================= */
 .form-select,
 .form-control {
   height: 46px;
@@ -88,7 +75,65 @@ label {
   box-shadow: none;
 }
 
-/* 왼쪽 초기화 버튼 */
+
+/* =========================
+   검색 버튼
+   검색어 옆 작은 버튼
+========================= */
+.search-btn {
+  min-width: 96px;
+  height: 46px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+
+/* =========================
+   거래 방식 칩 영역
+   PIN / 배송 / 현장 / 기타
+========================= */
+.trade-type-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.trade-chip {
+  margin: 0;
+}
+
+.trade-chip input {
+  display: none;
+}
+
+.trade-chip span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 64px;
+  height: 38px;
+  padding: 0 14px;
+  border: 1px solid #dfe3e8;
+  border-radius: 999px;
+  background: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  color: #444;
+  cursor: pointer;
+}
+
+.trade-chip input:checked + span {
+  background: #111;
+  border-color: #111;
+  color: #fff;
+}
+
+
+/* =========================
+   초기화 버튼
+   검색 아래 밝은 버튼
+========================= */
 .btn-light {
   height: 46px;
   border-radius: 12px;
@@ -103,75 +148,182 @@ label {
   border-color: #cfd6dd;
 }
 
-/* 가운데 카드 */
-.card {
-  border: 1px solid #eceef2 !important;
-  border-radius: 18px !important;
-  overflow: hidden;
-  transition: transform 0.18s ease, box-shadow 0.18s ease;
+
+/* =========================
+   가운데 티켓 카드 박스
+   티켓 1개 전체 영역
+========================= */
+.ticket-card {
+  background: #fff;
+  border: 1px solid #d9dde3;
+  border-radius: 18px;
+  padding: 18px 20px;
+  margin-bottom: 14px;
+}
+
+
+/* =========================
+   카드 상단
+   경기일시 / 정가이하 / 비교담기
+========================= */
+.ticket-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 14px;
+}
+
+.ticket-date {
+  font-size: 15px;
+  color: #7b8794;
+  font-weight: 500;
+}
+
+.ticket-date span {
+  color: #111;
+  font-weight: 700;
+  margin-left: 6px;
+}
+
+.ticket-badges {
+  display: flex;
+  gap: 6px;
+}
+
+
+/* =========================
+   카드 상단 배지
+   정가 이하 / 비교담기
+========================= */
+.badge-price,
+.badge-compare {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.badge-price {
+  background: #fff1f5;
+  border: 1px solid #ffb7cb;
+  color: #ff2b6a;
+}
+
+.badge-compare {
+  background: #f8f9fb;
+  border: 1px solid #d9dde3;
+  color: #a0a8b0;
+}
+
+
+/* =========================
+   카드 본문
+   왼쪽 정보 / 오른쪽 가격 정렬
+========================= */
+.ticket-card-body {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 20px;
+}
+
+.ticket-info {
+  flex: 1;
+  min-width: 0;
+}
+
+
+/* =========================
+   티켓 제목 / 부가정보
+   경기명, 좌석, 전달 방식 등
+========================= */
+.ticket-title {
+  margin: 0 0 8px;
+  font-size: 18px;
+  font-weight: 800;
+  color: #111;
+  line-height: 1.4;
+}
+
+.ticket-sub {
+  margin: 0 0 12px;
+  font-size: 15px;
+  color: #7b8794;
+}
+
+.ticket-sub .divider {
+  margin: 0 6px;
+  color: #c0c6cc;
+}
+
+
+/* =========================
+   거래 타입 태그
+   PIN / 배송 / 현장 같은 표시
+========================= */
+.ticket-tag-wrap {
+  margin-top: 4px;
+}
+
+.ticket-tag {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 10px;
+  border: 1px solid #d9dde3;
+  border-radius: 7px;
+  font-size: 13px;
+  color: #8b95a1;
   background: #fff;
 }
 
 
-.card-body {
-  padding: 22px 24px;
+/* =========================
+   오른쪽 가격 박스
+   수량 / 가격 영역
+========================= */
+.ticket-price-box {
+  min-width: 140px;
+  text-align: right;
+  flex-shrink: 0;
 }
 
-/* 카드 제목 */
-.card h5 {
-  font-size: 18px;
-  font-weight: 700;
+.ticket-qty {
+  font-size: 15px;
+  color: #7b8794;
+  margin-bottom: 8px;
+}
+
+.ticket-qty strong {
   color: #111;
-  line-height: 1.4;
-  margin-bottom: 6px;
-}
-
-/* 카드 설명 */
-.card p {
-  font-size: 14px;
-  color: #6b7280;
-}
-
-/* 가격 */
-.card .text-end h5,
-.card h4 {
-  font-size: 24px;
   font-weight: 800;
-  color: #111;
-  margin-bottom: 10px;
 }
 
-/* 상세보기 버튼 */
-.btn-outline-dark {
-  min-width: 96px;
-  height: 38px;
-  border-radius: 999px;
-  font-size: 13px;
-  font-weight: 600;
-  border-width: 1px;
+.ticket-price-label {
+  font-size: 14px;
+  color: #ff2b6a;
+  margin-bottom: 2px;
 }
 
-.btn-outline-dark:hover {
-  color: #fff;
+.ticket-price {
+  font-size: 18px;
+  font-weight: 800;
+  color: #ff2b6a;
 }
 
-/* 배지 */
-.badge {
-  padding: 6px 12px;
-  font-size: 12px;
-  font-weight: 600;
-  border-radius: 999px;
-  background-color: #f1f3f5 !important;
-  color: #333 !important;
-  border: 1px solid #e0e3e7;
-}
 
-/* 오른쪽 사이드 */
-.side-box,
-.bg-light.p-3.rounded-4 {
+/* =========================
+   오른쪽 사이드 박스
+   상품 비교 / 최근 본 상품
+========================= */
+.side-box {
   border: 1px solid #eceef2;
-  background: #fff !important;
-  border-radius: 18px !important;
+  background: #fff;
+  border-radius: 18px;
   min-height: 84px;
   display: flex;
   flex-direction: column;
@@ -181,92 +333,98 @@ label {
   color: #222;
 }
 
-.side-box .small,
-.bg-light.p-3.rounded-4 .small {
+.side-box .small {
   font-size: 12px;
   font-weight: 500;
 }
 
-/* 오른쪽 알림 박스 */
-.alarm-box,
-.p-3.rounded-4.text-center[style*="linear-gradient"] {
-  border-radius: 18px !important;
-  border: 1px solid #dbe6ff;
-  min-height: 140px;
+
+/* =========================
+   페이지네이션 전체
+   아래 숫자 버튼 정렬
+========================= */
+.custom-pagination {
   display: flex;
-  flex-direction: column;
   justify-content: center;
+  align-items: center;
+  gap: 6px;
+  margin-top: 24px;
+  padding-left: 0;
 }
 
-.alarm-box .fw-bold,
-.p-3.rounded-4.text-center .fw-bold {
-  font-size: 18px;
+.custom-pagination .page-item {
+  list-style: none;
+}
+
+.custom-pagination .page-link {
+  min-width: 40px;
+  height: 40px;
+  padding: 0 12px;
+  border: none;
+  background: transparent;
+  color: #222;
+  font-size: 16px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  text-decoration: none;
+  box-shadow: none;
+}
+
+.custom-pagination .page-item.active .page-link {
+  background: #111;
+  color: #fff;
+  font-weight: 700;
+}
+
+.custom-pagination .page-item.disabled .page-link {
+  color: #c9c9c9;
+  pointer-events: none;
+}
+
+.custom-pagination .page-link:hover {
+  background: #f3f4f6;
   color: #111;
 }
 
-.alarm-box .small,
-.p-3.rounded-4.text-center .small {
-  font-size: 13px;
-  line-height: 1.6;
-}
 
-/* 상단 제목 */
-.mb-4 h3 {
-  font-size: 28px;
-  font-weight: 800;
-  color: #111;
-}
-
-.mb-4 .text-muted {
-  font-size: 14px;
-}
-
-/* 카드 내부 정렬 보정 */
-.card .d-flex.justify-content-between.align-items-center {
-  gap: 18px;
-}
-
-/* 반응형 */
-@media (max-width: 1199px) {
-  .card .text-end h5,
-  .card h4 {
-    font-size: 21px;
-  }
-
-  .card h5 {
-    font-size: 16px;
-  }
-}
-
+/* =========================
+   반응형
+   화면이 작아지면 카드 세로 정렬
+========================= */
 @media (max-width: 991px) {
-  .container {
+  .ticket-page .container {
     max-width: 100%;
   }
 
-  .card-body {
-    padding: 18px;
-  }
-
-  .side-box,
-  .bg-light.p-3.rounded-4,
-  .alarm-box {
+  .side-box {
     min-height: auto;
   }
 }
 
-@media (max-width: 767px) {
-  .card .card-body.d-flex,
-  .card-body.d-flex.justify-content-between.align-items-center {
+@media (max-width: 768px) {
+  .ticket-card-top {
     flex-direction: column;
-    align-items: flex-start !important;
+    gap: 10px;
   }
 
-  .card .text-end {
-    text-align: left !important;
+  .ticket-card-body {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .ticket-price-box {
     width: 100%;
+    text-align: left;
+    margin-top: 8px;
   }
 
-  .btn-outline-dark {
-    margin-top: 6px;
+  .custom-pagination .page-link {
+    min-width: 36px;
+    height: 36px;
+    font-size: 14px;
+    padding: 0 10px;
   }
 }

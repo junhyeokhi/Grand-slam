@@ -1,141 +1,173 @@
-{% extends "base.html" %}
-{% block content %}
+{% extends "base.html" %} {% block content %}
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
 <!-- bootstrap css연결 -->
-<link rel="stylesheet" href="{{ url_for('static', filename='css/ticket.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/ticket.css') }}" />
 
 <div class="container py-4">
+  <!-- 상단 현재 선택 정보 -->
+  <div class="mb-4">
+    <h3 class="fw-bold mb-2">티켓 거래</h3>
+    <p class="text-muted mb-0">
+      선택 팀: <span class="fw-semibold">{{ team if team else '전체' }}</span> {% if option %} | 옵션: <span class="fw-semibold">{{ option }}</span>
+      {% endif %}
+    </p>
+  </div>
 
-    <!-- 상단 현재 선택 정보 -->
-    <div class="mb-4">
-        <h3 class="fw-bold mb-2">티켓 거래</h3>
-        <p class="text-muted mb-0">
-            선택 팀: <span class="fw-semibold">{{ team if team else '전체' }}</span>
-            {% if option %}
-            | 옵션: <span class="fw-semibold">{{ option }}</span>
-            {% endif %}
-        </p>
-    </div>
-
-<div class="row g-4">
-
+  <div class="row g-4">
     <!-- 왼쪽 필터 -->
-<div class="col-lg-3">
-    <div class="filter-panel bg-white rounded-4 shadow-sm p-4">
-        <h5 class="fw-bold mb-4">
-            야구 - {{ team if team else '전체 팀' }}
-        </h5>
+    <div class="col-lg-3">
+      <div class="filter-panel bg-white rounded-4 shadow-sm p-4">
+        <h5 class="fw-bold mb-4">야구 - {{ team if team else '전체 팀' }}</h5>
 
         <form method="get">
-            <input type="hidden" name="team" value="{{ team }}">
-            <input type="hidden" name="option" value="{{ option }}">
+          <input type="hidden" name="team" value="{{ team }}" />
+          <input type="hidden" name="option" value="{{ option }}" />
 
-            <!-- 경기 일시 -->
-            <div class="mb-4">
-                <label class="filter-label">경기 일시</label>
-                <input type="date" class="form-control" name="game_date">
-            </div>
+          <!-- 경기 일시 -->
+          <div class="mb-4">
+            <label class="filter-label">경기 일시</label>
+            <input type="date" class="form-control" name="game_date" />
+          </div>
 
-            <!-- 상대팀 -->
-            <div class="mb-4">
-                <label class="filter-label">상대팀</label>
-                <select class="form-select" name="awayteam">
-                    <option value="">전체</option>
-                    {% for item in kbo_teams %}
-                        {% if item.name != team %}
-                        <option value="{{ item.name }}">{{ item.name }}</option>
-                        {% endif %}
-                    {% endfor %}
-                </select>
-            </div>
+          <!-- 상대팀 -->
+          <div class="mb-4">
+            <label class="filter-label">상대팀</label>
+            <select class="form-select" name="awayteam">
+              <option value="">전체</option>
+              {% for item in kbo_teams %} {% if item.name != team %}
+              <option value="{{ item.name }}">{{ item.name }}</option>
+              {% endif %} {% endfor %}
+            </select>
+          </div>
 
-            <!-- 좌석 -->
-            <div class="mb-4">
-                <label class="filter-label">좌석</label>
-                <select class="form-select" name="seat">
-                    <option value="">전체</option>
-                    {% if selected_team_data %}
-                        {% for grade in selected_team_data.seat_grades %}
-                        <option value="{{ grade }}">{{ grade }}</option>
-                        {% endfor %}
-                    {% endif %}
-                </select>
-            </div>
+          <!-- 좌석 -->
+          <div class="mb-4">
+            <label class="filter-label">좌석</label>
+            <select class="form-select" name="seat">
+              <option value="">전체</option>
+              {% if selected_team_data %} {% for grade in selected_team_data.seat_grades %}
+              <option value="{{ grade }}">{{ grade }}</option>
+              {% endfor %} {% endif %}
+            </select>
+          </div>
 
-            <!-- 수량 -->
-            <div class="mb-4">
-                <label class="filter-label">수량</label>
-                <select class="form-select" name="quantity">
-                    <option value="">전체</option>
-                    <option value="1">1매</option>
-                    <option value="2">2매</option>
-                    <option value="3">3매</option>
-                    <option value="4">4매</option>
-                </select>
-            </div>
+          <!-- 수량 -->
+          <div class="mb-4">
+            <label class="filter-label">수량</label>
+            <select class="form-select" name="quantity">
+              <option value="">전체</option>
+              <option value="1">1매</option>
+              <option value="2">2매</option>
+              <option value="3">3매</option>
+              <option value="4">4매</option>
+            </select>
+          </div>
 
-            <!-- 검색어 -->
-            <div class="mb-4">
-                <label class="filter-label">검색어</label>
-                <div class="d-flex gap-2">
-                    <input type="text" class="form-control" name="keyword" placeholder="검색어 입력">
-                    <button type="submit" class="btn btn-outline-dark search-btn">검색</button>
-                </div>
+          <!-- 검색어 -->
+          <div class="mb-4">
+            <label class="filter-label">검색어</label>
+            <div class="d-flex gap-2">
+              <input type="text" class="form-control" name="keyword" placeholder="검색어 입력" />
+              <button type="submit" class="btn btn-outline-dark search-btn">검색</button>
             </div>
+          </div>
 
-            <!-- 거래 방식 -->
-            <div class="mb-4">
-                <label class="filter-label d-block mb-2">거래 방식</label>
-                <div class="trade-type-wrap">
-                    <label class="trade-chip">
-                        <input type="radio" name="trade_type" value="PIN">
-                        <span>PIN</span>
-                    </label>
-                    <label class="trade-chip">
-                        <input type="radio" name="trade_type" value="배송">
-                        <span>배송</span>
-                    </label>
-                    <label class="trade-chip">
-                        <input type="radio" name="trade_type" value="현장">
-                        <span>현장</span>
-                    </label>
-                    <label class="trade-chip">
-                        <input type="radio" name="trade_type" value="기타">
-                        <span>기타</span>
-                    </label>
-                </div>
+          <!-- 거래 방식 -->
+          <div class="mb-4">
+            <label class="filter-label d-block mb-2">거래 방식</label>
+            <div class="trade-type-wrap">
+              <label class="trade-chip">
+                <input type="radio" name="trade_type" value="PIN" />
+                <span>PIN</span>
+              </label>
+              <label class="trade-chip">
+                <input type="radio" name="trade_type" value="배송" />
+                <span>배송</span>
+              </label>
+              <label class="trade-chip">
+                <input type="radio" name="trade_type" value="현장" />
+                <span>현장</span>
+              </label>
+              <label class="trade-chip">
+                <input type="radio" name="trade_type" value="기타" />
+                <span>기타</span>
+              </label>
             </div>
+          </div>
 
-            <!-- 체크 옵션 -->
-            <div class="mb-4">
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" name="under_price" id="under_price">
-                    <label class="form-check-label" for="under_price">정가 이하 상품 보기</label>
-                </div>
+          <!-- 체크 옵션 -->
+          <div class="mb-4">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name="under_price" id="under_price" />
+              <label class="form-check-label" for="under_price">정가 이하 상품 보기</label>
             </div>
+          </div>
 
-            <!-- 버튼 -->
-            <div class="d-grid gap-2">
-                <button type="submit" class="btn btn-dark">검색</button>
-                <a href="{{ url_for('ticket.ticket_list', team=team, option=option) }}" class="btn btn-light">초기화</a>
-            </div>
+          <!-- 버튼 -->
+          <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-dark">검색</button>
+            <a href="{{ url_for('ticket.ticket_list', team=team, option=option) }}" class="btn btn-light">초기화</a>
+          </div>
         </form>
+      </div>
     </div>
-</div>
-
+    
 <!-- 가운데 티켓 리스트 -->
 <div class="col-lg-6">
-    {% for ticket in tickets %}
-    <div style="background: white; color: black; border: 2px solid red; padding: 12px; margin-bottom: 12px;">
-        테스트 {{ ticket.id }} / {{ ticket.Hometeam_name }} vs {{ ticket.awayteam_name }}
+    {% for ticket in tickets.items %}
+    <div class="ticket-card">
+        <div class="ticket-card-top">
+            <div class="ticket-date">
+                경기 일시
+                <span>
+                    {{ ticket.game_date.strftime('%Y.%m.%d %H:%M') if ticket.game_date else '일시 미정' }}
+                </span>
+            </div>
+
+            <div class="ticket-badges">
+                {% if ticket.price %}
+                <span class="badge-price">정가 이하</span>
+                {% endif %}
+                <span class="badge-compare">비교담기</span>
+            </div>
+        </div>
+
+        <div class="ticket-card-body">
+            <div class="ticket-info">
+                <h3 class="ticket-title">
+                    VS {{ ticket.awayteam_name }} | {{ ticket.seat }} {{ ticket.row if ticket.row else '' }}열
+                </h3>
+
+                <p class="ticket-sub">
+                    {{ ticket.seat_grade if ticket.seat_grade else '' }}
+                    {% if ticket.delivery_method %}
+                    <span class="divider">|</span>
+                    {{ ticket.delivery_method }}
+                    {% endif %}
+                </p>
+
+                {% if ticket.trade_type %}
+                <div class="ticket-tag-wrap">
+                    <span class="ticket-tag">{{ ticket.trade_type }}</span>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="ticket-price-box">
+                <div class="ticket-qty">수량 <strong>{{ ticket.quantity }}매</strong></div>
+                <div class="ticket-price-label">한 매 가격</div>
+                <div class="ticket-price">
+                    {{ "{:,}".format(ticket.price) if ticket.price else 0 }}원
+                </div>
+            </div>
+        </div>
+
     </div>
-    {% endfor %}
-</div>
-        
+
     <!-- 오른쪽 사이드 -->
     <div class="col-lg-3">
-
+      <div class="side-box p-3 rounded-4 mb-3 text-center">상품 비교 <span class="text-danger">0</span></div>
         <div class="side-box p-3 rounded-4 mb-3 text-center">
             상품 비교 <span class="text-danger">0</span>
         </div>
@@ -147,7 +179,94 @@
 
       
         </div>
+<nav aria-label="티켓 페이지 이동" class="mt-4">
+    <ul class="pagination custom-pagination justify-content-center">
 
+        <!-- 맨 처음 -->
+        <li class="page-item {% if tickets.page == 1 %}disabled{% endif %}">
+            <a class="page-link"
+               href="{{ url_for('ticket.ticket_list',
+                                page=1,
+                                awayteam=request.args.get('awayteam', ''),
+                                seat=request.args.get('seat', ''),
+                                quantity=request.args.get('quantity', ''),
+                                team=team,
+                                option=option) }}">
+                &laquo;
+            </a>
+        </li>
+
+        <!-- 이전 -->
+        <li class="page-item {% if not tickets.has_prev %}disabled{% endif %}">
+            <a class="page-link"
+               href="{{ url_for('ticket.ticket_list',
+                                page=tickets.prev_num if tickets.has_prev else 1,
+                                awayteam=request.args.get('awayteam', ''),
+                                seat=request.args.get('seat', ''),
+                                quantity=request.args.get('quantity', ''),
+                                team=team,
+                                option=option) }}">
+                &lsaquo;
+            </a>
+        </li>
+
+        <!-- 현재 페이지 주변 숫자만 표시 -->
+        {% set start_page = tickets.page - 2 if tickets.page - 2 > 0 else 1 %}
+        {% set end_page = tickets.page + 2 if tickets.page + 2 <= tickets.pages else tickets.pages %}
+
+        {% for page_num in range(start_page, end_page + 1) %}
+            {% if page_num == tickets.page %}
+            <li class="page-item active">
+                <span class="page-link">{{ page_num }}</span>
+            </li>
+            {% else %}
+            <li class="page-item">
+                <a class="page-link"
+                   href="{{ url_for('ticket.ticket_list',
+                                    page=page_num,
+                                    awayteam=request.args.get('awayteam', ''),
+                                    seat=request.args.get('seat', ''),
+                                    quantity=request.args.get('quantity', ''),
+                                    team=team,
+                                    option=option) }}">
+                    {{ page_num }}
+                </a>
+            </li>
+            {% endif %}
+        {% endfor %}
+
+        <!-- 다음 -->
+        <li class="page-item {% if not tickets.has_next %}disabled{% endif %}">
+            <a class="page-link"
+               href="{{ url_for('ticket.ticket_list',
+                                page=tickets.next_num if tickets.has_next else tickets.pages,
+                                awayteam=request.args.get('awayteam', ''),
+                                seat=request.args.get('seat', ''),
+                                quantity=request.args.get('quantity', ''),
+                                team=team,
+                                option=option) }}">
+                &rsaquo;
+            </a>
+        </li>
+
+        <!-- 맨 끝 -->
+        <li class="page-item {% if tickets.page == tickets.pages %}disabled{% endif %}">
+            <a class="page-link"
+               href="{{ url_for('ticket.ticket_list',
+                                page=tickets.pages,
+                                awayteam=request.args.get('awayteam', ''),
+                                seat=request.args.get('seat', ''),
+                                quantity=request.args.get('quantity', ''),
+                                team=team,
+                                option=option) }}">
+                &raquo;
+            </a>
+        </li>
+
+    </ul>
+</nav>
     </div>
+  </div>
 
-{% endblock %}
+  {% endblock %}
+</div>

@@ -4,8 +4,7 @@
       class="navbar-brand fw-bold fs-3 me-4"
       href="{{ url_for('main.index') }}"
       style="letter-spacing: -2px; color: #000"
-      >만루홈런</a
-    >
+    >만루홈런</a>
 
     <form class="flex-grow-1 mx-5" style="max-width: 600px">
       <div class="input-group">
@@ -57,7 +56,14 @@
           </a>
           <ul class="dropdown-menu rounded-0 border-dark shadow-sm">
             {% for option in team.sub_options %}
-            <li><a class="dropdown-item small" href="#">{{ option }}</a></li>
+            <li>
+              <a
+                class="dropdown-item small"
+                href="{{ url_for('ticket.ticket_list', team=team.name, option=option) }}"
+              >
+                {{ option }}
+              </a>
+            </li>
             {% endfor %}
           </ul>
         </li>

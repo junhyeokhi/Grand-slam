@@ -21,308 +21,118 @@
 <div class="row g-4">
 
     <!-- 왼쪽 필터 -->
-    <div class="col-lg-3">
-        <div class="filter-panel bg-white rounded-4 shadow-sm p-4">
+<div class="col-lg-3">
+    <div class="filter-panel bg-white rounded-4 shadow-sm p-4">
+        <h5 class="fw-bold mb-4">
+            야구 - {{ team if team else '전체 팀' }}
+        </h5>
 
-            <h5 class="fw-bold mb-4">야구 - LG 트윈스</h5>
-
-            <!-- 경기 선택 -->
-            <div class="mb-4">
-                <label class="filter-label">경기 선택</label>
-                <select class="form-select">
-                    <option selected>LG - 잠실야구장 (주중)</option>
-                    <option>LG - 잠실야구장 (주말)</option>
-                </select>
-            </div>
+        <form method="get">
+            <input type="hidden" name="team" value="{{ team }}">
+            <input type="hidden" name="option" value="{{ option }}">
 
             <!-- 경기 일시 -->
             <div class="mb-4">
                 <label class="filter-label">경기 일시</label>
-                <input type="date" class="form-control">
+                <input type="date" class="form-control" name="game_date">
             </div>
 
-            <!-- 좌석 선택 -->
+            <!-- 상대팀 -->
             <div class="mb-4">
-                <label class="filter-label">좌석 선택</label>
-
-                <select class="form-select mb-2">
-                    <option selected>상대팀</option>
-                    <option>두산</option>
-                    <option>SSG</option>
-                    <option>KIA</option>
-                    <option>삼성</option>
+                <label class="filter-label">상대팀</label>
+                <select class="form-select" name="awayteam">
+                    <option value="">전체</option>
+                    {% for item in kbo_teams %}
+                        {% if item.name != team %}
+                        <option value="{{ item.name }}">{{ item.name }}</option>
+                        {% endif %}
+                    {% endfor %}
                 </select>
+            </div>
 
-                <select class="form-select">
-                    <option selected>좌석</option>
-                    <option>중앙석</option>
-                    <option>내야석</option>
-                    <option>외야석</option>
-                    <option>테이블석</option>
+            <!-- 좌석 -->
+            <div class="mb-4">
+                <label class="filter-label">좌석</label>
+                <select class="form-select" name="seat">
+                    <option value="">전체</option>
+                    {% if selected_team_data %}
+                        {% for grade in selected_team_data.seat_grades %}
+                        <option value="{{ grade }}">{{ grade }}</option>
+                        {% endfor %}
+                    {% endif %}
                 </select>
             </div>
 
             <!-- 수량 -->
             <div class="mb-4">
                 <label class="filter-label">수량</label>
-                <select class="form-select">
-                    <option selected>전체</option>
-                    <option>1매</option>
-                    <option>2매</option>
-                    <option>3매</option>
+                <select class="form-select" name="quantity">
+                    <option value="">전체</option>
+                    <option value="1">1매</option>
+                    <option value="2">2매</option>
+                    <option value="3">3매</option>
+                    <option value="4">4매</option>
                 </select>
             </div>
 
-            <!-- 검색 -->
+            <!-- 검색어 -->
             <div class="mb-4">
                 <label class="filter-label">검색어</label>
                 <div class="d-flex gap-2">
-                    <input type="text" class="form-control" placeholder="검색어 입력">
-                    <button class="btn btn-outline-dark">검색</button>
+                    <input type="text" class="form-control" name="keyword" placeholder="검색어 입력">
+                    <button type="submit" class="btn btn-outline-dark search-btn">검색</button>
                 </div>
             </div>
 
             <!-- 거래 방식 -->
             <div class="mb-4">
                 <label class="filter-label d-block mb-2">거래 방식</label>
-                <div class="d-flex flex-wrap gap-2">
-                    <button class="btn btn-outline-secondary btn-sm">PIN</button>
-                    <button class="btn btn-outline-secondary btn-sm">배송</button>
-                    <button class="btn btn-outline-secondary btn-sm">현장</button>
-                    <button class="btn btn-outline-secondary btn-sm">기타</button>
+                <div class="trade-type-wrap">
+                    <label class="trade-chip">
+                        <input type="radio" name="trade_type" value="PIN">
+                        <span>PIN</span>
+                    </label>
+                    <label class="trade-chip">
+                        <input type="radio" name="trade_type" value="배송">
+                        <span>배송</span>
+                    </label>
+                    <label class="trade-chip">
+                        <input type="radio" name="trade_type" value="현장">
+                        <span>현장</span>
+                    </label>
+                    <label class="trade-chip">
+                        <input type="radio" name="trade_type" value="기타">
+                        <span>기타</span>
+                    </label>
                 </div>
             </div>
 
             <!-- 체크 옵션 -->
             <div class="mb-4">
                 <div class="form-check">
-                    <input class="form-check-input" type="checkbox">
-                    <label class="form-check-label">정가 이하 상품 보기</label>
+                    <input class="form-check-input" type="checkbox" name="under_price" id="under_price">
+                    <label class="form-check-label" for="under_price">정가 이하 상품 보기</label>
                 </div>
             </div>
 
-            <!-- 초기화 -->
-            <button class="btn btn-light w-100">초기화</button>
-
-        </div>
-    </div>
-
-
-    <!-- 가운데 티켓 리스트 -->
-    <div class="col-lg-6">
-
-        <!-- 티켓 카드 1 -->
-    <div class="card border-0 shadow-sm rounded-4 mb-3">
-        <div class="card-body">
-            <div class="row align-items-center">
-                <div class="col-md-8">
-                    <div class="d-flex align-items-center gap-2 mb-2">
-                        <span class="badge bg-danger">판매중</span>
-                        <span class="badge bg-light text-dark border">양도</span>
-                    </div>
-                    <h5 class="fw-bold mb-2">두산 vs LG 외야석 2연석 양도</h5>
-                    <p class="text-muted mb-2">2026.04.20(월) 18:30 · 잠실야구장</p>
-                    <p class="mb-0 text-secondary">팀: 두산 베어스 / 좌석: 외야석 / 수량: 2매</p>
-                </div>
-                <div class="col-md-4 text-md-end mt-3 mt-md-0">
-                    <h4 class="fw-bold mb-2">₩40,000</h4>
-                    <a href="#" class="btn btn-outline-dark rounded-pill px-4">상세보기</a>
-                </div>
+            <!-- 버튼 -->
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-dark">검색</button>
+                <a href="{{ url_for('ticket.ticket_list', team=team, option=option) }}" class="btn btn-light">초기화</a>
             </div>
-        </div>
-    </div>
-
-    <!-- 티켓 카드 2 -->
-    <div class="card border-0 shadow-sm rounded-4 mb-3">
-        <div class="card-body">
-            <div class="row align-items-center">
-                <div class="col-md-8">
-                    <div class="d-flex align-items-center gap-2 mb-2">
-                        <span class="badge bg-primary">판매중</span>
-                        <span class="badge bg-light text-dark border">직거래</span>
-                    </div>
-                    <h5 class="fw-bold mb-2">SSG 경기 내야 지정석 구합니다</h5>
-                    <p class="text-muted mb-2">2026.04.22(수) 18:30 · 인천SSG랜더스필드</p>
-                    <p class="mb-0 text-secondary">팀: SSG 랜더스 / 좌석: 내야 지정석 / 수량: 1매</p>
-                </div>
-                <div class="col-md-4 text-md-end mt-3 mt-md-0">
-                    <h4 class="fw-bold mb-2">₩25,000</h4>
-                    <a href="#" class="btn btn-outline-dark rounded-pill px-4">상세보기</a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 티켓 카드 3 -->
-    <div class="card border-0 shadow-sm rounded-4 mb-3">
-        <div class="card-body">
-            <div class="row align-items-center">
-                <div class="col-md-8">
-                    <div class="d-flex align-items-center gap-2 mb-2">
-                        <span class="badge bg-danger">판매중</span>
-                        <span class="badge bg-light text-dark border">모바일티켓</span>
-                    </div>
-                    <h5 class="fw-bold mb-2">기아 경기 중앙석 1매 판매</h5>
-                    <p class="text-muted mb-2">2026.04.25(토) 17:00 · 광주기아챔피언스필드</p>
-                    <p class="mb-0 text-secondary">팀: KIA 타이거즈 / 좌석: 중앙석 / 수량: 1매</p>
-                </div>
-                <div class="col-md-4 text-md-end mt-3 mt-md-0">
-                    <h4 class="fw-bold mb-2">₩35,000</h4>
-                    <a href="#" class="btn btn-outline-dark rounded-pill px-4">상세보기</a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 티켓 카드 4 -->
-    <div class="card border-0 shadow-sm rounded-4 mb-3">
-        <div class="card-body">
-            <div class="row align-items-center">
-                <div class="col-md-8">
-                    <div class="d-flex align-items-center gap-2 mb-2">
-                        <span class="badge bg-danger">판매중</span>
-                        <span class="badge bg-light text-dark border">직거래</span>
-                    </div>
-                    <h5 class="fw-bold mb-2">롯데 vs 삼성 1루 지정석 2매</h5>
-                    <p class="text-muted mb-2">2026.04.28(화) 18:30 · 사직야구장</p>
-                    <p class="mb-0 text-secondary">팀: 롯데 자이언츠 / 좌석: 1루 지정석 / 수량: 2매</p>
-                </div>
-                <div class="col-md-4 text-md-end mt-3 mt-md-0">
-                    <h4 class="fw-bold mb-2">₩55,000</h4>
-                    <a href="#" class="btn btn-outline-dark rounded-pill px-4">상세보기</a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 티켓 카드 5 -->
-    <div class="card border-0 shadow-sm rounded-4 mb-3">
-        <div class="card-body">
-            <div class="row align-items-center">
-                <div class="col-md-8">
-                    <div class="d-flex align-items-center gap-2 mb-2">
-                        <span class="badge bg-primary">판매중</span>
-                        <span class="badge bg-light text-dark border">양도</span>
-                    </div>
-                    <h5 class="fw-bold mb-2">KT 경기 중앙 테이블석 구합니다</h5>
-                    <p class="text-muted mb-2">2026.04.30(목) 18:30 · 수원KT위즈파크</p>
-                    <p class="mb-0 text-secondary">팀: KT 위즈 / 좌석: 테이블석 / 수량: 2매</p>
-                </div>
-                <div class="col-md-4 text-md-end mt-3 mt-md-0">
-                    <h4 class="fw-bold mb-2">₩70,000</h4>
-                    <a href="#" class="btn btn-outline-dark rounded-pill px-4">상세보기</a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 티켓 카드 6 -->
-    <div class="card border-0 shadow-sm rounded-4 mb-3">
-        <div class="card-body">
-            <div class="row align-items-center">
-                <div class="col-md-8">
-                    <div class="d-flex align-items-center gap-2 mb-2">
-                        <span class="badge bg-danger">판매중</span>
-                        <span class="badge bg-light text-dark border">모바일티켓</span>
-                    </div>
-                    <h5 class="fw-bold mb-2">NC vs 키움 외야석 1매 판매</h5>
-                    <p class="text-muted mb-2">2026.05.02(토) 17:00 · 창원NC파크</p>
-                    <p class="mb-0 text-secondary">팀: NC 다이노스 / 좌석: 외야석 / 수량: 1매</p>
-                </div>
-                <div class="col-md-4 text-md-end mt-3 mt-md-0">
-                    <h4 class="fw-bold mb-2">₩20,000</h4>
-                    <a href="#" class="btn btn-outline-dark rounded-pill px-4">상세보기</a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 티켓 카드 7 -->
-    <div class="card border-0 shadow-sm rounded-4 mb-3">
-        <div class="card-body">
-            <div class="row align-items-center">
-                <div class="col-md-8">
-                    <div class="d-flex align-items-center gap-2 mb-2">
-                        <span class="badge bg-danger">판매중</span>
-                        <span class="badge bg-light text-dark border">양도</span>
-                    </div>
-                    <h5 class="fw-bold mb-2">LG vs 두산 중앙석 2연석</h5>
-                    <p class="text-muted mb-2">2026.05.03(일) 18:00 · 잠실야구장</p>
-                    <p class="mb-0 text-secondary">팀: LG 트윈스 / 좌석: 중앙석 / 수량: 2매</p>
-                </div>
-                <div class="col-md-4 text-md-end mt-3 mt-md-0">
-                    <h4 class="fw-bold mb-2">₩65,000</h4>
-                    <a href="#" class="btn btn-outline-dark rounded-pill px-4">상세보기</a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 티켓 카드 8 -->
-    <div class="card border-0 shadow-sm rounded-4 mb-3">
-        <div class="card-body">
-            <div class="row align-items-center">
-                <div class="col-md-8">
-                    <div class="d-flex align-items-center gap-2 mb-2">
-                        <span class="badge bg-primary">판매중</span>
-                        <span class="badge bg-light text-dark border">직거래</span>
-                    </div>
-                    <h5 class="fw-bold mb-2">한화 경기 내야석 1매 구해요</h5>
-                    <p class="text-muted mb-2">2026.05.05(화) 18:30 · 대전한화생명이글스파크</p>
-                    <p class="mb-0 text-secondary">팀: 한화 이글스 / 좌석: 내야석 / 수량: 1매</p>
-                </div>
-                <div class="col-md-4 text-md-end mt-3 mt-md-0">
-                    <h4 class="fw-bold mb-2">₩30,000</h4>
-                    <a href="#" class="btn btn-outline-dark rounded-pill px-4">상세보기</a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 티켓 카드 9 -->
-    <div class="card border-0 shadow-sm rounded-4 mb-3">
-        <div class="card-body">
-            <div class="row align-items-center">
-                <div class="col-md-8">
-                    <div class="d-flex align-items-center gap-2 mb-2">
-                        <span class="badge bg-danger">판매중</span>
-                        <span class="badge bg-light text-dark border">모바일티켓</span>
-                    </div>
-                    <h5 class="fw-bold mb-2">삼성 vs 롯데 VIP석 2매</h5>
-                    <p class="text-muted mb-2">2026.05.07(목) 18:30 · 대구삼성라이온즈파크</p>
-                    <p class="mb-0 text-secondary">팀: 삼성 라이온즈 / 좌석: VIP석 / 수량: 2매</p>
-                </div>
-                <div class="col-md-4 text-md-end mt-3 mt-md-0">
-                    <h4 class="fw-bold mb-2">₩120,000</h4>
-                    <a href="#" class="btn btn-outline-dark rounded-pill px-4">상세보기</a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 티켓 카드 10 -->
-    <div class="card border-0 shadow-sm rounded-4 mb-3">
-        <div class="card-body">
-            <div class="row align-items-center">
-                <div class="col-md-8">
-                    <div class="d-flex align-items-center gap-2 mb-2">
-                        <span class="badge bg-primary">판매중</span>
-                        <span class="badge bg-light text-dark border">양도</span>
-                    </div>
-                    <h5 class="fw-bold mb-2">키움 경기 외야석 2매 구합니다</h5>
-                    <p class="text-muted mb-2">2026.05.10(일) 17:00 · 고척스카이돔</p>
-                    <p class="mb-0 text-secondary">팀: 키움 히어로즈 / 좌석: 외야석 / 수량: 2매</p>
-                </div>
-                <div class="col-md-4 text-md-end mt-3 mt-md-0">
-                    <h4 class="fw-bold mb-2">₩22,000</h4>
-                    <a href="#" class="btn btn-outline-dark rounded-pill px-4">상세보기</a>
-                </div>
-            </div>
-        </div>
+        </form>
     </div>
 </div>
-        
 
+<!-- 가운데 티켓 리스트 -->
+<div class="col-lg-6">
+    {% for ticket in tickets %}
+    <div style="background: white; color: black; border: 2px solid red; padding: 12px; margin-bottom: 12px;">
+        테스트 {{ ticket.id }} / {{ ticket.Hometeam_name }} vs {{ ticket.awayteam_name }}
+    </div>
+    {% endfor %}
+</div>
+        
     <!-- 오른쪽 사이드 -->
     <div class="col-lg-3">
 

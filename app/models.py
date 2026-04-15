@@ -46,3 +46,11 @@ class Team(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     team_name = db.Column(db.String(50), unique=True, nullable=False)
     logo_image = db.Column(db.String(100), nullable=False)
+
+class Question(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    subject = db.Column(db.String(200), nullable=False) # 문의 제목
+    content = db.Column(db.Text(), nullable=False)     # 문의 내용
+    create_date = db.Column(db.DateTime(), nullable=False) # 작성일
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
+    user = db.relationship('User', backref=db.backref('question_set'))

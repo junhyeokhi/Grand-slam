@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}결제 완료 - 만루홈런{% endblock %}
+
+{% block styles %}
+<style>
+    .success-container {
+        max-width: 650px;
+        margin: 60px auto;
+        text-align: center;
+    }
+    /* 로고가 들어갈 박스 스타일 */
+    .logo-display-box {
+        background-color: #ffffff;
+        border-radius: 15px;
+        padding: 30px;
+        margin-bottom: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+        border: 1px solid #eee;
+    }
+    .team-logo-item { flex: 1; }
+    .team-logo-item img {
+        max-height: 120px;
+        width: auto;
+        object-fit: contain;
+        margin-bottom: 10px;
+    }
+    .vs-divider {
+        font-size: 2rem;
+        font-weight: 900;
+        color: #eee;
+        font-style: italic;
+        margin: 0 15px;
+    }
+    .success-icon {
+        font-size: 3.5rem;
+        color: #198754;
+        margin-bottom: 15px;
+    }
+    .order-info-box {
+        background-color: #f8f9fa;
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 30px;
+        border: 1px solid #e9ecef;
+    }
+    .btn-custom { padding: 12px 25px; font-weight: bold; border-radius: 10px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="success-container">
+
+        <div class="logo-display-box shadow-sm">
+            <div class="team-logo-item">
+                <img src="{{ url_for('static', filename='img/' + ticket.Hometeam_name + '.jpg') }}"
+                     alt="{{ ticket.Hometeam_name }}">
+                <div class="fw-bold">{{ ticket.Hometeam_name }}</div>
+            </div>
+
+            <div class="vs-divider">VS</div>
+
+            <div class="team-logo-item">
+                <img src="{{ url_for('static', filename='img/' + ticket.awayteam_name + '.jpg') }}"
+                     alt="{{ ticket.awayteam_name }}">
+                <div class="fw-bold">{{ ticket.awayteam_name }}</div>
+            </div>
+        </div>
+
+        <div class="success-icon">
+            <i class="bi bi-check-circle-fill"></i>
+        </div>
+        <h2 class="fw-bold">결제가 완료되었습니다!</h2>
+        <p class="text-muted">주문해주셔서 감사합니다. 즐거운 경기 관람 되세요!</p>
+
+        <div class="order-info-box text-start">
+            <h5 class="fw-bold border-bottom pb-2 mb-3">결제 정보</h5>
+            <div class="d-flex justify-content-between mb-2">
+                <span class="text-muted">좌석</span>
+                <span class="fw-bold">{{ ticket.sub_category }} {{ ticket.seat }}</span>
+            </div>
+            <div class="d-flex justify-content-between mb-2">
+                <span class="text-muted">수량</span>
+                <span>{{ ticket.quantity }}매</span>
+            </div>
+            <div class="d-flex justify-content-between mt-3 pt-2 border-top">
+                <span class="fw-bold text-dark">최종 결제 금액</span>
+                <span class="text-danger fw-bold fs-5">{{ "{:,}".format(ticket.price) }}원</span>
+            </div>
+        </div>
+
+        <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+            <a href="{{ url_for('main.index') }}" class="btn btn-outline-secondary btn-custom flex-grow-1">홈으로</a>
+            <a href="{{ url_for('auth.mypage') }}" class="btn btn-primary btn-custom flex-grow-1">나의 티켓 관리</a>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

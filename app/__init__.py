@@ -4,6 +4,8 @@ import config  # config.py 임포트
 from constants import KBO_TEAMS
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
+from flask_apscheduler import APScheduler
+
 
 naming_convention = {
     'ix': 'ix_%(column_0_label)s',
@@ -15,6 +17,8 @@ naming_convention = {
 
 db = SQLAlchemy(metadata=MetaData(naming_convention=naming_convention))
 migrate = Migrate()
+scheduler = APScheduler()
+
 
 from . import models
 
@@ -45,5 +49,12 @@ def create_app():
     @app.context_processor
     def inject_teams():
         return dict(teams=KBO_TEAMS)
+
+    # 스케줄러 설정 및 시작
+    scheduler.init_app(app)
+    scheduler.start()
+
+    with app.app_context():
+        from app import tasks 
 
     return app

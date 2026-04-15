@@ -1,0 +1,87 @@
+{% extends "base.html" %} {% block title %}거래 내역 관리{% endblock %} {% block content %}
+<div class="container my-5">
+  <h3 class="fw-bold mb-4">거래 내역 관리</h3>
+
+  <ul class="nav nav-tabs mb-4" id="historyTab" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button
+        class="nav-link active fw-bold text-dark"
+        id="purchase-tab"
+        data-bs-toggle="tab"
+        data-bs-target="#purchase-content"
+        type="button"
+        role="tab"
+      >
+        구매 내역 ({{ purchases|length }})
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link fw-bold text-dark" id="sales-tab" data-bs-toggle="tab" data-bs-target="#sales-content" type="button" role="tab">
+        판매 내역 ({{ sales|length }})
+      </button>
+    </li>
+  </ul>
+
+  <div class="tab-content" id="historyTabContent">
+    <div class="tab-pane fade show active" id="purchase-content" role="tabpanel">
+      {% if purchases %} {% for order in purchases %}
+      <div class="card mb-3 border-0 shadow-sm rounded-4 p-3">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <span class="badge {% if order.ticket.status == '거래완료' %}bg-success{% else %}bg-primary{% endif %} mb-2"
+              >{{ order.ticket.status }}</span
+            >
+            <h5 class="fw-bold mb-1">{{ order.ticket.Hometeam_name }} vs {{ order.ticket.awayteam_name }}</h5>
+            <small class="text-muted">결제일: {{ order.created_at.strftime('%Y-%m-%d %H:%M') }} | 수량: {{ order.ticket.quantity }}매</small><br />
+            <small class="text-muted"
+              >장당 가격: {{ "{:,}".format(order.ticket.price) }}원 | 총 가격: {{ "{:,}".format(order.ticket.price * order.ticket.quantity)
+              }}원</small
+            >
+          </div>
+          <div class="text-end">
+            <div class="fw-bold text-danger fs-5 mb-2">{{ "{:,}".format(order.ticket.price) }}원</div>
+
+            <div class="bg-light px-3 py-2 rounded-3 mb-2 small border">
+              <strong>PIN:</strong> <code class="text-primary fw-bold">{{ order.ticket.pin }}</code>
+            </div>
+
+            {% if order.ticket.status == '판매완료' %}
+            <form action="{{ url_for('ticket.confirm_purchase', order_id=order.id) }}" method="post">
+              <button type="submit" class="btn btn-dark btn-sm rounded-pill w-100">구매확정</button>
+            </form>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% endfor %} {% else %}
+      <div class="text-center py-5 text-muted bg-white rounded-4 shadow-sm">구매한 내역이 없습니다.</div>
+      {% endif %}
+    </div>
+
+    <div class="tab-pane fade" id="sales-content" role="tabpanel">
+      {% if sales %} {% for ticket in sales %}
+      <div class="card mb-3 border-0 shadow-sm rounded-4 p-3">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <span class="badge bg-secondary mb-2">{{ ticket.status }}</span>
+            <h5 class="fw-bold mb-1">{{ ticket.Hometeam_name }} vs {{ ticket.awayteam_name }}</h5>
+            <small class="text-muted"
+              >등록일: {{ ticket.created_at.strftime('%Y-%m-%d') }} | 경기일: {{ ticket.game_date.strftime('%Y-%m-%d') }} | 수량: {{ ticket.quantity
+              }}매</small
+            >
+            <small class="text-muted"
+              >장당 가격: {{ "{:,}".format(ticket.price) }}원 | 총 가격: {{ "{:,}".format(ticket.price * ticket.quantity) }}원</small
+            >
+          </div>
+          <div class="text-end">
+            <div class="fw-bold fs-5 mb-2">{{ "{:,}".format(ticket.price) }}원</div>
+          </div>
+        </div>
+      </div>
+      {% endfor %} {% else %}
+      <div class="text-center py-5 text-muted bg-white rounded-4 shadow-sm">판매 등록한 내역이 없습니다.</div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

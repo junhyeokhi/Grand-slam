@@ -2,9 +2,18 @@
   <div class="container d-flex align-items-center">
     <a class="navbar-brand fw-bold fs-3 me-4" href="{{ url_for('main.index') }}" style="letter-spacing: -2px; color: #000">만루홈런</a>
 
-    <form class="flex-grow-1 mx-5" style="max-width: 600px">
+    <form action="{{ url_for('ticket.ticket_list') }}" method="GET" class="flex-grow-1 mx-5" style="max-width: 600px">
       <div class="input-group">
-        <input type="text" class="form-control rounded-pill-start border-dark-subtle bg-light ps-4" placeholder="경기명, 구단명 등 검색" />
+        <input type="hidden" name="team" value="{{ request.args.get('team', '') }}" />
+
+        <input
+          type="text"
+          name="kw"
+          value="{{ request.args.get('kw', '') }}"
+          class="form-control rounded-pill-start border-dark-subtle bg-light ps-4"
+          placeholder="경기명, 구단명 등 검색"
+        />
+
         <button class="btn btn-dark rounded-pill-end px-4" type="submit">🔍</button>
       </div>
     </form>

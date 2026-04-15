@@ -171,8 +171,9 @@ def ticket_create():
         # 'seat' 필드에 좌석 등급과 상세 위치를 조합하여 저장
         full_seat_info = f"{seat_grade} {seat_detail}".strip()
 
-        # 사용자가 입력한 PIN 번호를 암호화
-        hashed_pin = generate_password_hash(user_pin)
+        #  사용자가 입력한 PIN 번호를 암호화 // 구매자에게 보이기 위해선 암호화 임시 제거 추후 다른방향모색
+        # hashed_pin = generate_password_hash(user_pin)
+
         # Ticket 객체 생성
         ticket = Ticket(
             seller_id=g.user.id, # 현재 로그인된 사용자 ID
@@ -182,7 +183,7 @@ def ticket_create():
             seat=full_seat_info,
             quantity=quantity,
             price=price, # 1매당 가격
-            pin=hashed_pin, # 암호화된 PIN 저장
+            pin=user_pin, # 암호화된 PIN 저장
             game_date=game_datetime
         )
 
@@ -204,3 +205,40 @@ def ticket_detail(ticket_id):
     ticket = Ticket.query.get_or_404(ticket_id)
     # 찾은 ticket 데이터를 HTML로 리턴
     return render_template('ticket/ticket_detail.html', ticket=ticket)
+
+@bp.route('/history/')
+@login_required
+def ticket_history():
+    # 구매 내역: 내가 산 주문(Order)들 (최신순)
+    purchases = Order.query.filter_by(buyer_id=g.user.id).order_by(Order.created_at.desc()).all()
+    
+    # 판매 내역: 내가 등록한 티켓(Ticket)들 (최신순)
+    sales = Ticket.query.filter_by(seller_id=g.user.id).order_by(Ticket.created_at.desc()).all()
+    
+    return render_template('ticket/ticket_history.html', 
+                           purchases=purchases, 
+                           sales=sales)
+
+# 구매확정 처리 라우트 (주소: /ticket/confirm_purchase/<order_id>/)
+@bp.route('/confirm_purchase/<int:order_id>/', methods=['POST'])
+@login_required
+def confirm_purchase(order_id):
+    # 넘어온 주문번호로 Order 찾기
+    order = Order.query.get_or_404(order_id)
+    # 본인 확인 티켓 구매자가 맞는지 검증
+    if order.buyer_id != g.user.id:
+        flash("권한이 없습니다.")
+        return redirect(url_for('ticket.ticket_history'))
+    # 3. 티켓 상태를 '거래완료'로 변경
+    order.ticket.status = '거래완료'
+    # 4. DB 저장
+    try:
+        db.session.commit()
+        flash("구매확정이 완료되었습니다. 판매자에게 정산이 진행됩니다.")
+    except Exception as e:
+        db.session.rollback()
+        print(f"구매확정 에러: {e}")
+        flash("처리 중 오류가 발생했습니다.")
+        
+    # 처리가 끝나면 다시 거래 내역(탭) 페이지로 이동
+    return redirect(url_for('ticket.ticket_history'))

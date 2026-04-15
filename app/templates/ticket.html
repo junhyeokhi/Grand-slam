@@ -16,19 +16,20 @@
   </div>
 
   <div class="row g-4">
+
     <!-- 왼쪽 필터 -->
     <div class="col-lg-3">
       <div class="filter-panel bg-white rounded-4 shadow-sm p-4">
         <h5 class="fw-bold mb-4">야구 - {{ team if team else '전체 팀' }}</h5>
 
-        <form method="get">
+        <form method="get" action="{{ url_for('ticket.ticket_list') }}">
           <input type="hidden" name="team" value="{{ team }}" />
           <input type="hidden" name="option" value="{{ option }}" />
 
           <!-- 경기 일시 -->
           <div class="mb-4">
             <label class="filter-label">경기 일시</label>
-            <input type="date" class="form-control" name="game_date" />
+            <input type="date" class="form-control" name="game_date" value="{{ request.args.get('game_date', '') }}" />
           </div>
 
           <!-- 상대팀 -->
@@ -36,9 +37,13 @@
             <label class="filter-label">상대팀</label>
             <select class="form-select" name="awayteam">
               <option value="">전체</option>
-              {% for item in kbo_teams %} {% if item.name != team %}
-              <option value="{{ item.name }}">{{ item.name }}</option>
-              {% endif %} {% endfor %}
+              {% for item in kbo_teams %}
+              {% if item.name != team %}
+              <option value="{{ item.name }}" {% if request.args.get('awayteam')==item.name %}selected{% endif %}>
+                {{ item.name }}
+              </option>
+              {% endif %}
+              {% endfor %}
             </select>
           </div>
 
@@ -47,9 +52,13 @@
             <label class="filter-label">좌석</label>
             <select class="form-select" name="seat">
               <option value="">전체</option>
-              {% if selected_team_data %} {% for grade in selected_team_data.seat_grades %}
-              <option value="{{ grade }}">{{ grade }}</option>
-              {% endfor %} {% endif %}
+              {% if selected_team_data %}
+              {% for grade in selected_team_data.seat_grades %}
+              <option value="{{ grade }}" {% if request.args.get('seat')==grade %}selected{% endif %}>
+                {{ grade }}
+              </option>
+              {% endfor %}
+              {% endif %}
             </select>
           </div>
 
@@ -58,64 +67,30 @@
             <label class="filter-label">수량</label>
             <select class="form-select" name="quantity">
               <option value="">전체</option>
-              <option value="1">1매</option>
-              <option value="2">2매</option>
-              <option value="3">3매</option>
-              <option value="4">4매</option>
+              <option value="1" {% if request.args.get('quantity')=='1' %}selected{% endif %}>1매</option>
+              <option value="2" {% if request.args.get('quantity')=='2' %}selected{% endif %}>2매</option>
+              <option value="3" {% if request.args.get('quantity')=='3' %}selected{% endif %}>3매</option>
+              <option value="4" {% if request.args.get('quantity')=='4' %}selected{% endif %}>4매</option>
             </select>
           </div>
+          <!-- 검색 + 초기화 버튼 -->
+          <div class="d-flex gap-2 mt-3">
+            <!-- 검색 -->
+            <button type="submit" class="btn btn-dark w-50">검색</button>
 
-          <!-- 검색어 -->
-          <div class="mb-4">
-            <label class="filter-label">검색어</label>
-            <div class="d-flex gap-2">
-              <input type="text" class="form-control" name="keyword" placeholder="검색어 입력" />
-              <button type="submit" class="btn btn-outline-dark search-btn">검색</button>
-            </div>
-          </div>
-
-          <!-- 거래 방식 -->
-          <div class="mb-4">
-            <label class="filter-label d-block mb-2">거래 방식</label>
-            <div class="trade-type-wrap">
-              <label class="trade-chip">
-                <input type="radio" name="trade_type" value="PIN" />
-                <span>PIN</span>
-              </label>
-              <label class="trade-chip">
-                <input type="radio" name="trade_type" value="배송" />
-                <span>배송</span>
-              </label>
-              <label class="trade-chip">
-                <input type="radio" name="trade_type" value="현장" />
-                <span>현장</span>
-              </label>
-              <label class="trade-chip">
-                <input type="radio" name="trade_type" value="기타" />
-                <span>기타</span>
-              </label>
-            </div>
-          </div>
-
-          <!-- 체크 옵션 -->
-          <div class="mb-4">
-            <div class="form-check">
-              <input class="form-check-input" type="checkbox" name="under_price" id="under_price" />
-              <label class="form-check-label" for="under_price">정가 이하 상품 보기</label>
-            </div>
-          </div>
-
-          <!-- 버튼 -->
-          <div class="d-grid gap-2">
-            <button type="submit" class="btn btn-dark">검색</button>
-            <a href="{{ url_for('ticket.ticket_list', team=team, option=option) }}" class="btn btn-light">초기화</a>
+            <!-- 초기화 -->
+            <a href="{{ url_for('ticket.ticket_list', team=team, option=option) }}"
+              class="btn btn-outline-secondary w-50">
+              초기화
+            </a>
           </div>
         </form>
       </div>
     </div>
 
-    <!-- 가운데 티켓 리스트 -->
-    <div class="col-lg-6">
+
+    <!-- 중앙 티켓 리스트 -->
+    <div class="col-lg-7">
       {% for ticket in tickets.items %}
 
       <a href="{{ url_for('ticket.ticket_detail', ticket_id=ticket.id) }}" class="ticket-link">
@@ -130,19 +105,24 @@
             </div>
 
             <div class="ticket-badges">
-
               <span class="badge-compare">비교담기</span>
             </div>
           </div>
 
           <div class="ticket-card-body">
             <div class="ticket-info">
+
               <h3 class="ticket-title">
-               vs {{ ticket.awayteam_short }} | {{ ticket.seat }} {{ ticket.row if ticket.row else '' }}열
+                VS {{ ticket.awayteam_short }}
+                {% if ticket.row %}
+                | {{ ticket.row }}열
+                {% endif %}
               </h3>
 
               <p class="ticket-sub">
-                {{ ticket.seat_grade if ticket.seat_grade else '' }}
+                {% if ticket.seat %}
+                {{ ticket.seat }}
+                {% endif %}
                 {% if ticket.delivery_method %}
                 <span class="divider">|</span>
                 {{ ticket.delivery_method }}
@@ -154,6 +134,7 @@
                 <span class="ticket-tag">{{ ticket.trade_type }}</span>
               </div>
               {% endif %}
+
             </div>
 
             <div class="ticket-price-box">
@@ -172,7 +153,7 @@
     </div>
 
     <!-- 오른쪽 사이드 -->
-    <div class="col-lg-3">
+    <div class="col-lg-2">
       <div class="side-box p-3 rounded-4 mb-3 text-center">상품 비교 <span class="text-danger">0</span></div>
 
       <div class="side-box p-3 rounded-4 mb-3 text-center">
@@ -211,9 +192,8 @@
         <!-- 현재 페이지 주변 숫자만 표시 -->
         {% set start_page = tickets.page - 2 if tickets.page - 2 > 0 else 1 %}
         {% set end_page = tickets.page + 2 if
-        tickets.page + 2 <= tickets.pages else tickets.pages %} 
-        {% for page_num in range(start_page, end_page + 1) %} 
-        {% if page_num==tickets.page %} <li class="page-item active">
+        tickets.page + 2 <= tickets.pages else tickets.pages %} {% for page_num in range(start_page, end_page + 1) %} {%
+          if page_num==tickets.page %} <li class="page-item active">
           <span class="page-link">{{ page_num }}</span>
           </li>
           {% else %}

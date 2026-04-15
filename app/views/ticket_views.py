@@ -120,6 +120,15 @@ def pay_success():
         # URL 속 티켓 아이디 가져오기
         ticket_id = request.args.get('ticket_id')
         ticket = Ticket.query.get_or_404(ticket_id)
+
+        # 결제 금액 검증: 토스에서 받은 금액과 DB에 저장된 티켓의 총 금액을 비교
+        expected_total_amount = ticket.price * ticket.quantity
+        if int(amount) != expected_total_amount:
+            db.session.rollback() # 금액 불일치 시 롤백
+            flash("결제 금액이 일치하지 않습니다. 관리자에게 문의해주세요.")
+            print(f"결제 금액 불일치: Toss 응답 금액 {amount}, 예상 금액 {expected_total_amount}")
+            return redirect(url_for('main.index'))
+
         # 티켓 상태변경
         ticket.status = '판매완료'
         
@@ -133,7 +142,7 @@ def pay_success():
         try:
             db.session.commit()
             flash("결제가 성공적으로 완료되었습니다!")
-            return redirect(url_for('auth.mypage'))
+            return render_template('auth/order_success.html', ticket=ticket)
         
         except Exception as e:
             # 만약 DB 저장 중 에러가 나면, 변경 사항을 되돌리고(rollback) 에러를 알립니다.
@@ -227,6 +236,22 @@ def ticket_detail(ticket_id):
     # 찾은 ticket 데이터를 HTML로 리턴
 
     return render_template('ticket/ticket_detail.html', ticket=ticket)
+
+# 구매/판매 완료된 티켓 상세 정보 확인 페이지 (새로 추가)
+@bp.route('/view_detail/<int:ticket_id>/')
+@login_required
+def view_ticket_detail(ticket_id):
+    ticket = Ticket.query.get_or_404(ticket_id)
+    
+    # 권한 체크: 판매자이거나 구매자인 경우에만 접근 허용
+    is_seller = (g.user.id == ticket.seller_id)
+    is_buyer = (ticket.order and g.user.id == ticket.order.buyer_id)
+    if not (is_seller or is_buyer):
+        flash("접근 권한이 없습니다.", "danger")
+        return redirect(url_for('main.index'))
+        
+    # 이 페이지는 구매/판매 완료된 티켓의 상세 정보를 보여주며, 결제 위젯은 없습니다.
+    return render_template('ticket/ticket_view_detail.html', ticket=ticket)
 
 @bp.route('/history/')
 @login_required

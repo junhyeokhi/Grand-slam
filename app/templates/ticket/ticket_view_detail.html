@@ -1,0 +1,88 @@
+{% extends "base.html" %} {% block title %}티켓 상세 정보 - 만루홈런{% endblock %} {% block content %}
+<div class="container">
+  <div class="container text-center my-5" style="max-width: 650px">
+    <div class="bg-white p-4 mb-4 d-flex align-items-center justify-content-around border rounded-4 shadow-sm">
+      <div class="flex-grow-1">
+        <img
+          src="{{ url_for('static', filename='img/' + ticket.Hometeam_name + '.jpg') }}"
+          alt="{{ ticket.Hometeam_name }}"
+          class="mb-2 img-fluid"
+          style="max-height: 120px; object-fit: contain"
+        />
+        <div class="fw-bold">{{ ticket.Hometeam_name }}</div>
+      </div>
+
+      <div class="fs-1 fw-bold fst-italic mx-3" style="color: #eee">VS</div>
+
+      <div class="flex-grow-1">
+        <img
+          src="{{ url_for('static', filename='img/' + ticket.awayteam_name + '.jpg') }}"
+          alt="{{ ticket.awayteam_name }}"
+          class="mb-2 img-fluid"
+          style="max-height: 120px; object-fit: contain"
+        />
+        <div class="fw-bold">{{ ticket.awayteam_name }}</div>
+      </div>
+    </div>
+
+    <h2 class="fw-bold mb-3">티켓 상세 정보</h2>
+    <p class="text-muted">거래된 티켓의 상세 내역입니다.</p>
+
+    <div class="bg-light p-4 mb-4 border rounded-4 text-start">
+      <h5 class="fw-bold border-bottom pb-2 mb-3">티켓 정보</h5>
+      <div class="d-flex justify-content-between mb-2">
+        <span class="text-muted">티켓 상태</span>
+        <span
+          class="fw-bold badge {% if ticket.status == '거래완료' %}bg-success{% elif ticket.status == '판매완료' %}{% if g.user.id == ticket.seller_id %}bg-primary{% else %}bg-info{% endif %}{% else %}bg-secondary{% endif %}"
+        >
+          {% if ticket.status == '판매완료' %} {% if g.user.id == ticket.seller_id %}판매완료{% else %}구매완료{% endif %} {% else %} {{ ticket.status
+          }} {% endif %}
+        </span>
+      </div>
+      <div class="d-flex justify-content-between mb-2">
+        <span class="text-muted">경기 일시</span>
+        <span class="fw-bold">{{ ticket.game_date.strftime('%Y-%m-%d %H:%M') }}</span>
+      </div>
+      <div class="d-flex justify-content-between mb-2">
+        <span class="text-muted">좌석</span>
+        <span class="fw-bold">{{ ticket.sub_category }} {{ ticket.seat }}</span>
+      </div>
+      <div class="d-flex justify-content-between mb-2">
+        <span class="text-muted">수량</span>
+        <span>{{ ticket.quantity }}매</span>
+      </div>
+      <div class="d-flex justify-content-between mb-2">
+        <span class="text-muted">판매자</span>
+        <span class="fw-bold">{{ ticket.seller.nickname }}</span>
+      </div>
+      <div class="d-flex justify-content-between mb-2">
+        <span class="text-muted">장당 가격</span>
+        <span class="fw-bold">{{ "{:,}".format(ticket.price) }}원</span>
+      </div>
+      <div class="d-flex justify-content-between mt-3 pt-2 border-top">
+        <span class="fw-bold text-dark">총 결제 금액</span>
+        <span class="text-danger fw-bold fs-5">{{ "{:,}".format(ticket.price * ticket.quantity) }}원</span>
+      </div>
+      <div class="d-flex justify-content-between mt-3 pt-2 border-top">
+        <span class="fw-bold text-dark">PIN 번호</span>
+        <span class="fw-bold fs-5 text-primary">{{ ticket.pin }}</span>
+      </div>
+    </div>
+
+    <div class="d-grid gap-3">
+      <div class="row g-3">
+        <div class="col">
+          <a href="{{ url_for('ticket.ticket_history') }}" class="btn btn-outline-secondary fw-bold px-4 py-2 rounded-3 w-100">거래 내역으로</a>
+        </div>
+        <div class="col"><a href="{{ url_for('auth.mypage') }}" class="btn btn-primary fw-bold px-4 py-2 rounded-3 w-100">마이페이지</a></div>
+      </div>
+      {% if ticket.status == '판매중' and g.user.id == ticket.seller_id %}
+      <div class="row g-3">
+        <div class="col"><a href="#" class="btn btn-outline-secondary fw-bold px-4 py-2 rounded-3 w-100">상품 수정</a></div>
+        <div class="col"><a href="#" class="btn btn-danger fw-bold px-4 py-2 rounded-3 w-100">상품 삭제</a></div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -6,7 +6,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask import session
 from app.form import UserLoginForm
 from datetime import datetime
-from app.models import User, Ticket
+from app.models import User, Ticket, Question
 import functools
 
 from app import db
@@ -252,3 +252,31 @@ def kakao_callback():
 def detail(ticket_id):
     ticket = Ticket.query.get_or_404(ticket_id)
     return render_template('auth/subpage.html', ticket=ticket)
+
+@bp.route('/order/success/<int:ticket_id>/')
+def order_success(ticket_id):
+    ticket = Ticket.query.get_or_404(ticket_id)
+    return render_template('auth/order_success.html', ticket=ticket)
+
+
+@bp.route('/question/create/', methods=('GET', 'POST'))
+@login_required  # 로그인이 필요한 기능
+def create_question():
+    if request.method == 'POST':
+        subject = request.form['subject']
+        content = request.form['content']
+
+        # DB에 저장
+        question = Question(
+            subject=subject,
+            content=content,
+            create_date=datetime.now(),
+            user=g.user
+        )
+        db.session.add(question)
+        db.session.commit()
+
+        flash('문의가 성공적으로 등록되었습니다.')
+        return redirect(url_for('auth.mypage'))  # 등록 후 마이페이지로 이동
+
+    return render_template('auth/question_form.html')

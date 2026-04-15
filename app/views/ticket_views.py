@@ -7,6 +7,19 @@ from constants import KBO_TEAMS
 from app import db
 from werkzeug.security import generate_password_hash
 
+TEAM_SHORT_NAMES = {
+    '두산베어스': '두산',
+    '삼성라이온즈': '삼성',
+    'NC다이노스': 'NC',
+    'SSG랜더스': 'SSG',
+    'LG트윈스': 'LG',
+    '롯데자이언츠': '롯데',
+    'KIA타이거즈': 'KIA',
+    '키움히어로즈': '키움',
+    '한화이글스': '한화',
+    'KT위즈': 'KT'
+}
+
 bp = Blueprint('ticket', __name__, url_prefix='/ticket')
 
 
@@ -26,7 +39,9 @@ def ticket_list():
     #  기본 쿼리 생성
    
     query = Ticket.query
-
+    # 판매중 티켓만 조회
+    
+    query = query.filter(Ticket.status == '판매중')
     
     #  필터 조건 적용 (검색 기능)
     
@@ -49,8 +64,13 @@ def ticket_list():
         per_page=10,      # 한 페이지당 10개
         error_out=False   # 에러 방지
     )
-    #  created_at.desc() → 최신 등록순 정렬
 
+
+    for ticket in tickets.items:
+     ticket.awayteam_short = TEAM_SHORT_NAMES.get(
+        ticket.awayteam_name,
+        ticket.awayteam_name
+    )
     
     #  선택한 팀 정보 찾기 (UI용)
     
@@ -59,6 +79,7 @@ def ticket_list():
         if t['name'] == team:
             selected_team_data = t
             break
+            
 
     #  템플릿으로 데이터 전달
     return render_template(
@@ -122,7 +143,7 @@ def pay_success():
             return redirect(url_for('main.index'))
         
     else:
-        # 💥 승인 실패 (금액이 조작되었거나, 한도가 초과된 경우 등)
+        #  승인 실패 (금액이 조작되었거나, 한도가 초과된 경우 등)
         error_data = response.json()
         error_msg = error_data.get('message', '알 수 없는 결제 에러가 발생했습니다.')
         
@@ -204,6 +225,7 @@ def ticket_detail(ticket_id):
     # DB에서 해당 티켓을 찾기
     ticket = Ticket.query.get_or_404(ticket_id)
     # 찾은 ticket 데이터를 HTML로 리턴
+
     return render_template('ticket/ticket_detail.html', ticket=ticket)
 
 @bp.route('/history/')

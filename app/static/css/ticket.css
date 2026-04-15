@@ -154,70 +154,67 @@
    티켓 1개 전체 영역
 ========================= */
 .ticket-card {
+  position: relative;
   background: #fff;
-  border: 1px solid #d9dde3;
+  border: 1px solid #dfe3e8;
   border-radius: 18px;
-  padding: 18px 20px;
-  margin-bottom: 14px;
+  padding: 18px 24px;
+  margin-bottom: 16px;
+  width: 100%;
+  min-height: 135px;
 }
 
 
 /* =========================
    카드 상단
-   경기일시 / 정가이하 / 비교담기
+   경기일시 / 비교담기
 ========================= */
 .ticket-card-top {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 14px;
+  margin-bottom: 34px;
 }
 
 .ticket-date {
   font-size: 15px;
   color: #7b8794;
   font-weight: 500;
+  line-height: 1.4;
 }
 
 .ticket-date span {
   color: #111;
   font-weight: 700;
-  margin-left: 6px;
+  margin-left: 4px;
 }
 
 .ticket-badges {
   display: flex;
-  gap: 6px;
+  gap: 8px;
+  align-items: center;
 }
-
 
 /* =========================
    카드 상단 배지
-   정가 이하 / 비교담기
+  비교담기
 ========================= */
-.badge-price,
+
 .badge-compare {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  height: 28px;
-  padding: 0 10px;
-  border-radius: 8px;
-  font-size: 13px;
+  height: 24px;
+  padding: 0 8px;
+  border-radius: 6px;
+  font-size: 11px;
   font-weight: 600;
-}
-
-.badge-price {
-  background: #fff1f5;
-  border: 1px solid #ffb7cb;
-  color: #ff2b6a;
-}
-
-.badge-compare {
   background: #f8f9fb;
-  border: 1px solid #d9dde3;
-  color: #a0a8b0;
+  border: 1px solid #e1e5ea;
+  color: #a8b0b8;
 }
+
+
 
 
 /* =========================
@@ -225,14 +222,42 @@
    왼쪽 정보 / 오른쪽 가격 정렬
 ========================= */
 .ticket-card-body {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  gap: 20px;
+  display: block;
+  padding-right: 180px;
+}
+
+.ticket-price {
+  font-size: 20px;
+  font-weight: 800;
+  color: #ff2b6a;
+  line-height: 1.2;
+}
+
+.ticket-price-box {
+  position: absolute;
+  right: 28px;
+  bottom: 22px;
+  min-width: 150px;
+  text-align: right;
+}
+
+.ticket-price-label {
+  font-size: 14px;
+  color: #ff2b6a;
+  margin-bottom: 4px;
+}
+
+.ticket-qty strong {
+  color: #111;
+  font-weight: 800;
+}
+
+.ticket-qty strong {
+  color: #111;
+  font-weight: 800;
 }
 
 .ticket-info {
-  flex: 1;
   min-width: 0;
 }
 
@@ -241,23 +266,28 @@
    티켓 제목 / 부가정보
    경기명, 좌석, 전달 방식 등
 ========================= */
+.ticket-seat-wrap {
+  margin-top: 6px;
+}
+
 .ticket-title {
   margin: 0 0 8px;
   font-size: 18px;
-  font-weight: 800;
+  font-weight: 700;
   color: #111;
   line-height: 1.4;
 }
 
 .ticket-sub {
-  margin: 0 0 12px;
+  margin: 0;
   font-size: 15px;
   color: #7b8794;
+  line-height: 1.45;
 }
 
 .ticket-sub .divider {
   margin: 0 6px;
-  color: #c0c6cc;
+  color: #b0b7c3;
 }
 
 
@@ -266,36 +296,33 @@
    PIN / 배송 / 현장 같은 표시
 ========================= */
 .ticket-tag-wrap {
-  margin-top: 4px;
+  margin-top: 10px;
 }
 
 .ticket-tag {
   display: inline-flex;
   align-items: center;
-  height: 24px;
+  justify-content: center;
+  height: 22px;
   padding: 0 10px;
   border: 1px solid #d9dde3;
-  border-radius: 7px;
-  font-size: 13px;
-  color: #8b95a1;
-  background: #fff;
+  border-radius: 6px;
+  background: #f8f9fb;
+  font-size: 12px;
+  font-weight: 500;
+  color: #8a94a6;
+  line-height: 1;
 }
-
 
 /* =========================
    오른쪽 가격 박스
    수량 / 가격 영역
 ========================= */
-.ticket-price-box {
-  min-width: 140px;
-  text-align: right;
-  flex-shrink: 0;
-}
 
 .ticket-qty {
   font-size: 15px;
   color: #7b8794;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .ticket-qty strong {
@@ -303,18 +330,26 @@
   font-weight: 800;
 }
 
+.ticket-price {
+  font-size: 22px;
+  font-weight: 800;
+  color: #ff2b6a;
+  line-height: 1.2;
+}
+
+.ticket-price-box {
+  min-width: 150px;
+  text-align: right;
+  flex-shrink: 0;
+  align-self: flex-end;
+  margin-top: auto;
+}
+
 .ticket-price-label {
   font-size: 14px;
   color: #ff2b6a;
-  margin-bottom: 2px;
+  margin-bottom: 4px;
 }
-
-.ticket-price {
-  font-size: 18px;
-  font-weight: 800;
-  color: #ff2b6a;
-}
-
 
 /* =========================
    오른쪽 사이드 박스

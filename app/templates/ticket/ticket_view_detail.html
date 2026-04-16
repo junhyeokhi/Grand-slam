@@ -78,8 +78,19 @@
       </div>
       {% if ticket.status == '판매중' and g.user.id == ticket.seller_id %}
       <div class="row g-3">
-        <div class="col"><a href="#" class="btn btn-outline-secondary fw-bold px-4 py-2 rounded-3 w-100">상품 수정</a></div>
-        <div class="col"><a href="#" class="btn btn-danger fw-bold px-4 py-2 rounded-3 w-100">상품 삭제</a></div>
+        <div class="col">
+          <a href="{{ url_for('ticket.ticket_modify', ticket_id=ticket.id) }}" class="btn btn-outline-secondary fw-bold px-4 py-2 rounded-3 w-100"
+            >상품 수정</a
+          >
+        </div>
+        <div class="col">
+          <a
+            href="{{url_for('ticket.delete_ticket', ticket_id=ticket.id)}}"
+            class="btn btn-danger fw-bold px-4 py-2 rounded-3 w-100"
+            onclick="return confirm('정말로 이 상품을 삭제하시겠습니까?');"
+            >상품 삭제</a
+          >
+        </div>
       </div>
       {% endif %}
     </div>

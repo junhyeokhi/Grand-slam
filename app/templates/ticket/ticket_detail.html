@@ -50,8 +50,8 @@
             <div class="col-8">{{ ticket.seller.nickname }}</div>
           </div>
         </div>
-        {# 티켓 상태가 '판매중'이고, 현재 유저가 판매자가 아닐 경우에만 결제창 보이기 #} {% if ticket.status == '판매중' and g.user.id !=
-        ticket.seller_id %}
+        {# 티켓 상태가 '판매중'이고, 현재 유저가 판매자가 아닐 경우에만 결제창 보이기 #} {% if ticket.status == '판매중' and
+        g.user.id!=ticket.seller_id %}
         <div class="card border-0 shadow-sm p-4 mt-4">
           <h5 class="fw-bold mb-3">결제 수단 선택</h5>
 

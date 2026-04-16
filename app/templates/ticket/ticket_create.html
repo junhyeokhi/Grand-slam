@@ -3,7 +3,8 @@
   <div class="row g-5">
     <div class="col-lg-5">
       <div class="card border-0 shadow-sm p-4 bg-white">
-        <h4 class="fw-bold mb-4">티켓 판매 등록</h4>
+        {# 티켓의 객체가 존재한다면 수정 아니라면 등록 #}
+        <h4 class="fw-bold mb-4">{% if ticket %}티켓 판매 수정{% else %}티켓 판매 등록{% endif %}</h4>
         <form method="post" id="ticketForm">
           <div class="mb-3">
             <label class="form-label fw-bold small">홈팀 (장소)</label>
@@ -83,7 +84,9 @@
             </div>
           </div>
 
-          <button type="submit" class="btn btn-dark w-100 rounded-0 mt-3 py-3 fw-bold">판매 등록하기</button>
+          <button type="submit" class="btn btn-dark w-100 rounded-0 mt-3 py-3 fw-bold">
+            {# 티켓 객체가 있다면 수정버튼 아니라면 등록버튼 #} {% if ticket %}수정 완료하기{% else %}판매 등록하기{% endif %}
+          </button>
         </form>
       </div>
     </div>
@@ -141,8 +144,8 @@
   const subSelect = document.getElementById('sub_category');
   const awaySelect = document.getElementById('awayteam');
   const dateInput = document.getElementById('game_date');
-  const hourSelect = document.getElementById('game_time_hour'); // 경기 시간 시 input 추가
-  const minuteSelect = document.getElementById('game_time_minute'); // 경기 시간 분 input 추가
+  const hourSelect = document.getElementById('game_time_hour');
+  const minuteSelect = document.getElementById('game_time_minute');
   const gradeSelect = document.getElementById('seat_grade');
   const ticketForm = document.getElementById('ticketForm');
 
@@ -251,6 +254,37 @@
       const month = String(today.getMonth() + 1).padStart(2, '0');
       const day = String(today.getDate()).padStart(2, '0');
       dateInput.min = `${year}-${month}-${day}`;
+
+      // 수정 모드일 경우 기존 데이터 자동 세팅
+      {% if ticket %}
+      homeSelect.value = "{{ ticket.Hometeam_name }}";
+      homeSelect.dispatchEvent(new Event('change'));
+
+      subSelect.value = "{{ ticket.sub_category }}";
+      subSelect.dispatchEvent(new Event('change'));
+
+      awaySelect.value = "{{ ticket.awayteam_name }}";
+      awaySelect.dispatchEvent(new Event('change'));
+
+      dateInput.value = "{{ ticket.game_date.strftime('%Y-%m-%d') }}";
+      dateInput.dispatchEvent(new Event('change'));
+
+      hourSelect.value = "{{ ticket.game_date.strftime('%H') }}";
+      minuteSelect.value = "{{ ticket.game_date.strftime('%M') }}";
+      hourSelect.dispatchEvent(new Event('change'));
+
+      gradeSelect.value = "{{ ticket.seat_grade }}";
+      gradeSelect.dispatchEvent(new Event('change'));
+
+      document.getElementById('seat_detail').value = "{{ ticket.seat }}";
+      document.getElementById('pin_number').value = "{{ ticket.pin }}";
+      document.getElementById('quantity').value = "{{ ticket.quantity }}";
+      document.getElementById('price').value = "{{ ticket.price }}";
+
+      // 세팅 후 프리뷰 영역 수동 업데이트 트리거
+      document.getElementById('seat_detail').dispatchEvent(new Event('input'));
+      document.getElementById('price').dispatchEvent(new Event('input'));
+      {% endif %}
   });
 
   ticketForm.addEventListener('input', function(e) {

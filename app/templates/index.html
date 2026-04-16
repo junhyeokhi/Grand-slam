@@ -1,4 +1,81 @@
-{% extends "base.html" %}
-{% block content %}
-<h1>화면 표출 테스트</h1>
+{% extends "base.html" %} {% block title %}그랜드슬램 - KBO 티켓의 모든 것{% endblock %} {% block content %}
+<div class="position-relative bg-dark text-white text-center py-5 mb-5 rounded-4 overflow-hidden shadow mt-4">
+  <img src="{{ url_for('static', filename='img/banner.png') }}" alt="Banner" class="position-absolute top-0 start-0 w-100 h-100 opacity-50" />
+  <div class="position-relative z-index-1 py-5">
+    <h1 class="display-5 fw-bold mb-3">직관의 완성, 그랜드슬램</h1>
+    <p class="lead mb-4">가장 안전하고 빠른 KBO 야구 티켓 거래 플랫폼</p>
+  </div>
+</div>
+
+<div class="container mb-5">
+  <h4 class="fw-bold mb-4">⚾ 구단별 티켓 찾기</h4>
+  <div class="row row-cols-2 row-cols-md-5 g-4 text-center mb-5">
+    {% for team in teams %}
+    <div class="col">
+      <a
+        href="{{ url_for('ticket.ticket_list', team=team.name) }}"
+        class="text-decoration-none text-dark d-block p-3 rounded-4 hover-shadow transition"
+      >
+        <img
+          src="{{ url_for('static', filename='img/' ~ team.name ~ '.jpg') }}"
+          alt="{{ team.name }}"
+          class="img-fluid rounded-circle shadow-sm mb-3"
+          style="width: 80px; height: 80px; object-fit: cover"
+        />
+        <h6 class="fw-bold mb-0">{{ team.name }}</h6>
+      </a>
+    </div>
+    {% endfor %}
+  </div>
+
+  <hr class="my-5 text-muted" />
+
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="fw-bold mb-0">🔥 방금 올라온 뜨거운 티켓</h4>
+    <a href="{{ url_for('ticket.ticket_list') }}" class="text-decoration-none text-muted small">전체보기 <i class="bi bi-chevron-right"></i></a>
+  </div>
+
+  <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+    {% if recent_tickets %} {% for ticket in recent_tickets %}
+    <div class="col">
+      <div class="card h-100 border-0 shadow-sm rounded-4 hover-lift">
+        <div class="card-body p-4">
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <span class="badge bg-danger rounded-pill px-3">{{ ticket.status }}</span>
+            <small class="text-muted">{{ ticket.game_date.strftime('%m/%d %H:%M') }}</small>
+          </div>
+          <h5 class="card-title fw-bold mb-1">{{ ticket.Hometeam_name }} vs {{ ticket.awayteam_name }}</h5>
+          <p class="card-text text-muted small mb-3">{{ ticket.sub_category }} | {{ ticket.seat_grade }}</p>
+
+          <div class="d-flex justify-content-between align-items-end mt-auto">
+            <div class="fs-5 fw-bold text-dark">{{ "{:,}".format(ticket.price) }}<span class="fs-6 text-muted fw-normal">원</span></div>
+          </div>
+        </div>
+        <div class="card-footer bg-white border-0 pt-0 pb-4 px-4">
+          <a href="{{ url_for('ticket.ticket_detail', ticket_id=ticket.id) }}" class="btn btn-outline-dark w-100 rounded-pill fw-bold">자세히 보기</a>
+        </div>
+      </div>
+    </div>
+    {% endfor %} {% else %}
+    <div class="col-12 text-center py-5 text-muted bg-light rounded-4 w-100">현재 등록된 티켓이 없습니다. 첫 번째 판매자가 되어보세요!</div>
+    {% endif %}
+  </div>
+</div>
+
+<style>
+  .hover-lift {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .hover-lift:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+  }
+  .hover-shadow:hover {
+    background-color: #f8f9fa;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  }
+  .transition {
+    transition: all 0.2s ease;
+  }
+</style>
 {% endblock %}

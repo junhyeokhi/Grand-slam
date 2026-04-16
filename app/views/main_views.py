@@ -9,4 +9,7 @@ bp = Blueprint('main', __name__, url_prefix='/')
 
 @bp.route('/')
 def index():
-    return render_template('index.html')
+    # '판매중'인 티켓을 최신순으로 4개만 가져옵니다.
+    recent_tickets = Ticket.query.filter_by(status='판매중').order_by(Ticket.created_at.desc()).limit(4).all()
+
+    return render_template('index.html', recent_tickets=recent_tickets)

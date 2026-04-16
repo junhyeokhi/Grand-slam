@@ -2,12 +2,13 @@ import random
 from datetime import datetime, timedelta
 from werkzeug.security import generate_password_hash
 from app import create_app, db
-from app.models import User, Ticket, Order # ✨ Order 모델 추가 임포트
+from app.models import User, Ticket, Order
 from constants import KBO_TEAMS
 
 def insert_all_test_data():
     app = create_app()
     with app.app_context():
+        db.create_all()
         print("1. 테스트 유저 10명 생성 중...")
         user_list = []
         for i in range(1, 11):
@@ -37,6 +38,7 @@ def insert_all_test_data():
             home_team_dict = selected_teams[0]
             
             detailed_category = random.choice(home_team_dict.get('sub_options', ['기타 구역']))
+            seat_grade_choice = random.choice(home_team_dict.get('seat_grades', ['일반석']))
 
             block = random.randint(101, 315)
             row = random.randint(1, 20)
@@ -48,6 +50,7 @@ def insert_all_test_data():
                 Hometeam_name=home_team_dict['name'],
                 awayteam_name=selected_teams[1]['name'],
                 sub_category=detailed_category, 
+                seat_grade=seat_grade_choice,
                 seat=seat_detail,               
                 quantity=random.randint(1, 4),
                 price=random.choice([12000, 15000, 25000, 35000]),

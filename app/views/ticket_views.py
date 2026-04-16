@@ -67,9 +67,9 @@ def ticket_list():
     if awayteam:
         query = query.filter(Ticket.awayteam_name == awayteam)
 
-    # 좌석 필터
+    # 좌석 필터 (상세 좌석 번호 또는 좌석 등급 포함 검색)
     if seat:
-        query = query.filter(Ticket.seat.contains(seat))
+        query = query.filter(or_(Ticket.seat.contains(seat), Ticket.seat_grade.contains(seat)))
 
     # 수량 필터
     if quantity:
@@ -234,9 +234,6 @@ def ticket_create():
             flash('유효하지 않은 날짜 또는 시간 형식입니다.', 'danger')
             return render_template('ticket/ticket_create.html')
 
-        # 'seat' 필드에 좌석 등급과 상세 위치를 조합하여 저장
-        full_seat_info = f"{seat_grade} {seat_detail}".strip()
-
         #  사용자가 입력한 PIN 번호를 암호화 // 구매자에게 보이기 위해선 암호화 임시 제거 추후 다른방향모색
         # hashed_pin = generate_password_hash(user_pin)
 
@@ -246,7 +243,8 @@ def ticket_create():
             Hometeam_name=hometeam_name,
             awayteam_name=awayteam_name,
             sub_category=sub_category,
-            seat=full_seat_info,
+            seat_grade=seat_grade,
+            seat=seat_detail,
             quantity=quantity,
             price=price, # 1매당 가격
             pin=user_pin, # 암호화된 PIN 저장

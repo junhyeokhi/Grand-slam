@@ -23,6 +23,7 @@ class Ticket(db.Model):
     Hometeam_name = db.Column(db.String(50), nullable=False)  # KBO 구단명
     awayteam_name = db.Column(db.String(50), nullable=False)  # KBO 구단명
     sub_category = db.Column(db.String(100))  # 상세 구간
+    seat_grade = db.Column(db.String(100))  # 좌석 등급 (예: 3루 응원지정석)
     seat = db.Column(db.String(100), nullable=True)  # 좌석 정보
     quantity = db.Column(db.Integer, nullable=False)  # 티켓 수량
     price = db.Column(db.Integer, nullable=False) #가격
@@ -30,6 +31,7 @@ class Ticket(db.Model):
     status = db.Column(db.String(20), default='판매중') #상태 관리
     game_date = db.Column(db.DateTime, nullable=False) #경기일자
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(KST), nullable=False) #판매티켓 생성 날짜 및 시간
+    
 
     seller = db.relationship('User', backref=db.backref('ticket_set'))    
 

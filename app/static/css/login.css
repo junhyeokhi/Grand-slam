@@ -1,15 +1,17 @@
+/* [1. 전체 레이아웃] 페이지의 배경과 중앙 정렬 설정 */
 .login-page {
   width: 100%;
   padding: 60px 0;
 }
 
+/* [2. 메인 컨테이너] 흰색 박스 모델 및 좌우 2단 Flex 레이아웃 */
 .login-page .login-container {
   width: 1100px;
   max-width: 100%;
   min-height: 620px;
   background-color: #ffffff;
   border-radius: 24px;
-  display: flex;
+  display: flex;           /* 좌우 섹션을 가로로 배치 */
   justify-content: space-between;
   align-items: center;
   padding: 50px 70px;
@@ -17,10 +19,11 @@
   margin: 0 auto;
 }
 
+/* [3. 좌측 섹션] 이미지와 브랜드 메시지 영역 */
 .login-page .left-section {
   flex: 1;
   display: flex;
-  flex-direction: column;
+  flex-direction: column;  /* 내부 요소를 세로로 나열 */
   align-items: center;
   text-align: center;
 }
@@ -52,12 +55,14 @@
   color: #333;
 }
 
+/* [4. 중앙 구분선] 좌우 콘텐츠를 나누는 세로 실선 */
 .login-page .divider {
   width: 1px;
   height: 470px;
   background-color: #d8d8d8;
 }
 
+/* [5. 우측 섹션] 실제 로그인 입력 및 버튼 영역 */
 .login-page .right-section {
   flex: 1;
   max-width: 420px;
@@ -74,6 +79,7 @@
   width: 100%;
 }
 
+/* [6. 입력창 그룹] 라벨과 인풋 박스 스타일 */
 .login-page .input-group {
   margin-bottom: 28px;
 }
@@ -85,10 +91,11 @@
   margin-bottom: 10px;
 }
 
+/* 입력창을 깔끔한 언더라인 스타일로 정의 */
 .login-page .input-group input {
   width: 100%;
   border: none;
-  border-bottom: 1px solid #bbb;
+  border-bottom: 1px solid #bbb; /* 하단 테두리만 사용 */
   background: transparent;
   padding: 10px 0;
   font-size: 18px;
@@ -99,6 +106,7 @@
   color: #777;
 }
 
+/* [7. 편의기능] 아이디 저장 체크박스 */
 .login-page .save-id {
   display: flex;
   align-items: center;
@@ -113,6 +121,7 @@
   height: 16px;
 }
 
+/* [8. 버튼 공통] 모든 버튼의 크기, 폰트, 정렬 통합 관리 */
 .login-page .btn-login,
 .login-page .btn-kakao,
 .login-page .btn-email {
@@ -128,6 +137,7 @@
   justify-content: center;
 }
 
+/* 일반 로그인 버튼 - 검정 배경 */
 .login-page .btn-login {
   background-color: #000;
   color: #fff;
@@ -140,14 +150,16 @@
   margin: 20px 0;
 }
 
+/* [9. 소셜/회원가입] 각 서비스 브랜드 컬러 적용 */
 .login-page .btn-kakao {
   background-color: #FEE500;
   color: #111;
-  position: relative;
+  position: relative; /* 아이콘 배치를 위한 기준점 */
   border: none;
   text-decoration: none;
 }
 
+/* 카카오 아이콘 정중앙 좌측 배치 */
 .login-page .btn-kakao img {
   width: 18px;
   height: 18px;

@@ -112,23 +112,40 @@
           <div class="ticket-card-body">
             <div class="ticket-info">
 
-              <h3 class="ticket-title">
+              <h3 class="ticket-title d-flex align-items-center">
                 VS {{ ticket.awayteam_short }}
+
+                {# 💡 여기에 뱃지 코드가 들어갑니다! #}
+                {% if ticket.sub_category and '(' in ticket.sub_category %}
+                <span class="badge bg-secondary ms-2 text-white" style="font-size: 0.75rem; padding: 0.3em 0.6em;">
+                  {{ ticket.sub_category.split('(')[-1].replace(')', '') }}
+                </span>
+                {% endif %}
+
                 {% if ticket.row %}
-                | {{ ticket.row }}열
+                <span class="ms-2">| {{ ticket.row }}열</span>
                 {% endif %}
               </h3>
 
               <p class="ticket-sub">
-                {% if ticket.seat %}
+                {# 1. 새로운 좌석 등급 표시 #}
+                {% if ticket.seat_grade %}
+                <span class="fw-bold text-primary">[{{ ticket.seat_grade }}]</span>
+                {% endif %}
+
+                {# 2. 좌석 상세 정보 또는 기존 통합 정보 표시 #}
+                {% if ticket.seat_detail %}
+                {{ ticket.seat_detail }}
+                {% elif ticket.seat %}
                 {{ ticket.seat }}
                 {% endif %}
+
+                {# 3. 배송 방법 표시 (기존 유지) #}
                 {% if ticket.delivery_method %}
                 <span class="divider">|</span>
                 {{ ticket.delivery_method }}
                 {% endif %}
               </p>
-
               {% if ticket.trade_type %}
               <div class="ticket-tag-wrap">
                 <span class="ticket-tag">{{ ticket.trade_type }}</span>

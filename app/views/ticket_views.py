@@ -42,6 +42,19 @@ bp = Blueprint('ticket', __name__, url_prefix='/ticket')
 
 @bp.route('/list')
 def ticket_list():
+
+    # 1. 새롭게 추가된 부분: 검색창 로직 (가장 먼저 실행)
+    kw = request.args.get('kw', '').strip()
+    
+    if kw:
+        teams = ["두산베어스", "LG트윈스", "한화이글스", "SSG랜더스", "삼성라이온즈", 
+                 "NC다이노스", "KTwiz", "롯데자이언츠", "KIA타이거즈", "키움히어로즈"]
+        
+        found_team = next((t for t in teams if kw.upper() in t.upper()), None)
+        
+        if found_team:
+            return redirect(url_for('ticket.ticket_list', team=found_team))
+
     awayteam = request.args.get('awayteam', '')
     seat = request.args.get('seat', '')
     quantity = request.args.get('quantity', '')
@@ -128,6 +141,7 @@ def ticket_list():
         team=team,
         option=option
     )
+
 # 프론트엔드에서 결제 성공 시!
 @bp.route('/pay/success')
 def pay_success():

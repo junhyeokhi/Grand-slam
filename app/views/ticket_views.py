@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from flask import Blueprint, flash, g, redirect, render_template, request, session, url_for
+from flask import Blueprint, flash, g, redirect, render_template, request, session, url_for, jsonify
 import requests
 from app.models import Order, Ticket
 from app.views.auth_views import login_required
@@ -7,6 +7,7 @@ from constants import KBO_TEAMS
 from app import db
 from werkzeug.security import generate_password_hash
 from sqlalchemy import or_,func
+
 
 # 티켓카드 이름 간소화
 TEAM_SHORT_NAMES = {
@@ -150,7 +151,7 @@ def pay_success():
     order_id = request.args.get('orderId')
     amount = request.args.get('amount')
 
-    # 2. 토스 개발자 센터에서 발급받은 '시크릿 키' (반드시 test_sk_ 로 시작!)
+    # 2. 토스 개발자 센터에서 발급받은 '시크릿 키'
     TOSS_SECRET_KEY = "test_gsk_docs_OaPz8L5KdmQXkzRz3y47BMw6"
 
     # 3. 토스 서버로 '결제 최종 승인' API 요청 보내기
@@ -388,3 +389,38 @@ def ticket_modify(ticket_id):
         return redirect(url_for('ticket.view_ticket_detail', ticket_id=ticket.id))
         
     return render_template('ticket/ticket_create.html', ticket=ticket)
+
+   
+
+# 1. 장바구니에 티켓 담기 (AJAX 요청 처리)
+@bp.route('/cart/add', methods=['POST'])
+def add_to_cart():
+    ticket_id = request.json.get('ticket_id')
+    
+    # 세션에 장바구니 리스트가 없으면 생성
+    if 'cart' not in session:
+        session['cart'] = []
+        
+    # 중복 담기 방지
+    if ticket_id not in session['cart']:
+        session['cart'].append(ticket_id)
+        session.modified = True # 세션 변경사항 저장
+        
+    return jsonify({
+        "status": "success", 
+        "cart_count": len(session['cart'])
+    })
+
+# 2. 장바구니 페이지 렌더링
+@bp.route('/cart')
+def cart_page():
+    cart_ids = session.get('cart', [])
+    
+    # 세션에 저장된 티켓 ID들로 DB에서 티켓 정보 조회
+    if cart_ids:
+        # Ticket은 실제 사용하시는 모델명으로 변경하세요
+        cart_tickets = Ticket.query.filter(Ticket.id.in_(cart_ids)).all()
+    else:
+        cart_tickets = []
+        
+    return render_template('ticket/cart.html', tickets=cart_tickets)

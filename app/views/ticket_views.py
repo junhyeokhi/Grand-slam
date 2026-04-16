@@ -151,7 +151,7 @@ def pay_success():
     order_id = request.args.get('orderId')
     amount = request.args.get('amount')
 
-    # 2. 토스 개발자 센터에서 발급받은 '시크릿 키' (반드시 test_sk_ 로 시작!)
+    # 2. 토스 개발자 센터에서 발급받은 '시크릿 키'
     TOSS_SECRET_KEY = "test_gsk_docs_OaPz8L5KdmQXkzRz3y47BMw6"
 
     # 3. 토스 서버로 '결제 최종 승인' API 요청 보내기

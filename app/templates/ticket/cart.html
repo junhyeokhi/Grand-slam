@@ -12,48 +12,68 @@
         color: #0d6efd !important;
         text-decoration: underline !important;
     }
+
+    .table th {
+        background-color: #f8f9fa;
+    }
 </style>
 
 <div class="container py-5">
     <h2 class="fw-bold mb-4">🛒 장바구니</h2>
 
-    {% if not tickets %}
+    {# 서버에서 넘겨준 변수명이 cart_items이므로 이를 체크합니다 #}
+    {% if not cart_items %}
+    <div class="text-center py-5 shadow-sm rounded bg-white">
+        <p class="fs-5 text-muted">장바구니에 담긴 티켓이 없습니다.</p>
+        <a href="{{ url_for('ticket.ticket_list') }}" class="btn btn-primary px-4">티켓 보러가기</a>
+    </div>
     {% else %}
     <div id="cart-content">
         <div class="table-responsive shadow-sm rounded">
             <table class="table table-hover align-middle text-center mb-0 bg-white">
                 <thead class="table-light">
                     <tr>
-                        <th><input type="checkbox" id="check-all" onclick="toggleAll(this)"></th>
+                        <th style="width: 50px;"><input type="checkbox" id="check-all" onclick="toggleAll(this)"></th>
                         <th>경기 정보</th>
                         <th>수량</th>
                         <th>가격</th>
+                        <th>관리</th>
                     </tr>
                 </thead>
                 <tbody id="cart-tbody">
-                    {% for item in tickets %}
+                    {% for item in cart_items %}
                     <tr>
-                        <td><input type="checkbox" class="cart-checkbox" value="{{ item.id }}"></td>
+                        {# 체크박스 value를 ticket_id로 설정 #}
+                        <td><input type="checkbox" class="cart-checkbox" value="{{ item.ticket.id }}"></td>
                         <td class="text-start ps-4">
-                            <a href="{{ url_for('ticket.ticket_detail', ticket_id=item.id) }}"
+                            <a href="{{ url_for('ticket.ticket_detail', ticket_id=item.ticket.id) }}"
                                 class="text-decoration-none text-dark custom-hover-link">
                                 <div class="fw-bold fs-5">
-                                    {{ item.Hometeam_name }} vs {{ item.awayteam_name }}
+                                    {{ item.ticket.Hometeam_name }} vs {{ item.ticket.awayteam_name }}
                                 </div>
                             </a>
-                            <small class="text-muted">티켓 ID: {{ item.id }}</small>
+                            <small class="text-muted">장소: {{ item.ticket.sub_category }} | 등급: {{ item.ticket.seat_grade
+                                }}</small>
                         </td>
                         <td><strong>{{ item.quantity }}</strong> 매</td>
-                        <td>{{ "{:,}".format(item.price) }}원</td>
+                        <td>{{ "{:,}".format(item.ticket.price) }}원</td>
+                        <td>
+                            {# 개별 삭제 버튼 #}
+                            <button class="btn btn-sm btn-outline-danger"
+                                onclick="deleteItem('{{ item.ticket.id }}')">삭제</button>
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
 
-        <div class="d-flex justify-content-end mt-4">
-            <button class="btn btn-outline-danger btn-lg px-4 fw-bold" onclick="deleteSelected()">
-                🗑️ 선택한 항목 삭제하기
+        <div class="d-flex justify-content-between align-items-center mt-4">
+            <a href="{{ url_for('ticket.ticket_list') }}" class="btn btn-outline-secondary">
+                ← 쇼핑 계속하기
+            </a>
+            <button class="btn btn-danger btn-lg px-4 fw-bold" onclick="deleteSelected()">
+                 선택한 항목 삭제하기
             </button>
         </div>
     </div>
@@ -67,7 +87,32 @@
         checkboxes.forEach(cb => cb.checked = mainCheckbox.checked);
     }
 
-    // 2. 선택된 항목 삭제 기능
+    // 2. 공통 삭제 처리 함수 (AJAX)
+    function sendDeleteRequest(ticketIds) {
+        fetch("{{ url_for('ticket.remove_selected_cart') }}", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ ticket_ids: ticketIds })
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === "success") {
+                    location.reload(); // 삭제 성공 시 새로고침하여 목록 갱신
+                } else {
+                    alert("삭제 처리 중 오류가 발생했습니다.");
+                }
+            })
+            .catch(err => console.error("Error:", err));
+    }
+
+    // 3. 개별 삭제 버튼 클릭 시
+    function deleteItem(ticketId) {
+        if (confirm("이 티켓을 장바구니에서 삭제할까요?")) {
+            sendDeleteRequest([ticketId]);
+        }
+    }
+
+    // 4. 선택 삭제 버튼 클릭 시
     function deleteSelected() {
         const selected = document.querySelectorAll('.cart-checkbox:checked');
         const ids = Array.from(selected).map(cb => cb.value);
@@ -77,19 +122,8 @@
             return;
         }
 
-        if (confirm("선택한 ${ ids.length }개의 항목을 삭제하시겠습니까 ?")) {
-            // 여러 ID를 처리하기 위해 POST 방식으로 전송
-            fetch("{{ url_for('ticket.remove_selected_cart') }}", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ ticket_ids: ids })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.status === "success") {
-                    location.reload(); // 삭제 후 페이지 새로고침
-                }
-            });
+        if (confirm(`선택한 ${ids.length}개의 항목을 삭제하시겠습니까?`)) {
+            sendDeleteRequest(ids);
         }
     }
 </script>

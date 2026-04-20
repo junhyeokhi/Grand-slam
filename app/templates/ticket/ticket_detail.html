@@ -109,38 +109,41 @@
       failUrl: window.location.origin + "/ticket/pay/fail",   // 실패 시 이동할 주소
     });
   });
-    // 장바구니 담기 기능
-function addToCart(ticketId) {
-    // 1. 기존 장바구니 데이터 가져오기
-    let cart = JSON.parse(localStorage.getItem('cart')) || [];
-
-    // 2. 중복 체크 (티켓 ID 기준)
-    const isExist = cart.some(item => item.id === ticketId);
-
-    if (isExist) {
-      alert("이미 장바구니에 담긴 티켓입니다.");
-      return; 
-    }
-
-    // 3. 장바구니에 담을 티켓 정보 구성
-    const ticketInfo = {
-      id: ticketId,
-      homeTeam: "{{ ticket.Hometeam_name }}",
-      awayTeam: "{{ ticket.awayteam_name }}",
-      price: {{ ticket.price }},
-      quantity: {{ ticket.quantity }}
-    };
-
-    // 4. 로컬 스토리지에 저장
-    cart.push(ticketInfo);
-    localStorage.setItem('cart', JSON.stringify(cart));
-
-    // 5. [핵심] 장바구니 담기 성공 시 이벤트 발생
-    const event = new CustomEvent('cartUpdated', { detail: { count: cart.length } });
-    window.dispatchEvent(event);
-
-    alert("장바구니에 담겼습니다!");
-  }
   
+function addToCart(ticketId) {
+    fetch("{{ url_for('ticket.add_to_cart') }}", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ticket_id: ticketId })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === "success") {
+            // alert("장바구니에 담겼습니다!");
+
+            // [수정 포인트] 모든 'cart-count' ID를 찾아서 숫자를 바꿉니다.
+            // 만약 ID가 중복되어 있더라도 이 코드는 모두 찾아내서 업데이트합니다.
+            const cartCounts = document.querySelectorAll('#cart-count');
+            
+            if (cartCounts.length > 0) {
+                cartCounts.forEach(el => {
+                    el.innerText = data.cart_count;
+                });
+            } else {
+                // 만약 숫자가 안 바뀐다면 콘솔창(F12)에 이 메시지가 뜰 거예요.
+                console.error("화면에서 id='cart-count'를 찾을 수 없습니다.");
+            }
+
+            // 기존 이벤트 유지
+            window.dispatchEvent(new CustomEvent('cartUpdated', { detail: { count: data.cart_count } }));
+        } else {
+            alert("장바구니 담기에 실패했습니다.");
+        }
+    })
+    .catch(err => {
+        console.error("연결 에러:", err);
+        alert("서버 통신 오류가 발생했습니다.");
+    });
+}
 </script>
 {% endblock %}

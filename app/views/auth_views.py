@@ -6,7 +6,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask import session
 from app.form import UserLoginForm
 from datetime import datetime, timedelta
-from app.models import User, Ticket, Question, Answer
+from app.models import User, Ticket, Question, Answer, Notification
 import functools
 
 from app import db
@@ -293,6 +293,13 @@ def order_success(ticket_id):
     ticket = Ticket.query.get_or_404(ticket_id)
     return render_template('auth/order_success.html', ticket=ticket)
 
+# 나의 전체 알림 내역 페이지
+@bp.route('/my_notifications/')
+@login_required
+def my_notifications():
+    page = request.args.get('page', 1, type=int)
+    notifications = Notification.query.filter_by(user_id=g.user.id).order_by(Notification.created_at.desc()).paginate(page=page, per_page=10, error_out=False)
+    return render_template('auth/my_notifications.html', notifications=notifications)
 
 @bp.route('/question/create/', methods=('GET', 'POST'))
 @login_required  # 로그인이 필요한 기능
@@ -372,6 +379,17 @@ def admin_question_detail(question_id):
                 user_id=g.user.id
             )
             db.session.add(answer)
+            
+            # 작성자(사용자)에게 답변 등록 알림 전송
+            noti_msg = f"1:1 문의 '{question.subject}'에 답변이 등록되었습니다."
+            noti_link = url_for('auth.question_detail', question_id=question.id)
+            noti = Notification(
+                user_id=question.user_id,
+                message=noti_msg,
+                link=noti_link
+            )
+            db.session.add(noti)
+            
             db.session.commit()
             flash('답변이 성공적으로 등록되었습니다.', 'success')
             return redirect(url_for('auth.admin_question_detail', question_id=question.id))

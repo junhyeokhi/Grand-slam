@@ -171,20 +171,26 @@
 
     <!-- 오른쪽 사이드 -->
     <div class="col-lg-2">
-      <div class="side-box p-3 rounded-4 mb-3 text-center">상품 비교 <span class="text-danger">0</span></div>
+    <div class="side-box p-3 rounded-4 mb-3 text-center">
+        상품 비교 <span class="text-danger">0</span>
+    </div>
 
-      <div class="side-box p-3 rounded-4 mb-3 text-center">
+    <div class="side-box p-3 rounded-4 mb-3 text-center">
         최근 본 상품 <span class="text-danger">0</span>
-        <div class="mt-2 text-muted small">더보기</div>
-      </div>
-      <div class="floating-cart shadow-sm text-center">
+        <div class="mt-2 text-muted small" style="cursor: pointer;">더보기</div>
+    </div>
+
+    <div class="floating-cart shadow-sm text-center">
         <div class="fw-bold mb-2">장바구니</div>
         <div class="text-danger fs-4 fw-bold mb-3" id="cart-count">
-          {{ session.get('cart', []) | length }}
+            {{ current_cart_count }}
         </div>
-        <a href="/ticket/cart" class="text-decoration-none text-muted small">더보기</a>
-      </div>
+        <a href="{{ url_for('ticket.cart_page') }}" class="text-decoration-none text-muted small">더보기</a>
     </div>
+</div> 
+
+
+</div>
 
     <!-- 페이지네이션 -->
     <nav aria-label="티켓 페이지 이동" class="mt-4">
@@ -265,21 +271,5 @@
     </nav>
   </div>
 
-  <!-- 장바구니 카운트 -->
-  <script>
-  // 페이지(화면)가 렌더링 될 때마다 실행됩니다.
-  document.addEventListener('DOMContentLoaded', function() {
-    
-    // 1. 상세 페이지에서 로컬 스토리지에 저장해둔 장바구니 데이터를 꺼냅니다.
-    const cart = JSON.parse(localStorage.getItem('cart')) || [];
-    
-    // 2. 장바구니 숫자가 들어갈 HTML 요소를 찾습니다.
-    const countElement = document.getElementById('cart-count');
-    
-    // 3. 로컬 스토리지에 담긴 개수(cart.length)로 숫자를 바꿔치기 합니다.
-    if (countElement) {
-      countElement.innerText = cart.length;
-    }
-  });
-</script>
+
   {% endblock %}

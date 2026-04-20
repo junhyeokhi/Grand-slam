@@ -15,8 +15,7 @@
       <li><a href="{{ url_for('ticket.ticket_history', tab='purchase') }}">구매 상품 내역</a></li>
       <li><a href="{{ url_for('ticket.ticket_history', tab='sales') }}">판매 상품 내역</a></li>
       <li class="big">메시지</li>
-      <li><a href="#">알림메시지</a></li>
-      <li><a href="#">메시지 보관함</a></li>
+      <li><a href="{{ url_for('auth.my_notifications') }}">알림메시지</a></li>
       <li class="big">활동현황</li>
       <li><a href="#">상품 비교</a></li>
       <li><a href="#">최근 본 상품</a></li>
@@ -114,6 +113,12 @@
             </button>
           </li>
         </ul>
+        <a
+          href="{{ url_for('ticket.ticket_history', tab='purchase') }}"
+          id="history-detail-link"
+          class="text-danger small text-decoration-none fw-bold"
+          >구매 내역 자세히 보기 <i class="bi bi-chevron-right"></i
+        ></a>
       </div>
 
       <div class="tab-content" id="myTabContent">
@@ -139,11 +144,6 @@
           {% else %}
           <div class="py-5 text-center text-muted border rounded-3 bg-light">구매 이력이 없습니다.</div>
           {% endif %}
-          <div class="text-end mt-3">
-            <a href="{{ url_for('ticket.ticket_history', tab='purchase') }}" class="text-danger small text-decoration-none fw-bold"
-              >구매 내역 자세히 보기 <i class="bi bi-chevron-right"></i
-            ></a>
-          </div>
         </div>
 
         <div class="tab-pane fade" id="sell-content" role="tabpanel">
@@ -173,25 +173,29 @@
           {% else %}
           <div class="py-5 text-center text-muted border rounded-3 bg-light">판매 이력이 없습니다.</div>
           {% endif %}
-          <div class="text-end mt-3">
-            <a href="{{ url_for('ticket.ticket_history', tab='sales') }}" class="text-danger small text-decoration-none fw-bold"
-              >판매 내역 자세히 보기 <i class="bi bi-chevron-right"></i
-            ></a>
-          </div>
         </div>
 
         <div id="message" class="mb-5">
           <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
             <h5 class="fw-bold mb-0">알림메시지</h5>
-            <a href="#" class="text-danger small text-decoration-none">자세히 보기 <i class="bi bi-chevron-right"></i></a>
+            <a href="{{ url_for('auth.my_notifications') }}" class="text-danger small text-decoration-none"
+              >자세히 보기 <i class="bi bi-chevron-right"></i
+            ></a>
           </div>
-          {% if g.user.notification_set %}
+
+          {% set recent_notis = g.user.notifications[:5] %} {% if recent_notis %}
           <div class="list-group list-group-flush">
-            {% for note in g.user.notification_set %}
-            <div class="list-group-item py-3">
-              <div class="small text-primary mb-1">{{ note.created_at.strftime('%Y-%m-%d') }}</div>
-              <div>{{ note.content }}</div>
-            </div>
+            {% for note in recent_notis %}
+            <a
+              href="{{ url_for('main.read_noti', noti_id=note.id) }}"
+              class="list-group-item list-group-item-action py-3 text-decoration-none text-dark"
+            >
+              <div class="small text-primary mb-1">{{ note.created_at.strftime('%Y-%m-%d %H:%M') }}</div>
+              <div>
+                {{ note.message }} {% if not note.is_read %}<span class="badge bg-danger rounded-pill ms-2" style="font-size: 0.6rem">N</span>{% endif
+                %}
+              </div>
+            </a>
             {% endfor %}
           </div>
           {% else %}
@@ -200,6 +204,20 @@
         </div>
       </div>
     </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const detailLink = document.getElementById("history-detail-link");
+        document.getElementById("buy-tab").addEventListener("shown.bs.tab", function (e) {
+          detailLink.href = "{{ url_for('ticket.ticket_history', tab='purchase') }}";
+          detailLink.innerHTML = '구매 내역 자세히 보기 <i class="bi bi-chevron-right"></i>';
+        });
+        document.getElementById("sell-tab").addEventListener("shown.bs.tab", function (e) {
+          detailLink.href = "{{ url_for('ticket.ticket_history', tab='sales') }}";
+          detailLink.innerHTML = '판매 내역 자세히 보기 <i class="bi bi-chevron-right"></i>';
+        });
+      });
+    </script>
     {% endblock %}
   </div>
 </div>

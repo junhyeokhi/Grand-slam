@@ -37,7 +37,8 @@
 
   <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
     {% if recent_tickets %} {% for ticket in recent_tickets %}
-    <div class="col">
+    <!-- 4장의 티켓 스르륵 나오게하기 -->
+    <div class="col anim-fade-up delay-{{ loop.index }}">
       <div class="card h-100 border-0 shadow-sm rounded-4 hover-lift">
         <div class="card-body p-4">
           <div class="d-flex justify-content-between align-items-start mb-3">
@@ -76,6 +77,38 @@
   }
   .transition {
     transition: all 0.2s ease;
+  }
+  /* 4장의 티켓 스르륵 나오게하기 */
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* 카드에 공통으로 먹일 클래스 */
+  .anim-fade-up {
+    opacity: 0; /* 처음엔 투명하게 숨겨둠 */
+    /* forwards: 애니메이션이 끝난 후 그 상태(선명함)를 유지 */
+    animation: fadeInUp 0.8s ease-out forwards;
+  }
+
+  /* 3. 0.1초씩 늦게 출발하게 만드는 딜레이 클래스 */
+  .delay-1 {
+    animation-delay: 0.1s;
+  }
+  .delay-2 {
+    animation-delay: 0.2s;
+  }
+  .delay-3 {
+    animation-delay: 0.3s;
+  }
+  .delay-4 {
+    animation-delay: 0.4s;
   }
 </style>
 {% endblock %}

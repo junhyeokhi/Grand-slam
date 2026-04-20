@@ -172,15 +172,27 @@ def pay_success():
         ticket_id = request.args.get('ticket_id')
         ticket = Ticket.query.get_or_404(ticket_id)
 
-        noti_msg = f"'{ticket.Hometeam_name}전' 티켓 결제가 완료되었습니다."
-        noti_link = url_for('ticket.ticket_history') # 알림 클릭 시 이동할 내역 페이지
+        # 구매자 알림
+        buyer_noti_msg = f"'{ticket.Hometeam_name}전' 티켓 결제가 완료되었습니다."
+        buyer_noti_link = url_for('ticket.ticket_history', tab='purchase') # 알림 클릭 시 구매 내역 페이지로 이동
         
-        new_noti = Notification(
+        buyer_noti = Notification(
             user_id=g.user.id, 
-            message=noti_msg, 
-            link=noti_link
+            message=buyer_noti_msg, 
+            link=buyer_noti_link
         )
-        db.session.add(new_noti)
+        db.session.add(buyer_noti)
+
+        # 판매자 알림
+        seller_noti_msg = f"등록하신 '{ticket.Hometeam_name}전' 티켓이 판매되었습니다."
+        seller_noti_link = url_for('ticket.ticket_history', tab='sales') # 알림 클릭 시 판매 내역 페이지로 이동
+        
+        seller_noti = Notification(
+            user_id=ticket.seller_id,
+            message=seller_noti_msg,
+            link=seller_noti_link
+        )
+        db.session.add(seller_noti)
 
         # 결제 금액 검증: 토스에서 받은 금액과 DB에 저장된 티켓의 총 금액을 비교
         expected_total_amount = ticket.price * ticket.quantity
@@ -341,7 +353,18 @@ def confirm_purchase(order_id):
         return redirect(url_for('ticket.ticket_history'))
     # 3. 티켓 상태를 '거래완료'로 변경
     order.ticket.status = '거래완료'
-    # 4. DB 저장
+    
+    # 4. 판매자에게 구매 확정 알림 전송
+    seller_noti_msg = f"등록하신 '{order.ticket.Hometeam_name}전' 티켓의 구매 확정 및 정산이 진행됩니다."
+    seller_noti_link = url_for('ticket.ticket_history', tab='sales')
+    seller_noti = Notification(
+        user_id=order.ticket.seller_id,
+        message=seller_noti_msg,
+        link=seller_noti_link
+    )
+    db.session.add(seller_noti)
+    
+    # 5. DB 저장
     try:
         db.session.commit()
         flash("구매확정이 완료되었습니다. 판매자에게 정산이 진행됩니다.")
@@ -406,35 +429,70 @@ def ticket_modify(ticket_id):
 
    
 
-# 1. 장바구니에 티켓 담기 (AJAX 요청 처리)
+# 1. 장바구니에 티켓 담기 
 @bp.route('/cart/add', methods=['POST'])
 def add_to_cart():
     ticket_id = request.json.get('ticket_id')
-    
-    # 세션에 장바구니 리스트가 없으면 생성
+
     if 'cart' not in session:
+
         session['cart'] = []
-        
-    # 중복 담기 방지
+
     if ticket_id not in session['cart']:
         session['cart'].append(ticket_id)
-        session.modified = True # 세션 변경사항 저장
-        
+
+        session.modified = True 
+
     return jsonify({
         "status": "success", 
         "cart_count": len(session['cart'])
     })
 
-# 2. 장바구니 페이지 렌더링
+# 2. 장바구니 페이지 렌더링 
 @bp.route('/cart')
 def cart_page():
     cart_ids = session.get('cart', [])
-    
-    # 세션에 저장된 티켓 ID들로 DB에서 티켓 정보 조회
+
     if cart_ids:
-        # Ticket은 실제 사용하시는 모델명으로 변경하세요
+
         cart_tickets = Ticket.query.filter(Ticket.id.in_(cart_ids)).all()
     else:
         cart_tickets = []
-        
+
     return render_template('ticket/cart.html', tickets=cart_tickets)
+
+# 3.  장바구니에서 삭제 
+@bp.route('/cart/remove/<int:ticket_id>')
+def remove_from_cart(ticket_id):
+    cart = session.get('cart', [])
+    
+    if ticket_id in cart:
+        cart.remove(ticket_id)
+        session['cart'] = cart
+        session.modified = True
+        # flash("장바구니에서 삭제되었습니다.") # 필요하면 주석 해제
+    
+    return redirect(url_for('ticket.cart_page'))
+
+#4. 장바구니에서 선택한 항목들만 골라서 삭제하기 (프론트엔드 -> 백엔드)
+@bp.route('/cart/remove_selected', methods=['POST'])
+def remove_selected_cart():
+    # 프론트에서 보낸 ID 리스트 받기
+    ticket_ids = request.json.get('ticket_ids', [])
+    cart = session.get('cart', [])
+
+    # 선택된 ID들만 장바구니 세션에서 제외
+    # 리스트 컴프리헨션을 써서 포함되지 않은 것들만 남깁니다.
+    new_cart = [tid for tid in cart if str(tid) not in [str(sid) for sid in ticket_ids]]
+    
+    session['cart'] = new_cart
+    session.modified = True
+    
+    return jsonify({"status": "success"})
+
+# 5. 모든 페이지에서 장바구니 숫자를 바로 쓸 수 있게 해주는 기능
+@bp.app_context_processor
+def inject_cart_count():
+    # 세션에서 cart 리스트를 가져온 뒤 그 길이를 반환
+    cart_ids = session.get('cart', [])
+    return dict(current_cart_count=len(cart_ids))

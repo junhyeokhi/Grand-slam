@@ -47,6 +47,17 @@
     </form>
 
     <div class="ms-auto d-flex align-items-center gap-4">
+
+      <div class="ms-auto d-flex align-items-center gap-4">
+      
+      <a href="{{ url_for('ticket.cart_page') }}" class="text-dark fw-bold text-decoration-none position-relative">
+        장바구니
+        <span id="cart-count" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem">
+          {{ current_cart_count if current_cart_count else 0 }}
+        </span>
+      </a>
+
+
       {% if g.user %}
       <a href="{{ url_for('auth.mypage') }}" class="text-dark fw-bold text-decoration-none">마이페이지</a>
 

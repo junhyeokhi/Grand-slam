@@ -93,15 +93,29 @@
 
     <div class="col-lg-7 d-none d-lg-block">
       <div class="sticky-top" style="top: 100px">
-        <p class="text-muted small fw-bold mb-3"><i class="bi bi-eye"></i> 티켓 프리뷰</p>
+        <p class="text-muted small fw-bold mb-3"><i class="bi bi-ticket-perforated-fill"></i> 티켓 프리뷰</p>
 
         <div class="d-flex shadow-lg overflow-hidden" style="min-height: 200px; border-radius: 4px">
           <div class="bg-white p-4 flex-grow-1 border-end border-dashed position-relative">
-            <div class="badge bg-danger rounded-0 mb-2">MATCH DAY</div>
-            <div class="h3 fw-bold mb-1">
+            <div id="pv-badge" class="badge rounded-0 mb-2" style="background-color: #dc3545; transition: background-color 0.3s ease">MATCH DAY</div>
+            <div class="d-flex align-items-center h3 fw-bold mb-1">
+              <img
+                id="pv-home-logo"
+                src=""
+                alt="Home Logo"
+                style="width: 35px; height: 35px; object-fit: cover; display: none"
+                class="rounded-circle shadow-sm me-2"
+              />
               <span id="pv-home">HOME</span>
-              <span class="text-muted small">vs</span>
+              <span class="text-muted small mx-2">vs</span>
               <span id="pv-away">AWAY</span>
+              <img
+                id="pv-away-logo"
+                src=""
+                alt="Away Logo"
+                style="width: 35px; height: 35px; object-fit: cover; display: none"
+                class="rounded-circle shadow-sm ms-2"
+              />
             </div>
             <div class="text-muted small mb-3">
               <span id="pv-date">경기 일자 선택 전</span>
@@ -124,11 +138,19 @@
               </div>
             </div>
           </div>
-          <div class="bg-dark text-white p-4 d-flex flex-column justify-content-center align-items-center" style="width: 180px">
+          <div
+            id="pv-theme-bg"
+            class="text-white p-4 d-flex flex-column justify-content-center align-items-center"
+            style="width: 180px; background-color: #212529; transition: background-color 0.3s ease"
+          >
             <div class="small opacity-50 mb-1">QUANTITY</div>
             <div class="h4 fw-bold" id="pv-qty">1매</div>
             <div class="mt-4 border border-secondary px-2 py-1 small opacity-50">GrandSlam</div>
           </div>
+        </div>
+        <div class="mt-4 p-3 bg-light border rounded-3 text-muted small d-flex align-items-center shadow-sm">
+          <i class="bi bi-info-circle-fill text-primary me-2 fs-5"></i>
+          <span>티켓 정보를 정확하게 입력하셔야 <strong>판매 가능성</strong>이 높아집니다.</span>
         </div>
       </div>
     </div>
@@ -139,6 +161,9 @@
   // 구단별 좌석 등급 데이터 불러와서 정의
   const teamData = {{ teams | tojson }};
 
+  // 이미지 경로 기본 URL (Flask의 url_for 활용)
+  const imgBaseUrl = "{{ url_for('static', filename='img/') }}";
+
   // DOM 요소 선택
   const homeSelect = document.getElementById('hometeam');
   const subSelect = document.getElementById('sub_category');
@@ -148,6 +173,20 @@
   const minuteSelect = document.getElementById('game_time_minute');
   const gradeSelect = document.getElementById('seat_grade');
   const ticketForm = document.getElementById('ticketForm');
+
+  // KBO 구단별 대표 상징색 정의
+  const teamColors = {
+      '두산베어스': '#131230',  // 네이비
+      'LG트윈스': '#C30452',   // 크림슨 레드
+      '한화이글스': '#FF6600',  // 오렌지
+      'SSG랜더스': '#CE0E2D',  // 레드
+      '삼성라이온즈': '#074CA1', // 블루
+      'NC다이노스': '#071D3F',  // 네이비 블루
+      'KTwiz': '#000000',      // 블랙
+      '롯데자이언츠': '#002955', // 네이비 (혹은 레드)
+      'KIA타이거즈': '#EA0029', // 레드
+      '키움히어로즈': '#570514'  // 버건디
+  };
 
   // 홈팀 선택 시 좌석 등급 업데이트
   homeSelect.addEventListener('change', function() {
@@ -163,6 +202,20 @@
       document.getElementById('pv-home').textContent = selectedHome || "HOME";
       document.getElementById('pv-sub').textContent = "경기정보";
       document.getElementById('pv-grade').textContent = "좌석등급";
+
+      // 홈팀 로고 업데이트
+      const homeLogo = document.getElementById('pv-home-logo');
+      if (selectedHome) {
+          homeLogo.src = imgBaseUrl + selectedHome + '.jpg';
+          homeLogo.style.display = 'inline-block';
+      } else {
+          homeLogo.style.display = 'none';
+      }
+
+      // 프리뷰 배경색을 선택한 홈팀의 상징색으로 변경
+      const selectedColor = teamColors[selectedHome] || '#212529'; // 매칭 안될시 기본 어두운 회색
+      document.getElementById('pv-theme-bg').style.backgroundColor = selectedColor;
+      document.getElementById('pv-badge').style.backgroundColor = selectedColor;
 
       if (selectedTeam) {
           // constants.py 데이터 기반 경기장/요일 정보 생성
@@ -214,6 +267,15 @@
   // 3. 상대팀 및 좌석등급, 날짜 선택 (change 이벤트)
   awaySelect.addEventListener('change', function() {
       document.getElementById('pv-away').textContent = this.value || "AWAY";
+
+      // 원정팀 로고 업데이트
+      const awayLogo = document.getElementById('pv-away-logo');
+      if (this.value) {
+          awayLogo.src = imgBaseUrl + this.value + '.jpg';
+          awayLogo.style.display = 'inline-block';
+      } else {
+          awayLogo.style.display = 'none';
+      }
   });
 
   gradeSelect.addEventListener('change', function() {

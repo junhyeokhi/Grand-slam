@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from app import db, scheduler
-from app.models import Order, Ticket
+from app.models import Order, Ticket, Notification
 
 # 매일 새벽 1시에 실행되도록 설정 (cron 방식)
 # @scheduler.task('cron', id='auto_confirm_job', hour=1, minute=0)
@@ -30,6 +30,14 @@ def auto_confirm_purchases():
         count = 0
         for order in target_orders:
             order.ticket.status = '거래완료'
+            
+            # 판매자에게 자동 구매 확정 알림 전송
+            seller_noti = Notification(
+                user_id=order.ticket.seller_id,
+                message=f"등록하신 '{order.ticket.Hometeam_name}전' 티켓의 자동 구매확정 및 정산이 진행됩니다.",
+                link='/ticket/history/?tab=sales' # 스케줄러 환경이므로 url_for 대신 직접 경로 입력
+            )
+            db.session.add(seller_noti)
             count += 1
             
         try:

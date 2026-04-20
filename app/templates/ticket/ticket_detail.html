@@ -95,61 +95,63 @@
 
 <script src="https://js.tosspayments.com/v1/payment-widget"></script>
 <script>
-    // 2. 토스페이먼츠 공용 테스트 클라이언트 키 (회원가입 없이 바로 작동합니다)
-    const clientKey = "test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm";
+    // 결제창 HTML 영역이 렌더링 되었을 때만 토스페이먼츠 스크립트 실행
+    if (document.getElementById("payment-method")) {
+      // 2. 토스페이먼츠 공용 테스트 클라이언트 키 (회원가입 없이 바로 작동합니다)
+      const clientKey = "test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm";
 
-    // 3. 구매자 고유 키 (로그인한 유저의 ID를 사용합니다)
-    const customerKey = "USER_{{ session.get('user_id', 'GUEST') }}";
+      // 3. 구매자 고유 키 (로그인한 유저의 ID를 사용합니다)
+      const customerKey = "USER_{{ session.get('user_id', 'GUEST') }}";
 
-    // 4. 결제 위젯 초기화
-    const paymentWidget = PaymentWidget(clientKey, PaymentWidget.ANONYMOUS); // 비회원 결제도 가능하도록 ANONYMOUS 사용
+      // 4. 결제 위젯 초기화
+      const paymentWidget = PaymentWidget(clientKey, PaymentWidget.ANONYMOUS); // 비회원 결제도 가능하도록 ANONYMOUS 사용
 
-    // 5. 결제 금액 설정 및 위젯 렌더링
-    const price = {{ ticket.price * ticket.quantity }}; // 파이썬에서 넘어온 티켓 장당 가격 * 수량
-    paymentWidget.renderPaymentMethods("#payment-method", { value: price });
-    paymentWidget.renderAgreement("#agreement");
+      // 5. 결제 금액 설정 및 위젯 렌더링
+      const price = {{ ticket.price * ticket.quantity }}; // 파이썬에서 넘어온 티켓 장당 가격 * 수량
+      paymentWidget.renderPaymentMethods("#payment-method", { value: price });
+      paymentWidget.renderAgreement("#agreement");
 
-    // 6. 결제하기 버튼 클릭 이벤트
-    const paymentButton = document.getElementById("payment-button");
-    paymentButton.addEventListener("click", function () {
+      // 6. 결제하기 버튼 클릭 이벤트
+      const paymentButton = document.getElementById("payment-button");
+      paymentButton.addEventListener("click", function () {
 
-      // 고유 주문번호 생성 (실제로는 DB에서 생성된 주문번호를 써야 하지만, 테스트를 위해 임의 생성)
-      const generateOrderId = "ORDER_" + new Date().getTime() + "_" + "{{ ticket.id }}";
+        // 고유 주문번호 생성 (실제로는 DB에서 생성된 주문번호를 써야 하지만, 테스트를 위해 임의 생성)
+        const generateOrderId = "ORDER_" + new Date().getTime() + "_" + "{{ ticket.id }}";
 
-      // 결제창 호출!
-      paymentWidget.requestPayment({
-        orderId: generateOrderId,
-        orderName: "{{ ticket.Hometeam_name }} vs {{ ticket.awayteam_name }} 티켓", // 예: 한화 vs 두산 티켓
-        successUrl: window.location.origin + "/ticket/pay/success?ticket_id={{ ticket.id }}", // 성공 시 이동할 주소
-        failUrl: window.location.origin + "/ticket/pay/fail",   // 실패 시 이동할 주소
+        // 결제창 호출!
+        paymentWidget.requestPayment({
+          orderId: generateOrderId,
+          orderName: "{{ ticket.Hometeam_name }} vs {{ ticket.awayteam_name }} 티켓", // 예: 한화 vs 두산 티켓
+          successUrl: window.location.origin + "/ticket/pay/success?ticket_id={{ ticket.id }}", // 성공 시 이동할 주소
+          failUrl: window.location.origin + "/ticket/pay/fail",   // 실패 시 이동할 주소
+        });
       });
-    });
-  });
-  
-function addToCart(ticketId) {
-    fetch("{{ url_for('ticket.add_to_cart') }}", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ticket_id: ticketId })
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.status === "success") {
-            // 1. 헤더의 장바구니 숫자 업데이트
-            const cartCounts = document.querySelectorAll('#cart-count');
-            cartCounts.forEach(el => { el.innerText = data.cart_count; });
+    }
 
-            // 2. 부트스트랩 모달 띄우기 (핵심!)
-            const myModal = new bootstrap.Modal(document.getElementById('cartModal'));
-            myModal.show();
-            
-        } else {
-            alert("장바구니 담기에 실패했습니다.");
-        }
-    })
-    .catch(err => {
-        console.error("에러 발생:", err);
-    });
-}
+  function addToCart(ticketId) {
+      fetch("{{ url_for('ticket.add_to_cart') }}", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ticket_id: ticketId })
+      })
+      .then(res => res.json())
+      .then(data => {
+          if (data.status === "success") {
+              // 1. 헤더의 장바구니 숫자 업데이트
+              const cartCounts = document.querySelectorAll('#cart-count');
+              cartCounts.forEach(el => { el.innerText = data.cart_count; });
+
+              // 2. 부트스트랩 모달 띄우기 (핵심!)
+              const myModal = new bootstrap.Modal(document.getElementById('cartModal'));
+              myModal.show();
+
+          } else {
+              alert("장바구니 담기에 실패했습니다.");
+          }
+      })
+      .catch(err => {
+          console.error("에러 발생:", err);
+      });
+  }
 </script>
 {% endblock %}

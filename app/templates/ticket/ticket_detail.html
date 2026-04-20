@@ -13,16 +13,14 @@
     <div class="col-md-6 mb-4">
       <div class="product-img-container shadow-sm p-4">
         <div class="team-logo-box">
-          <img src="{{ url_for('static', filename='img/' + ticket.Hometeam_name + '.jpg') }}"
-            alt="{{ ticket.Hometeam_name }}" />
+          <img src="{{ url_for('static', filename='img/' + ticket.Hometeam_name + '.jpg') }}" alt="{{ ticket.Hometeam_name }}" />
           <div class="fw-bold fs-5 text-dark">{{ ticket.Hometeam_name }}</div>
         </div>
 
         <div class="vs-text">VS</div>
 
         <div class="team-logo-box">
-          <img src="{{ url_for('static', filename='img/' + ticket.awayteam_name + '.jpg') }}"
-            alt="{{ ticket.awayteam_name }}" />
+          <img src="{{ url_for('static', filename='img/' + ticket.awayteam_name + '.jpg') }}" alt="{{ ticket.awayteam_name }}" />
           <div class="fw-bold fs-5 text-dark">{{ ticket.awayteam_name }}</div>
         </div>
       </div>
@@ -67,10 +65,7 @@
             </button>
 
             {# 장바구니 담기 버튼 추가 #}
-            <button id="add-cart-btn" class="btn btn-outline-secondary py-3 px-4 fw-bold fs-5"
-              onclick="addToCart({{ ticket.id }})">
-              🛒 담기
-            </button>
+            <button id="add-cart-btn" class="btn btn-outline-secondary py-3 px-4 fw-bold fs-5" onclick="addToCart({{ ticket.id }})">🛒 담기</button>
           </div>
         </div>
         {% endif %}
@@ -78,35 +73,56 @@
     </div>
   </div>
 </div>
+
+<div class="modal fade" id="cartModal" tabindex="-1" aria-labelledby="cartModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header bg-light">
+        <h5 class="modal-title fw-bold" id="cartModalLabel">🛒 장바구니 담기 완료</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center py-4">
+        <p class="fs-5 mb-0">상품이 장바구니에 성공적으로 담겼습니다!</p>
+        <p class="text-muted small">어디로 이동하시겠습니까?</p>
+      </div>
+      <div class="modal-footer justify-content-center border-0 pb-4">
+        <a href="{{ url_for('ticket.ticket_list', team=ticket.Hometeam_name) }}" class="btn btn-outline-secondary px-4">목록으로 돌아가기</a>
+        <a href="{{ url_for('ticket.cart_page') }}" class="btn btn-primary px-4 fw-bold">장바구니 확인</a>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="https://js.tosspayments.com/v1/payment-widget"></script>
 <script>
-  // 2. 토스페이먼츠 공용 테스트 클라이언트 키 (회원가입 없이 바로 작동합니다)
-  const clientKey = "test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm";
+    // 2. 토스페이먼츠 공용 테스트 클라이언트 키 (회원가입 없이 바로 작동합니다)
+    const clientKey = "test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm";
 
-  // 3. 구매자 고유 키 (로그인한 유저의 ID를 사용합니다)
-  const customerKey = "USER_{{ session.get('user_id', 'GUEST') }}";
+    // 3. 구매자 고유 키 (로그인한 유저의 ID를 사용합니다)
+    const customerKey = "USER_{{ session.get('user_id', 'GUEST') }}";
 
-  // 4. 결제 위젯 초기화
-  const paymentWidget = PaymentWidget(clientKey, PaymentWidget.ANONYMOUS); // 비회원 결제도 가능하도록 ANONYMOUS 사용
+    // 4. 결제 위젯 초기화
+    const paymentWidget = PaymentWidget(clientKey, PaymentWidget.ANONYMOUS); // 비회원 결제도 가능하도록 ANONYMOUS 사용
 
-  // 5. 결제 금액 설정 및 위젯 렌더링
-  const price = {{ ticket.price * ticket.quantity }}; // 파이썬에서 넘어온 티켓 장당 가격 * 수량
-  paymentWidget.renderPaymentMethods("#payment-method", { value: price });
-  paymentWidget.renderAgreement("#agreement");
+    // 5. 결제 금액 설정 및 위젯 렌더링
+    const price = {{ ticket.price * ticket.quantity }}; // 파이썬에서 넘어온 티켓 장당 가격 * 수량
+    paymentWidget.renderPaymentMethods("#payment-method", { value: price });
+    paymentWidget.renderAgreement("#agreement");
 
-  // 6. 결제하기 버튼 클릭 이벤트
-  const paymentButton = document.getElementById("payment-button");
-  paymentButton.addEventListener("click", function () {
+    // 6. 결제하기 버튼 클릭 이벤트
+    const paymentButton = document.getElementById("payment-button");
+    paymentButton.addEventListener("click", function () {
 
-    // 고유 주문번호 생성 (실제로는 DB에서 생성된 주문번호를 써야 하지만, 테스트를 위해 임의 생성)
-    const generateOrderId = "ORDER_" + new Date().getTime() + "_" + "{{ ticket.id }}";
+      // 고유 주문번호 생성 (실제로는 DB에서 생성된 주문번호를 써야 하지만, 테스트를 위해 임의 생성)
+      const generateOrderId = "ORDER_" + new Date().getTime() + "_" + "{{ ticket.id }}";
 
-    // 결제창 호출!
-    paymentWidget.requestPayment({
-      orderId: generateOrderId,
-      orderName: "{{ ticket.Hometeam_name }} vs {{ ticket.awayteam_name }} 티켓", // 예: 한화 vs 두산 티켓
-      successUrl: window.location.origin + "/ticket/pay/success?ticket_id={{ ticket.id }}", // 성공 시 이동할 주소
-      failUrl: window.location.origin + "/ticket/pay/fail",   // 실패 시 이동할 주소
+      // 결제창 호출!
+      paymentWidget.requestPayment({
+        orderId: generateOrderId,
+        orderName: "{{ ticket.Hometeam_name }} vs {{ ticket.awayteam_name }} 티켓", // 예: 한화 vs 두산 티켓
+        successUrl: window.location.origin + "/ticket/pay/success?ticket_id={{ ticket.id }}", // 성공 시 이동할 주소
+        failUrl: window.location.origin + "/ticket/pay/fail",   // 실패 시 이동할 주소
+      });
     });
   });
   
@@ -119,30 +135,20 @@ function addToCart(ticketId) {
     .then(res => res.json())
     .then(data => {
         if (data.status === "success") {
-            // alert("장바구니에 담겼습니다!");
-
-            // [수정 포인트] 모든 'cart-count' ID를 찾아서 숫자를 바꿉니다.
-            // 만약 ID가 중복되어 있더라도 이 코드는 모두 찾아내서 업데이트합니다.
+            // 1. 헤더의 장바구니 숫자 업데이트
             const cartCounts = document.querySelectorAll('#cart-count');
-            
-            if (cartCounts.length > 0) {
-                cartCounts.forEach(el => {
-                    el.innerText = data.cart_count;
-                });
-            } else {
-                // 만약 숫자가 안 바뀐다면 콘솔창(F12)에 이 메시지가 뜰 거예요.
-                console.error("화면에서 id='cart-count'를 찾을 수 없습니다.");
-            }
+            cartCounts.forEach(el => { el.innerText = data.cart_count; });
 
-            // 기존 이벤트 유지
-            window.dispatchEvent(new CustomEvent('cartUpdated', { detail: { count: data.cart_count } }));
+            // 2. 부트스트랩 모달 띄우기 (핵심!)
+            const myModal = new bootstrap.Modal(document.getElementById('cartModal'));
+            myModal.show();
+            
         } else {
             alert("장바구니 담기에 실패했습니다.");
         }
     })
     .catch(err => {
-        console.error("연결 에러:", err);
-        alert("서버 통신 오류가 발생했습니다.");
+        console.error("에러 발생:", err);
     });
 }
 </script>

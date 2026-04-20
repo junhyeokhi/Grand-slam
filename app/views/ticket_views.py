@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from flask import Blueprint, flash, g, redirect, render_template, request, session, url_for, jsonify
 import requests
-from app.models import Notification, Order, Ticket
+from app.models import Notification, Order, Ticket, Cart
 from app.views.auth_views import login_required
 from constants import KBO_TEAMS
 from app import db
@@ -293,7 +293,7 @@ def ticket_create():
         db.session.commit()
 
         flash('티켓이 성공적으로 등록되었습니다!', 'success')
-        return redirect(url_for('main.index')) # 등록 후 메인 페이지로 리다이렉트
+        return redirect(url_for('ticket.ticket_detail', ticket_id=ticket.id)) # 등록 후 티켓 상세 페이지로 리다이렉트
 
     # GET 요청 시 폼 렌더링
     return render_template('ticket/ticket_create.html')
@@ -429,70 +429,79 @@ def ticket_modify(ticket_id):
 
    
 
-# 1. 장바구니에 티켓 담기 
+# 1. 장바구니에 티켓 담기 (DB 저장 방식)
 @bp.route('/cart/add', methods=['POST'])
+@login_required
 def add_to_cart():
     ticket_id = request.json.get('ticket_id')
-
-    if 'cart' not in session:
-
-        session['cart'] = []
-
-    if ticket_id not in session['cart']:
-        session['cart'].append(ticket_id)
-
-        session.modified = True 
-
+    
+    # DB에서 해당 유저의 장바구니에 이 티켓이 이미 있는지 확인
+    cart_item = Cart.query.filter_by(user_id=g.user.id, ticket_id=ticket_id).first()
+    
+    if cart_item:
+        cart_item.quantity += 1  # 이미 있다면 수량 증가
+    else:
+        # 없다면 새로 추가
+        cart_item = Cart(user_id=g.user.id, ticket_id=ticket_id)
+        db.session.add(cart_item)
+    
+    db.session.commit()
+    
+    # 전체 장바구니 개수 계산
+    total_count = Cart.query.filter_by(user_id=g.user.id).count()
+    
     return jsonify({
         "status": "success", 
-        "cart_count": len(session['cart'])
+        "cart_count": total_count
     })
 
-# 2. 장바구니 페이지 렌더링 
+# 2. 장바구니 페이지 렌더링 (DB 데이터 사용)
 @bp.route('/cart')
+@login_required
 def cart_page():
-    cart_ids = session.get('cart', [])
+    # 여기서 변수명을 cart_items로 넘기고 있습니다.
+    cart_items = Cart.query.filter_by(user_id=g.user.id).all()
+    return render_template('ticket/cart.html', cart_items=cart_items)
 
-    if cart_ids:
-
-        cart_tickets = Ticket.query.filter(Ticket.id.in_(cart_ids)).all()
-    else:
-        cart_tickets = []
-
-    return render_template('ticket/cart.html', tickets=cart_tickets)
-
-# 3.  장바구니에서 삭제 
-@bp.route('/cart/remove/<int:ticket_id>')
-def remove_from_cart(ticket_id):
-    cart = session.get('cart', [])
-    
-    if ticket_id in cart:
-        cart.remove(ticket_id)
-        session['cart'] = cart
-        session.modified = True
-        # flash("장바구니에서 삭제되었습니다.") # 필요하면 주석 해제
-    
-    return redirect(url_for('ticket.cart_page'))
-
-#4. 장바구니에서 선택한 항목들만 골라서 삭제하기 (프론트엔드 -> 백엔드)
+# 3. 장바구니에서 선택 삭제 (DB 삭제 방식)
 @bp.route('/cart/remove_selected', methods=['POST'])
+@login_required
 def remove_selected_cart():
-    # 프론트에서 보낸 ID 리스트 받기
     ticket_ids = request.json.get('ticket_ids', [])
-    cart = session.get('cart', [])
-
-    # 선택된 ID들만 장바구니 세션에서 제외
-    # 리스트 컴프리헨션을 써서 포함되지 않은 것들만 남깁니다.
-    new_cart = [tid for tid in cart if str(tid) not in [str(sid) for sid in ticket_ids]]
     
-    session['cart'] = new_cart
-    session.modified = True
+    # DB에서 선택된 티켓들을 삭제
+    Cart.query.filter(
+        Cart.user_id == g.user.id,
+        Cart.ticket_id.in_(ticket_ids)
+    ).delete(synchronize_session=False)
     
+    db.session.commit()
     return jsonify({"status": "success"})
 
-# 5. 모든 페이지에서 장바구니 숫자를 바로 쓸 수 있게 해주는 기능
+# 4. '최근 본 상품' 로직 (기존 세션 구조 활용)
+@bp.route('/ticket/detail/<int:ticket_id>')
+def recent_ticket(ticket_id):
+    # 상세 페이지 접속 시 세션에 최근 본 상품 ID 저장
+    if 'recent_views' not in session:
+        session['recent_views'] = []
+    
+    recent = session['recent_views']
+    if ticket_id in recent:
+        recent.remove(ticket_id) # 이미 있으면 순서 최신화를 위해 제거
+    
+    recent.insert(0, ticket_id) # 가장 앞에 추가
+    session['recent_views'] = recent[:5] # 최근 5개만 유지
+    session.modified = True
+    
+    ticket = Ticket.query.get_or_404(ticket_id)
+    return render_template('ticket/detail.html', ticket=ticket)
+
+# 5. 모든 페이지에서 장바구니 숫자를 쓸 수 있게 해주는 기능 (추가할 부분)
 @bp.app_context_processor
 def inject_cart_count():
-    # 세션에서 cart 리스트를 가져온 뒤 그 길이를 반환
-    cart_ids = session.get('cart', [])
-    return dict(current_cart_count=len(cart_ids))
+    if g.user:
+        # 로그인했다면 DB에서 이 유저의 장바구니 개수를 세어옴
+        count = Cart.query.filter_by(user_id=g.user.id).count()
+    else:
+        count = 0
+    return dict(current_cart_count=count)

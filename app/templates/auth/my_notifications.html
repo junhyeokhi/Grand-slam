@@ -1,6 +1,11 @@
 {% extends "base.html" %} {% block title %}전체 알림 내역{% endblock %} {% block content %}
 <div class="container my-5" style="max-width: 800px">
-  <h3 class="fw-bold mb-4">전체 알림 내역</h3>
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="fw-bold mb-0">전체 알림 내역</h3>
+    {% if notifications.items %}
+    <a href="{{ url_for('auth.read_all_notis') }}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">모두 읽음 처리</a>
+    {% endif %}
+  </div>
 
   {% if notifications.items %}
   <div class="list-group shadow-sm mb-4 rounded-4 overflow-hidden">

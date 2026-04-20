@@ -301,6 +301,15 @@ def my_notifications():
     notifications = Notification.query.filter_by(user_id=g.user.id).order_by(Notification.created_at.desc()).paginate(page=page, per_page=10, error_out=False)
     return render_template('auth/my_notifications.html', notifications=notifications)
 
+# 모든 알림 일괄 읽음 처리
+@bp.route('/read_all_notis/')
+@login_required
+def read_all_notis():
+    Notification.query.filter_by(user_id=g.user.id, is_read=False).update({'is_read': True})
+    db.session.commit()
+    # 이전 페이지(referrer)로 돌아가고, 정보가 없으면 메인 홈으로 이동합니다.
+    return redirect(request.referrer or url_for('main.index'))
+
 @bp.route('/question/create/', methods=('GET', 'POST'))
 @login_required  # 로그인이 필요한 기능
 def create_question():

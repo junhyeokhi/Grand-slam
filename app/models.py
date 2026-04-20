@@ -78,3 +78,14 @@ class Notification(db.Model):
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(KST), nullable=False)
 
     user = db.relationship('User', backref=db.backref('notifications', lazy='dynamic', order_by='desc(Notification.created_at)'))
+
+class Cart(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    ticket_id = db.Column(db.Integer, db.ForeignKey('ticket.id'), nullable=False)
+    quantity = db.Column(db.Integer, default=1)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # 이 부분을 추가하면 cart.ticket.title 처럼 티켓 정보에 바로 접근 가능합니다.
+    user = db.relationship('User', backref=db.backref('cart_items', lazy=True))
+    ticket = db.relationship('Ticket', backref=db.backref('in_carts', lazy=True))

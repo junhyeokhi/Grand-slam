@@ -57,4 +57,17 @@ def create_app():
     with app.app_context():
         from app import tasks 
 
+    @app.context_processor
+    def inject_notifications():
+        from flask import g
+        from app.models import Notification
+        
+        if hasattr(g, 'user') and g.user:
+            # 안 읽은 알림 가져오기
+            unread_notis = Notification.query.filter_by(user_id=g.user.id, is_read=False).all()
+            return dict(
+                unread_noti_count=len(unread_notis),
+                unread_notis=unread_notis
+            )
+        return dict(unread_noti_count=0, unread_notis=[])
     return app

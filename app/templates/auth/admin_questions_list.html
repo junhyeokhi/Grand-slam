@@ -1,0 +1,68 @@
+{% extends "base.html" %} {% block title %}전체 문의 관리{% endblock %} {% block content %}
+<div class="container my-5">
+  <h3 class="fw-bold mb-4 text-danger"><i class="bi bi-shield-lock"></i> 전체 문의 관리 (관리자)</h3>
+
+  <!-- 필터 탭 -->
+  <div class="d-flex gap-2 mb-4">
+    <a
+      href="{{ url_for('auth.admin_questions_list', status='all') }}"
+      class="btn btn-sm {% if status == 'all' %}btn-dark{% else %}btn-outline-dark{% endif %} rounded-pill px-3 fw-bold"
+      >전체보기</a
+    >
+    <a
+      href="{{ url_for('auth.admin_questions_list', status='pending') }}"
+      class="btn btn-sm {% if status == 'pending' %}btn-danger{% else %}btn-outline-danger{% endif %} rounded-pill px-3 fw-bold"
+      >답변 대기</a
+    >
+    <a
+      href="{{ url_for('auth.admin_questions_list', status='completed') }}"
+      class="btn btn-sm {% if status == 'completed' %}btn-success{% else %}btn-outline-success{% endif %} rounded-pill px-3 fw-bold"
+      >답변 완료</a
+    >
+  </div>
+
+  {% if questions.items %} {% for question in questions.items %}
+  <a
+    href="{{ url_for('auth.admin_question_detail', question_id=question.id) }}"
+    class="card mb-3 border-0 shadow-sm rounded-4 p-3 text-decoration-none text-dark hover-lift"
+  >
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <span class="badge {% if question.answer_set %}bg-success{% else %}bg-danger{% endif %} mb-2">
+          {% if question.answer_set %}답변 완료{% else %}답변 대기{% endif %}
+        </span>
+        <h5 class="fw-bold mb-1">{{ question.subject }}</h5>
+        <small class="text-muted">작성자: {{ question.user.nickname }} | 작성일: {{ question.create_date.strftime('%Y-%m-%d %H:%M') }}</small>
+      </div>
+      <div class="text-end">
+        <i class="bi bi-chevron-right text-muted"></i>
+      </div>
+    </div>
+  </a>
+  {% endfor %}
+
+  <!-- 페이징 처리 시작 -->
+  <ul class="pagination justify-content-center mt-5">
+    <!-- 이전 페이지 -->
+    <li class="page-item {% if not questions.has_prev %}disabled{% endif %}">
+      <a class="page-link" href="{{ url_for('auth.admin_questions_list', page=questions.prev_num, status=status) }}">이전</a>
+    </li>
+    <!-- 페이지 번호 -->
+    {% for page_num in questions.iter_pages() %} {% if page_num %}
+    <li class="page-item {% if page_num == questions.page %}active{% endif %}">
+      <a class="page-link" href="{{ url_for('auth.admin_questions_list', page=page_num, status=status) }}">{{ page_num }}</a>
+    </li>
+    {% else %}
+    <li class="page-item disabled"><a class="page-link" href="#">...</a></li>
+    {% endif %} {% endfor %}
+    <!-- 다음 페이지 -->
+    <li class="page-item {% if not questions.has_next %}disabled{% endif %}">
+      <a class="page-link" href="{{ url_for('auth.admin_questions_list', page=questions.next_num, status=status) }}">다음</a>
+    </li>
+  </ul>
+  <!-- 페이징 처리 끝 -->
+  {% else %}
+  <div class="text-center py-5 text-muted bg-white rounded-4 shadow-sm border">해당 상태의 문의 내역이 없습니다.</div>
+  {% endif %}
+</div>
+{% endblock %}

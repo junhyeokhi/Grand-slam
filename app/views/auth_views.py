@@ -5,8 +5,8 @@ import requests
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask import session
 from app.form import UserLoginForm
-from datetime import datetime
-from app.models import User, Ticket, Question
+from datetime import datetime, timedelta
+from app.models import User, Ticket, Question, Answer
 import functools
 
 from app import db
@@ -37,6 +37,16 @@ def login_required(view):
         return view(**kwargs)
     return wrapped_view
 
+# 관리자 권한이 필요한 페이지에 적용할 데코레이터
+def admin_required(view):
+    @functools.wraps(view)
+    def wrapped_view(**kwargs):
+        if g.user is None or g.user.role != 'admin':
+            flash('관리자 권한이 필요합니다.', 'danger')
+            return redirect(url_for('main.index'))
+        return view(**kwargs)
+    return wrapped_view
+
 # 2. 로그인 페이지 연결 (주소: /auth/login)
 @bp.route('/login/', methods=['GET', 'POST'])
 def login():
@@ -55,6 +65,19 @@ def login():
         if error is None:
             session.clear()
             session['user_id'] = user.id
+            
+            # 로그인 성공 시: 탈퇴된 계정인지 확인
+            if user.is_deleted:
+                deadline = user.deleted_at + timedelta(days=30)
+                if datetime.now() <= deadline:
+                    user.is_deleted = False
+                    user.deleted_at = None
+                    db.session.commit()
+                    flash("환영합니다! 탈퇴가 취소되고 계정이 성공적으로 복구되었습니다.", "success")
+                else:
+                    session.clear() # 완전히 삭제된 계정이므로 다시 세션 비우기
+                    flash("탈퇴 후 30일이 경과하여 완전히 삭제된 계정입니다.", "danger")
+                    return redirect(url_for('auth.login'))
             
             # 이전 페이지 정보(next)가 있으면 그곳으로, 없으면 메인으로 리다이렉트
             _next = request.args.get('next', '')
@@ -167,6 +190,18 @@ def edit_profile():
     detail_address_value = request.form.get('detailAddress', '')
     return render_template('auth/edit_profile.html', form=form, detail_address_value=detail_address_value)
 
+
+# 회원탈퇴기능
+@bp.route('/delete_user/')
+@login_required
+def delete_user():
+    g.user.is_deleted = True
+    g.user.deleted_at = datetime.now()
+    db.session.commit()
+    session.clear() # 탈퇴 후 자동 로그아웃
+    flash('회원 탈퇴가 처리되었습니다. 30일 이내 다시 로그인하시면 계정이 복구됩니다.', 'success')
+    return redirect(url_for('main.index'))
+    
 @bp.route('/logout/')
 def logout():
     session.clear()
@@ -280,3 +315,65 @@ def create_question():
         return redirect(url_for('auth.mypage'))  # 등록 후 마이페이지로 이동
 
     return render_template('auth/question_form.html')
+
+# 나의 문의 내역 페이지
+@bp.route('/my_questions/')
+@login_required
+def my_questions():
+    page = request.args.get('page', 1, type=int)
+    # Question 모델에서 현재 로그인한 유저의 문의 내역을 최신순으로 정렬하여 페이징합니다.
+    questions = Question.query.filter_by(user_id=g.user.id).order_by(Question.create_date.desc()).paginate(page=page, per_page=10, error_out=False)
+    return render_template('auth/my_questions.html', questions=questions)
+
+# 문의 상세 내역 페이지
+@bp.route('/question/<int:question_id>/')
+@login_required
+def question_detail(question_id):
+    question = Question.query.get_or_404(question_id)
+    if question.user_id != g.user.id:
+        flash('접근 권한이 없습니다.', 'danger')
+        return redirect(url_for('auth.my_questions'))
+    return render_template('auth/question_detail.html', question=question)
+
+# 관리자: 전체 문의 내역 리스트
+@bp.route('/admin/questions_list/')
+@admin_required
+def admin_questions_list():
+    page = request.args.get('page', 1, type=int)
+    status = request.args.get('status', 'all')  # 'all', 'pending', 'completed'
+    
+    query = Question.query
+    
+    # 답변 상태에 따른 필터링 (answer_set 관계 활용)
+    if status == 'pending':
+        query = query.filter(~Question.answer_set.any())
+    elif status == 'completed':
+        query = query.filter(Question.answer_set.any())
+        
+    # 모든 사용자의 문의글을 최신순으로 정렬하여 가져옵니다.
+    questions = query.order_by(Question.create_date.desc()).paginate(page=page, per_page=10, error_out=False)
+    return render_template('auth/admin_questions_list.html', questions=questions, status=status)
+
+# 관리자: 문의 상세 및 답변 작성
+@bp.route('/admin/question/<int:question_id>/', methods=['GET', 'POST'])
+@admin_required
+def admin_question_detail(question_id):
+    question = Question.query.get_or_404(question_id)
+    
+    if request.method == 'POST':
+        content = request.form.get('content')
+        if not content:
+            flash('답변 내용을 입력해주세요.', 'danger')
+        else:
+            answer = Answer(
+                question_id=question.id,
+                content=content,
+                create_date=datetime.now(),
+                user_id=g.user.id
+            )
+            db.session.add(answer)
+            db.session.commit()
+            flash('답변이 성공적으로 등록되었습니다.', 'success')
+            return redirect(url_for('auth.admin_question_detail', question_id=question.id))
+            
+    return render_template('auth/admin_question_detail.html', question=question)

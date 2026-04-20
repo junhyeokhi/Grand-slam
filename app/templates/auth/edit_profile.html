@@ -58,9 +58,18 @@
         value="{{ detail_address_value if detail_address_value is not none else '' }}"
       />
     </div>
-
+    <!-- 수정버튼 -->
     <div class="mt-4">
       <button type="submit" class="btn btn-black w-100 rounded-0 fw-bold py-2" style="background-color: #000; color: #fff">정보 수정</button>
+    </div>
+    <!-- 탈퇴기능 -->
+    <div class="text-center mt-3">
+      <a
+        href="{{ url_for('auth.delete_user') }}"
+        class="text-danger small"
+        onclick="return confirm('정말로 탈퇴하시겠습니까? 탈퇴 후 30일 이내에 다시 로그인하시면 계정이 복구됩니다.');"
+        >회원 탈퇴</a
+      >
     </div>
   </form>
 </div>

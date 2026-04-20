@@ -15,6 +15,9 @@ class User(db.Model):
     password = db.Column(db.String(200), nullable=False)
     phone = db.Column(db.String(20), nullable=False)
     address = db.Column(db.String(200), nullable=False)
+    role = db.Column(db.String(20), default='user')
+    is_deleted = db.Column(db.Boolean, default=False, nullable=False) #탈퇴 여부 꼬리표
+    deleted_at = db.Column(db.DateTime, nullable=True)# 탈퇴 버튼을 누른 시간
 
 
 class Ticket(db.Model):
@@ -56,3 +59,22 @@ class Question(db.Model):
     create_date = db.Column(db.DateTime(), nullable=False) # 작성일
     user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
     user = db.relationship('User', backref=db.backref('question_set'))
+
+class Answer(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    question_id = db.Column(db.Integer, db.ForeignKey('question.id', ondelete='CASCADE'), nullable=False) # 어떤 문의글에 대한 답변인지
+    question = db.relationship('Question', backref=db.backref('answer_set'))
+    content = db.Column(db.Text(), nullable=False)         # 답변 내용
+    create_date = db.Column(db.DateTime(), nullable=False) # 작성일
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False) # 답변을 작성한 관리자
+    user = db.relationship('User', backref=db.backref('admin_answer_set'))
+
+class Notification(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False) # 알림 받을 사람
+    message = db.Column(db.String(255), nullable=False) # 알림 내용 (예: "결제가 완료되었습니다.")
+    link = db.Column(db.String(255), nullable=True)     # 클릭 시 이동할 주소 (예: 주문 내역 페이지)
+    is_read = db.Column(db.Boolean, default=False)      # 읽음 여부 (안 읽었으면 뱃지 띄우기)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(KST), nullable=False)
+
+    user = db.relationship('User', backref=db.backref('notifications', lazy='dynamic', order_by='desc(Notification.created_at)'))

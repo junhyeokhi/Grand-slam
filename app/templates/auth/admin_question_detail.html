@@ -1,0 +1,55 @@
+{% extends "base.html" %} {% block title %}문의 답변하기{% endblock %} {% block content %}
+<div class="container my-5" style="max-width: 800px">
+  <div class="mb-4">
+    <a href="{{ url_for('auth.admin_questions_list') }}" class="text-decoration-none text-muted fw-bold">
+      <i class="bi bi-chevron-left"></i> 목록으로 돌아가기
+    </a>
+  </div>
+
+  <h3 class="fw-bold mb-4 text-danger">문의 답변하기 (관리자)</h3>
+
+  <!-- 질문 영역 -->
+  <div class="card border-0 shadow-sm rounded-4 mb-4">
+    <div class="card-header bg-white border-bottom p-4">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <span class="badge {% if question.answer_set %}bg-success{% else %}bg-danger{% endif %}">
+          {% if question.answer_set %}답변 완료{% else %}답변 대기{% endif %}
+        </span>
+        <small class="text-muted">작성자: {{ question.user.nickname }} | {{ question.create_date.strftime('%Y-%m-%d %H:%M') }}</small>
+      </div>
+      <h5 class="fw-bold mb-0">{{ question.subject }}</h5>
+    </div>
+    <div class="card-body p-4 text-dark" style="min-height: 100px; white-space: pre-wrap">{{ question.content }}</div>
+  </div>
+
+  <!-- 기존 답변 영역 -->
+  {% if question.answer_set %}
+  <h5 class="fw-bold mb-3 text-success"><i class="bi bi-check-circle-fill"></i> 등록된 답변</h5>
+  {% for answer in question.answer_set %}
+  <div class="card border-0 shadow-sm rounded-4 bg-light mb-4">
+    <div class="card-body p-4">
+      <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-secondary-subtle">
+        <span class="fw-bold text-dark">{{ answer.user.nickname }} (관리자)</span>
+        <small class="text-muted">{{ answer.create_date.strftime('%Y-%m-%d %H:%M') }}</small>
+      </div>
+      <div style="white-space: pre-wrap">{{ answer.content }}</div>
+    </div>
+  </div>
+  {% endfor %} {% endif %}
+
+  <!-- 답변 작성 폼 -->
+  <div class="card border-0 shadow-sm rounded-4">
+    <div class="card-body p-4">
+      <h5 class="fw-bold mb-3"><i class="bi bi-pencil-square"></i> 새 답변 작성</h5>
+      <form method="post">
+        <div class="mb-3">
+          <textarea class="form-control" name="content" rows="6" placeholder="답변 내용을 입력해주세요." required></textarea>
+        </div>
+        <div class="text-end">
+          <button type="submit" class="btn btn-danger fw-bold px-4 py-2">답변 등록하기</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

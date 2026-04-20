@@ -5,26 +5,33 @@
   <ul class="nav nav-tabs mb-4" id="historyTab" role="tablist">
     <li class="nav-item" role="presentation">
       <button
-        class="nav-link active fw-bold text-dark"
+        class="nav-link {% if tab != 'sales' %}active{% endif %} fw-bold text-dark"
         id="purchase-tab"
         data-bs-toggle="tab"
         data-bs-target="#purchase-content"
         type="button"
         role="tab"
       >
-        구매 내역 ({{ purchases|length }})
+        구매 내역 ({{ purchases.total }})
       </button>
     </li>
     <li class="nav-item" role="presentation">
-      <button class="nav-link fw-bold text-dark" id="sales-tab" data-bs-toggle="tab" data-bs-target="#sales-content" type="button" role="tab">
-        판매 내역 ({{ sales|length }})
+      <button
+        class="nav-link {% if tab == 'sales' %}active{% endif %} fw-bold text-dark"
+        id="sales-tab"
+        data-bs-toggle="tab"
+        data-bs-target="#sales-content"
+        type="button"
+        role="tab"
+      >
+        판매 내역 ({{ sales.total }})
       </button>
     </li>
   </ul>
 
   <div class="tab-content" id="historyTabContent">
-    <div class="tab-pane fade show active" id="purchase-content" role="tabpanel">
-      {% if purchases %} {% for order in purchases %}
+    <div class="tab-pane fade {% if tab != 'sales' %}show active{% endif %}" id="purchase-content" role="tabpanel">
+      {% if purchases.items %} {% for order in purchases.items %}
       <a
         href="{{ url_for('ticket.view_ticket_detail', ticket_id=order.ticket.id) }}"
         class="card mb-3 border-0 shadow-sm rounded-4 p-3 text-decoration-none text-dark"
@@ -52,13 +59,32 @@
           </div>
         </div>
       </a>
-      {% endfor %} {% else %}
+      {% endfor %}
+
+      <!-- 구매 내역 페이징 -->
+      <ul class="pagination justify-content-center mt-4">
+        <li class="page-item {% if not purchases.has_prev %}disabled{% endif %}">
+          <a class="page-link" href="{{ url_for('ticket.ticket_history', tab='purchase', page=purchases.prev_num) }}">이전</a>
+        </li>
+        {% for page_num in purchases.iter_pages() %} {% if page_num %}
+        <li class="page-item {% if page_num == purchases.page %}active{% endif %}">
+          <a class="page-link" href="{{ url_for('ticket.ticket_history', tab='purchase', page=page_num) }}">{{ page_num }}</a>
+        </li>
+        {% else %}
+        <li class="page-item disabled"><a class="page-link" href="#">...</a></li>
+        {% endif %} {% endfor %}
+        <li class="page-item {% if not purchases.has_next %}disabled{% endif %}">
+          <a class="page-link" href="{{ url_for('ticket.ticket_history', tab='purchase', page=purchases.next_num) }}">다음</a>
+        </li>
+      </ul>
+
+      {% else %}
       <div class="text-center py-5 text-muted bg-white rounded-4 shadow-sm">구매한 내역이 없습니다.</div>
       {% endif %}
     </div>
 
-    <div class="tab-pane fade" id="sales-content" role="tabpanel">
-      {% if sales %} {% for ticket in sales %}
+    <div class="tab-pane fade {% if tab == 'sales' %}show active{% endif %}" id="sales-content" role="tabpanel">
+      {% if sales.items %} {% for ticket in sales.items %}
       <a
         href="{{ url_for('ticket.view_ticket_detail', ticket_id=ticket.id) }}"
         class="card mb-3 border-0 shadow-sm rounded-4 p-3 text-decoration-none text-dark"
@@ -83,7 +109,26 @@
           </div>
         </div>
       </a>
-      {% endfor %} {% else %}
+      {% endfor %}
+
+      <!-- 판매 내역 페이징 -->
+      <ul class="pagination justify-content-center mt-4">
+        <li class="page-item {% if not sales.has_prev %}disabled{% endif %}">
+          <a class="page-link" href="{{ url_for('ticket.ticket_history', tab='sales', page=sales.prev_num) }}">이전</a>
+        </li>
+        {% for page_num in sales.iter_pages() %} {% if page_num %}
+        <li class="page-item {% if page_num == sales.page %}active{% endif %}">
+          <a class="page-link" href="{{ url_for('ticket.ticket_history', tab='sales', page=page_num) }}">{{ page_num }}</a>
+        </li>
+        {% else %}
+        <li class="page-item disabled"><a class="page-link" href="#">...</a></li>
+        {% endif %} {% endfor %}
+        <li class="page-item {% if not sales.has_next %}disabled{% endif %}">
+          <a class="page-link" href="{{ url_for('ticket.ticket_history', tab='sales', page=sales.next_num) }}">다음</a>
+        </li>
+      </ul>
+
+      {% else %}
       <div class="text-center py-5 text-muted bg-white rounded-4 shadow-sm">판매 등록한 내역이 없습니다.</div>
       {% endif %}
     </div>

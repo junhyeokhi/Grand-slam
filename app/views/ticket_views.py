@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from flask import Blueprint, flash, g, redirect, render_template, request, session, url_for, jsonify
 import requests
-from app.models import Order, Ticket
+from app.models import Notification, Order, Ticket
 from app.views.auth_views import login_required
 from constants import KBO_TEAMS
 from app import db
@@ -172,6 +172,16 @@ def pay_success():
         ticket_id = request.args.get('ticket_id')
         ticket = Ticket.query.get_or_404(ticket_id)
 
+        noti_msg = f"'{ticket.Hometeam_name}전' 티켓 결제가 완료되었습니다."
+        noti_link = url_for('ticket.ticket_history') # 알림 클릭 시 이동할 내역 페이지
+        
+        new_noti = Notification(
+            user_id=g.user.id, 
+            message=noti_msg, 
+            link=noti_link
+        )
+        db.session.add(new_noti)
+
         # 결제 금액 검증: 토스에서 받은 금액과 DB에 저장된 티켓의 총 금액을 비교
         expected_total_amount = ticket.price * ticket.quantity
         if int(amount) != expected_total_amount:
@@ -302,18 +312,22 @@ def view_ticket_detail(ticket_id):
     # 이 페이지는 구매/판매 완료된 티켓의 상세 정보를 보여주며, 결제 위젯은 없습니다.
     return render_template('ticket/ticket_view_detail.html', ticket=ticket)
 
+# 거래내역
 @bp.route('/history/')
 @login_required
 def ticket_history():
+    tab = request.args.get('tab', 'purchase')
+    page = request.args.get('page', 1, type=int)
     # 구매 내역: 내가 산 주문(Order)들 (최신순)
-    purchases = Order.query.filter_by(buyer_id=g.user.id).order_by(Order.created_at.desc()).all()
+    purchases = Order.query.filter_by(buyer_id=g.user.id).order_by(Order.created_at.desc()).paginate(page=page, per_page=10, error_out=False)
     
     # 판매 내역: 내가 등록한 티켓(Ticket)들 (최신순)
-    sales = Ticket.query.filter_by(seller_id=g.user.id).order_by(Ticket.created_at.desc()).all()
+    sales = Ticket.query.filter_by(seller_id=g.user.id).order_by(Ticket.created_at.desc()).paginate(page=page, per_page=10, error_out=False)
     
     return render_template('ticket/ticket_history.html', 
                            purchases=purchases, 
-                           sales=sales)
+                           sales=sales,
+                           tab=tab)
 
 # 구매확정 처리 라우트 (주소: /ticket/confirm_purchase/<order_id>/)
 @bp.route('/confirm_purchase/<int:order_id>/', methods=['POST'])

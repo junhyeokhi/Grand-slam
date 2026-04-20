@@ -11,29 +11,23 @@
 <div class="row">
   <aside class="col-md-3 col-lg-2">
     <ul>
-      <li class="big">내가 구매한 상품</li>
-      <li><a href="#">구매 이력 관리</a></li>
-      <li class="big">내가 판매한 상품</li>
-      <li><a href="#">판매 상품 관리</a></li>
-      <li><a href="#">판매 이력 관리</a></li>
-      <li class="big">혜택 관리</li>
-      <li><a href="#">예치금 관리</a></li>
-      <li><a href="#">쿠폰 내역</a></li>
-      <li><a href="#">팬파워 내역</a></li>
-      <li><a href="#">혜택존</a></li>
-      <li><a href="#">등록권 내역</a></li>
+      <li class="big">내 거래 상품</li>
+      <li><a href="{{ url_for('ticket.ticket_history', tab='purchase') }}">구매 상품 내역</a></li>
+      <li><a href="{{ url_for('ticket.ticket_history', tab='sales') }}">판매 상품 내역</a></li>
       <li class="big">메시지</li>
       <li><a href="#">알림메시지</a></li>
-      <li><a href="#">PIN번호함</a></li>
       <li><a href="#">메시지 보관함</a></li>
       <li class="big">활동현황</li>
       <li><a href="#">상품 비교</a></li>
       <li><a href="#">최근 본 상품</a></li>
       <li><a href="{{ url_for('auth.create_question') }}">1:1 문의하기</a></li>
-      <li><a href="#">1:1 문의내역</a></li>
-      <li><a href="#">나의 후기</a></li>
+      <li><a href="{{ url_for('auth.my_questions') }}">1:1 문의내역</a></li>
       <li class="big">회원정보</li>
       <li><a href="{{ url_for('auth.edit_profile') }}">회원정보수정</a></li>
+      {% if g.user.role == 'admin' %}
+      <li class="big text-danger mt-3">관리자 메뉴</li>
+      <li><a href="{{ url_for('auth.admin_questions_list') }}" class="text-danger fw-bold">전체 문의 관리</a></li>
+      {% endif %}
     </ul>
   </aside>
 
@@ -120,9 +114,6 @@
             </button>
           </li>
         </ul>
-        <a href="{{ url_for('ticket.ticket_history') }}" class="text-danger small text-decoration-none"
-          >자세히 보기 <i class="bi bi-chevron-right"></i
-        ></a>
       </div>
 
       <div class="tab-content" id="myTabContent">
@@ -148,6 +139,11 @@
           {% else %}
           <div class="py-5 text-center text-muted border rounded-3 bg-light">구매 이력이 없습니다.</div>
           {% endif %}
+          <div class="text-end mt-3">
+            <a href="{{ url_for('ticket.ticket_history', tab='purchase') }}" class="text-danger small text-decoration-none fw-bold"
+              >구매 내역 자세히 보기 <i class="bi bi-chevron-right"></i
+            ></a>
+          </div>
         </div>
 
         <div class="tab-pane fade" id="sell-content" role="tabpanel">
@@ -177,6 +173,11 @@
           {% else %}
           <div class="py-5 text-center text-muted border rounded-3 bg-light">판매 이력이 없습니다.</div>
           {% endif %}
+          <div class="text-end mt-3">
+            <a href="{{ url_for('ticket.ticket_history', tab='sales') }}" class="text-danger small text-decoration-none fw-bold"
+              >판매 내역 자세히 보기 <i class="bi bi-chevron-right"></i
+            ></a>
+          </div>
         </div>
 
         <div id="message" class="mb-5">
@@ -195,29 +196,6 @@
           </div>
           {% else %}
           <div class="py-5 text-center text-muted">알림메시지 내역이 없습니다.</div>
-          {% endif %}
-        </div>
-
-        <div id="review" class="mb-5">
-          <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
-            <h5 class="fw-bold mb-0">최근 작성 후기</h5>
-            <a href="#" class="text-danger small text-decoration-none">자세히 보기 <i class="bi bi-chevron-right"></i></a>
-          </div>
-          {% if g.user.review_set %}
-          <div class="row row-cols-1 row-cols-md-2 g-3">
-            {% for review in g.user.review_set %}
-            <div class="col">
-              <div class="card h-100 border-light shadow-sm">
-                <div class="card-body">
-                  <div class="text-warning mb-2">{% for i in range(review.rating) %}★{% endfor %}</div>
-                  <p class="card-text small">{{ review.content }}</p>
-                </div>
-              </div>
-            </div>
-            {% endfor %}
-          </div>
-          {% else %}
-          <div class="py-5 text-center text-muted">작성한 거래 후기가 없습니다.</div>
           {% endif %}
         </div>
       </div>

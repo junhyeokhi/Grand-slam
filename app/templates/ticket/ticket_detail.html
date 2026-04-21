@@ -91,7 +91,8 @@
         <p class="text-muted small">어디로 이동하시겠습니까?</p>
       </div>
       <div class="modal-footer justify-content-center border-0 pb-4">
-        <a href="{{ url_for('ticket.ticket_list', team=ticket.Hometeam_name) }}" class="btn btn-outline-secondary px-4">목록으로 돌아가기</a>
+        <a href="{{ url_for('ticket.ticket_list', team=ticket.Hometeam_name) }}"
+          class="btn btn-outline-secondary px-4">목록으로 돌아가기</a>
         <a href="{{ url_for('ticket.cart_page') }}" class="btn btn-primary px-4 fw-bold">장바구니 확인</a>
       </div>
     </div>
@@ -129,31 +130,31 @@
       failUrl: window.location.origin + "/ticket/pay/fail",   // 실패 시 이동할 주소
     });
   });
-  
-function addToCart(ticketId) {
-    fetch("{{ url_for('ticket.add_to_cart') }}", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ticket_id: ticketId })
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.status === "success") {
-            // 1. 헤더의 장바구니 숫자 업데이트
-            const cartCounts = document.querySelectorAll('#cart-count');
-            cartCounts.forEach(el => { el.innerText = data.cart_count; });
 
-            // 2. 부트스트랩 모달 띄우기 (핵심!)
-            const myModal = new bootstrap.Modal(document.getElementById('cartModal'));
-            myModal.show();
-            
-        } else {
-            alert("장바구니 담기에 실패했습니다.");
-        }
+  function addToCart(ticketId) {
+    fetch("{{ url_for('ticket.add_to_cart') }}", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ticket_id: ticketId })
     })
-    .catch(err => {
+      .then(res => res.json())
+      .then(data => {
+        if (data.status === "success") {
+          // 1. 헤더의 장바구니 숫자 업데이트
+          const cartCounts = document.querySelectorAll('#cart-count');
+          cartCounts.forEach(el => { el.innerText = data.cart_count; });
+
+          // 2. 부트스트랩 모달 띄우기 (핵심!)
+          const myModal = new bootstrap.Modal(document.getElementById('cartModal'));
+          myModal.show();
+
+        } else {
+          alert("장바구니 담기에 실패했습니다.");
+        }
+      })
+      .catch(err => {
         console.error("에러 발생:", err);
-    });
-}
+      });
+  }
 </script>
 {% endblock %}

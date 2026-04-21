@@ -293,7 +293,7 @@ def ticket_create():
         db.session.commit()
 
         flash('티켓이 성공적으로 등록되었습니다!', 'success')
-        return redirect(url_for('main.index')) # 등록 후 메인 페이지로 리다이렉트
+        return redirect(url_for('ticket.ticket_detail', ticket_id=ticket.id)) # 등록 후 티켓 상세 페이지로 리다이렉트
 
     # GET 요청 시 폼 렌더링
     return render_template('ticket/ticket_create.html')

@@ -144,12 +144,17 @@ def ticket_list():
     )
 
 # 프론트엔드에서 결제 성공 시!
+# 프론트엔드에서 결제 성공 시!
 @bp.route('/pay/success')
 def pay_success():
-    # 1. 토스가 URL에 붙여서 보낸 데이터 3가지 받기
+    # 1. 토스가 URL에 붙여서 보낸 데이터 받기 (ticket_ids 추가 대응)
     payment_key = request.args.get('paymentKey')
     order_id = request.args.get('orderId')
     amount = request.args.get('amount')
+    
+    # 장바구니(ticket_ids) 혹은 단일 상세페이지(ticket_id)에서 온 ID들을 리스트로 변환
+    ids_raw = request.args.get('ticket_ids') or request.args.get('ticket_id')
+    ticket_id_list = ids_raw.split(',') if ids_raw else []
 
     # 2. 토스 개발자 센터에서 발급받은 '시크릿 키'
     TOSS_SECRET_KEY = "test_gsk_docs_OaPz8L5KdmQXkzRz3y47BMw6"
@@ -162,73 +167,75 @@ def pay_success():
         "amount": amount
     }
 
-    # requests 라이브러리로 POST 요청 (auth 파라미터에 시크릿 키를 넣으면 알아서 인증해 줍니다)
+    # requests 라이브러리로 POST 요청
     response = requests.post(url, json=data, auth=(TOSS_SECRET_KEY, ''))
 
     # 4. 토스 서버의 응답 결과 확인
     if response.status_code == 200:
-        # 승인 성공시
-        # URL 속 티켓 아이디 가져오기
-        ticket_id = request.args.get('ticket_id')
-        ticket = Ticket.query.get_or_404(ticket_id)
+        # 승인 성공시 DB에서 해당 티켓들 가져오기
+        tickets = Ticket.query.filter(Ticket.id.in_(ticket_id_list)).all()
 
-        # 구매자 알림
-        buyer_noti_msg = f"'{ticket.Hometeam_name}전' 티켓 결제가 완료되었습니다."
-        buyer_noti_link = url_for('ticket.ticket_history', tab='purchase') # 알림 클릭 시 구매 내역 페이지로 이동
+        # 결제 금액 검증: 모든 티켓의 (가격 * 수량) 합계와 토스 응답 금액 비교
+        expected_total_amount = sum(t.price * t.quantity for t in tickets)
         
-        buyer_noti = Notification(
-            user_id=g.user.id, 
-            message=buyer_noti_msg, 
-            link=buyer_noti_link
-        )
-        db.session.add(buyer_noti)
-
-        # 판매자 알림
-        seller_noti_msg = f"등록하신 '{ticket.Hometeam_name}전' 티켓이 판매되었습니다."
-        seller_noti_link = url_for('ticket.ticket_history', tab='sales') # 알림 클릭 시 판매 내역 페이지로 이동
-        
-        seller_noti = Notification(
-            user_id=ticket.seller_id,
-            message=seller_noti_msg,
-            link=seller_noti_link
-        )
-        db.session.add(seller_noti)
-
-        # 결제 금액 검증: 토스에서 받은 금액과 DB에 저장된 티켓의 총 금액을 비교
-        expected_total_amount = ticket.price * ticket.quantity
         if int(amount) != expected_total_amount:
             db.session.rollback() # 금액 불일치 시 롤백
             flash("결제 금액이 일치하지 않습니다. 관리자에게 문의해주세요.")
-            print(f"결제 금액 불일치: Toss 응답 금액 {amount}, 예상 금액 {expected_total_amount}")
             return redirect(url_for('main.index'))
 
-        # 티켓 상태변경
-        ticket.status = '판매완료'
-        
-        new_order = Order(
-            ticket_id=ticket.id,
-            buyer_id=session.get('user_id') # 세션에 저장된 로그인 유저 ID
-        )
-        
-        db.session.add(new_order)
-        
+        # 여러 개의 티켓을 일괄 처리하기 위한 반복문
+        for ticket in tickets:
+            # 구매자 알림
+            buyer_noti_msg = f"'{ticket.Hometeam_name}전' 티켓 결제가 완료되었습니다."
+            buyer_noti_link = url_for('ticket.ticket_history', tab='purchase')
+            
+            buyer_noti = Notification(
+                user_id=g.user.id, 
+                message=buyer_noti_msg, 
+                link=buyer_noti_link
+            )
+            db.session.add(buyer_noti)
+
+            # 판매자 알림
+            seller_noti_msg = f"등록하신 '{ticket.Hometeam_name}전' 티켓이 판매되었습니다."
+            seller_noti_link = url_for('ticket.ticket_history', tab='sales')
+            
+            seller_noti = Notification(
+                user_id=ticket.seller_id,
+                message=seller_noti_msg,
+                link=seller_noti_link
+            )
+            db.session.add(seller_noti)
+
+            # 티켓 상태변경
+            ticket.status = '판매완료'
+            
+            # 주문 정보 생성
+            new_order = Order(
+                ticket_id=ticket.id,
+                buyer_id=session.get('user_id')
+            )
+            db.session.add(new_order)
+            
+            # (추가) 결제가 완료된 상품은 장바구니에서 삭제
+            Cart.query.filter_by(user_id=g.user.id, ticket_id=ticket.id).delete()
+
         try:
             db.session.commit()
             flash("결제가 성공적으로 완료되었습니다!")
-            return render_template('auth/order_success.html', ticket=ticket)
+            # 여러 건일 수 있으므로 첫 번째 티켓 정보를 대표로 보내거나 리스트를 보냄
+            return render_template('auth/order_success.html', ticket=tickets[0], count=len(tickets))
         
         except Exception as e:
-            # 만약 DB 저장 중 에러가 나면, 변경 사항을 되돌리고(rollback) 에러를 알립니다.
             db.session.rollback()
-            print(f"DB 저장 에러: {e}") # 터미널 창에서 원인 확인용
-            flash("결제는 승인되었으나 시스템 저장 중 문제가 발생했습니다. 관리자에게 문의해주세요.")
+            print(f"DB 저장 에러: {e}")
+            flash("결제는 승인되었으나 시스템 저장 중 문제가 발생했습니다.")
             return redirect(url_for('main.index'))
         
     else:
-        #  승인 실패 (금액이 조작되었거나, 한도가 초과된 경우 등)
+        # 승인 실패 처리 (기존 로직 유지)
         error_data = response.json()
         error_msg = error_data.get('message', '알 수 없는 결제 에러가 발생했습니다.')
-        
         flash(f"결제 실패: {error_msg}")
         return redirect(url_for('main.index'))
 

@@ -1,6 +1,13 @@
 {% extends "base.html" %} {% block title %}결제 완료 - 만루홈런{% endblock %} {% block content %}
 <div class="container">
   <div class="container text-center my-5" style="max-width: 650px">
+    <div class="text-success mb-3" style="font-size: 3.5rem">
+      <i class="bi bi-check-circle-fill"></i>
+    </div>
+    <h2 class="fw-bold">결제가 완료되었습니다!</h2>
+    <p class="text-muted mb-4">주문해주셔서 감사합니다. 총 <strong>{{ tickets|length }}</strong>건의 결제가 성공적으로 처리되었습니다.</p>
+
+    {% for ticket in tickets %}
     <div class="bg-white p-4 mb-4 d-flex align-items-center justify-content-around border rounded-4 shadow-sm">
       <div class="flex-grow-1">
         <img
@@ -25,12 +32,6 @@
       </div>
     </div>
 
-    <div class="text-success mb-3" style="font-size: 3.5rem">
-      <i class="bi bi-check-circle-fill"></i>
-    </div>
-    <h2 class="fw-bold">결제가 완료되었습니다!</h2>
-    <p class="text-muted">주문해주셔서 감사합니다. 즐거운 경기 관람 되세요!</p>
-
     <div class="bg-light p-4 mb-4 border rounded-4 text-start">
       <h5 class="fw-bold border-bottom pb-2 mb-3">결제 정보</h5>
       <div class="d-flex justify-content-between mb-2">
@@ -54,6 +55,7 @@
         <span class="text-danger fw-bold fs-5">{{ "{:,}".format(ticket.price * ticket.quantity) }}원</span>
       </div>
     </div>
+    {% endfor %}
 
     <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
       <a href="{{ url_for('main.index') }}" class="btn btn-outline-secondary fw-bold px-4 py-2 rounded-3 flex-grow-1">홈으로</a>

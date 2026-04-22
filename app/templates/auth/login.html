@@ -29,23 +29,24 @@
         {{ form.csrf_token }}
         <div class="input-group">
           <label for="email">아이디(이메일)</label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            placeholder="아이디(이메일) 입력"
-            value="{{ form.email.data or '' }}"
-          />
+          {{ form.email(id="email", placeholder="아이디(이메일) 입력") }}
         </div>
 
         <div class="input-group">
           <label for="password">비밀번호</label>
-          <input type="password" id="password" name="password" placeholder="비밀번호 입력" />
+          {{ form.password(id="password", placeholder="비밀번호 입력") }}
         </div>
 
-        <div class="save-id">
-          <input type="checkbox" id="saveId" name="saveId" />
-          <label for="saveId">아이디 저장</label>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <div class="save-id mb-0">
+            <input type="checkbox" id="saveId" name="saveId" />
+            <label for="saveId">아이디 저장</label>
+          </div>
+          <div style="font-size: 0.85rem">
+            <a href="{{ url_for('auth.find_id') }}" class="text-decoration-none text-muted">아이디 찾기</a>
+            <span class="text-muted mx-1">|</span>
+            <a href="{{ url_for('auth.reset_password') }}" class="text-decoration-none text-muted">비밀번호 재설정</a>
+          </div>
         </div>
 
         <button type="submit" class="btn-login">로그인</button>

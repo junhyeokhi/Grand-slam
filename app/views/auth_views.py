@@ -87,6 +87,41 @@ def login():
     return render_template('auth/login.html', form=form)
 
 
+# 아이디 찾기 기능
+@bp.route('/find_id/', methods=['GET', 'POST'])
+def find_id():
+    from app.form import FindIdForm
+    form = FindIdForm()
+    if request.method == 'POST' and form.validate_on_submit():
+        user = User.query.filter_by(username=form.username.data, phone=form.phone.data).first()
+        if user:
+            flash(f"회원님의 아이디(이메일)는 [{user.email}] 입니다.", 'success')
+        else:
+            flash("입력하신 정보와 일치하는 회원이 없습니다.", 'danger')
+            
+    return render_template('auth/find_id.html', form=form)
+
+# 비밀번호 재설정 기능
+@bp.route('/reset_password/', methods=['GET', 'POST'])
+def reset_password():
+    from app.form import ResetPasswordForm
+    form = ResetPasswordForm()
+    if request.method == 'POST' and form.validate_on_submit():
+        if form.new_password.data != form.new_password_confirm.data:
+            flash("새 비밀번호가 일치하지 않습니다. 다시 확인해주세요.", 'danger')
+            return render_template('auth/reset_password.html', form=form)
+
+        user = User.query.filter_by(email=form.email.data, username=form.username.data, phone=form.phone.data).first()
+        if user:
+            user.password = generate_password_hash(form.new_password.data)
+            db.session.commit()
+            flash("비밀번호가 성공적으로 재설정되었습니다. 새 비밀번호로 로그인해주세요.", 'success')
+            return redirect(url_for('auth.login'))
+        else:
+            flash("입력하신 정보와 일치하는 회원이 없습니다.", 'danger')
+            
+    return render_template('auth/reset_password.html', form=form)
+
 # 3. 회원가입 페이지 연결 (주소: /auth/signup)
 @bp.route('/signup/', methods=['GET', 'POST'])
 def signup():

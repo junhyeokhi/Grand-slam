@@ -6,7 +6,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask import session
 from app.form import UserLoginForm
 from datetime import datetime, timedelta
-from app.models import User, Ticket, Question, Answer, Notification
+from app.models import User, Ticket, Question, Answer, Notification, Order
 import functools
 
 from app import db
@@ -291,7 +291,8 @@ def detail(ticket_id):
 @bp.route('/order/success/<int:ticket_id>/')
 def order_success(ticket_id):
     ticket = Ticket.query.get_or_404(ticket_id)
-    return render_template('auth/order_success.html', ticket=ticket)
+    # 템플릿의 for문을 위해 단일 객체도 리스트로 감싸서 전달합니다.
+    return render_template('auth/order_success.html', tickets=[ticket])
 
 # 나의 전체 알림 내역 페이지
 @bp.route('/my_notifications/')
@@ -316,13 +317,18 @@ def create_question():
     if request.method == 'POST':
         subject = request.form['subject']
         content = request.form['content']
+        ticket_id = request.form.get('ticket_id')
+        
+        if not ticket_id:
+            ticket_id = None
 
         # DB에 저장
         question = Question(
             subject=subject,
             content=content,
             create_date=datetime.now(),
-            user=g.user
+            user=g.user,
+            ticket_id=ticket_id
         )
         db.session.add(question)
         db.session.commit()
@@ -330,7 +336,9 @@ def create_question():
         flash('문의가 성공적으로 등록되었습니다.')
         return redirect(url_for('auth.mypage'))  # 등록 후 마이페이지로 이동
 
-    return render_template('auth/question_form.html')
+    purchased_orders = Order.query.filter_by(buyer_id=g.user.id).order_by(Order.created_at.desc()).all()
+    sold_tickets = Ticket.query.filter_by(seller_id=g.user.id).order_by(Ticket.created_at.desc()).all()
+    return render_template('auth/question_form.html', purchased_orders=purchased_orders, sold_tickets=sold_tickets)
 
 # 나의 문의 내역 페이지
 @bp.route('/my_questions/')

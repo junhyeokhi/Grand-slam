@@ -154,7 +154,7 @@ def pay_success():
     
     # 장바구니(ticket_ids) 혹은 단일 상세페이지(ticket_id)에서 온 ID들을 리스트로 변환
     ids_raw = request.args.get('ticket_ids') or request.args.get('ticket_id')
-    ticket_id_list = ids_raw.split(',') if ids_raw else []
+    ticket_id_list = [tid.strip() for tid in ids_raw.split(',')] if ids_raw else []
 
     # 2. 토스 개발자 센터에서 발급받은 '시크릿 키'
     TOSS_SECRET_KEY = "test_gsk_docs_OaPz8L5KdmQXkzRz3y47BMw6"
@@ -186,7 +186,7 @@ def pay_success():
         # 여러 개의 티켓을 일괄 처리하기 위한 반복문
         for ticket in tickets:
             # 구매자 알림
-            buyer_noti_msg = f"'{ticket.Hometeam_name}전' 티켓 결제가 완료되었습니다."
+            buyer_noti_msg = f"'{ticket.Hometeam_name} vs {ticket.awayteam_name}' 티켓 결제가 완료되었습니다."
             buyer_noti_link = url_for('ticket.ticket_history', tab='purchase')
             
             buyer_noti = Notification(
@@ -197,7 +197,7 @@ def pay_success():
             db.session.add(buyer_noti)
 
             # 판매자 알림
-            seller_noti_msg = f"등록하신 '{ticket.Hometeam_name}전' 티켓이 판매되었습니다."
+            seller_noti_msg = f"등록하신 '{ticket.Hometeam_name} vs {ticket.awayteam_name}' 티켓이 판매되었습니다."
             seller_noti_link = url_for('ticket.ticket_history', tab='sales')
             
             seller_noti = Notification(
@@ -223,8 +223,8 @@ def pay_success():
         try:
             db.session.commit()
             flash("결제가 성공적으로 완료되었습니다!")
-            # 여러 건일 수 있으므로 첫 번째 티켓 정보를 대표로 보내거나 리스트를 보냄
-            return render_template('auth/order_success.html', ticket=tickets[0], count=len(tickets))
+            # 결제된 모든 티켓 리스트를 화면으로 전달
+            return render_template('auth/order_success.html', tickets=tickets)
         
         except Exception as e:
             db.session.rollback()
@@ -362,7 +362,7 @@ def confirm_purchase(order_id):
     order.ticket.status = '거래완료'
     
     # 4. 판매자에게 구매 확정 알림 전송
-    seller_noti_msg = f"등록하신 '{order.ticket.Hometeam_name}전' 티켓의 구매 확정 및 정산이 진행됩니다."
+    seller_noti_msg = f"등록하신 '{order.ticket.Hometeam_name} vs {order.ticket.awayteam_name}' 티켓의 구매 확정 및 정산이 진행됩니다."
     seller_noti_link = url_for('ticket.ticket_history', tab='sales')
     seller_noti = Notification(
         user_id=order.ticket.seller_id,
@@ -446,7 +446,8 @@ def add_to_cart():
     cart_item = Cart.query.filter_by(user_id=g.user.id, ticket_id=ticket_id).first()
     
     if cart_item:
-        cart_item.quantity += 1  # 이미 있다면 수량 증가
+        # 중고 매물 특성상 단일 매물이므로 수량을 증가시키지 않음
+        pass
     else:
         # 없다면 새로 추가
         cart_item = Cart(user_id=g.user.id, ticket_id=ticket_id)

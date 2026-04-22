@@ -59,6 +59,8 @@ class Question(db.Model):
     create_date = db.Column(db.DateTime(), nullable=False) # 작성일
     user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
     user = db.relationship('User', backref=db.backref('question_set'))
+    ticket_id = db.Column(db.Integer, db.ForeignKey('ticket.id', ondelete='SET NULL'), nullable=True) # 관련 티켓 (선택)
+    ticket = db.relationship('Ticket', backref=db.backref('questions'))
 
 class Answer(db.Model):
     id = db.Column(db.Integer, primary_key=True)

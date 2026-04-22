@@ -1,222 +1,216 @@
-{% extends "base.html" %}
-{% block title %}장바구니{% endblock %}
-
-{% block content %}
+{% extends "base.html" %} {% block title %}장바구니{% endblock %} {% block content %}
 <style>
-    .custom-hover-link {
-        transition: color 0.2s ease;
-        display: inline-block;
-    }
+  .custom-hover-link {
+    transition: color 0.2s ease;
+    display: inline-block;
+  }
 
-    .custom-hover-link:hover {
-        color: #0d6efd !important;
-        text-decoration: underline !important;
-    }
+  .custom-hover-link:hover {
+    color: #0d6efd !important;
+    text-decoration: underline !important;
+  }
 
-    .table th {
-        background-color: #f8f9fa;
-    }
+  .table th {
+    background-color: #f8f9fa;
+  }
 
-    .btn-pay-selected {
-        background-color: #e53e3e;
-        color: white;
-        border: none;
-        padding: 10px 20px;
-        border-radius: 5px;
-        font-weight: bold;
-    }
+  .btn-pay-selected {
+    background-color: #e53e3e;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-weight: bold;
+  }
 
-    .btn-pay-selected:hover {
-        background-color: #c53030;
-    }
+  .btn-pay-selected:hover {
+    background-color: #c53030;
+  }
 </style>
 
 <div class="container py-5">
-    <h2 class="fw-bold mb-4">🛒 장바구니</h2>
+  <h2 class="fw-bold mb-4">🛒 장바구니</h2>
 
-    {% if not cart_items %}
-    <div class="text-center py-5 shadow-sm rounded bg-white">
-        <p class="fs-5 text-muted">장바구니에 담긴 티켓이 없습니다.</p>
-        <a href="{{ url_for('ticket.ticket_list') }}" class="btn btn-primary px-4">티켓 보러가기</a>
+  {% if not cart_items %}
+  <div class="text-center py-5 shadow-sm rounded bg-white">
+    <p class="fs-5 text-muted">장바구니에 담긴 티켓이 없습니다.</p>
+    <a href="{{ url_for('ticket.ticket_list') }}" class="btn btn-primary px-4">티켓 보러가기</a>
+  </div>
+  {% else %}
+  <div id="cart-content">
+    <div class="table-responsive shadow-sm rounded">
+      <table class="table table-hover align-middle text-center mb-0 bg-white">
+        <thead class="table-light">
+          <tr>
+            <th style="width: 50px"><input type="checkbox" id="check-all" onclick="toggleAll(this)" /></th>
+            <th>경기 정보</th>
+            <th>수량</th>
+            <th>가격</th>
+            <th>관리</th>
+          </tr>
+        </thead>
+        <tbody id="cart-tbody">
+          {% for item in cart_items %}
+          <tr>
+            <td>
+              <input
+                type="checkbox"
+                class="item-checkbox"
+                value="{{ item.id }}"
+                data-ticket-id="{{ item.ticket.id }}"
+                data-price="{{ item.ticket.price * item.ticket.quantity }}"
+                data-name="{{ item.ticket.hometeam_name }} vs {{ item.ticket.awayteam_name }}"
+                checked
+              />
+            </td>
+            <td class="text-start ps-4">
+              <a href="{{ url_for('ticket.ticket_detail', ticket_id=item.ticket.id) }}" class="text-decoration-none text-dark custom-hover-link">
+                <div class="fw-bold fs-5">{{ item.ticket.hometeam_name }} vs {{ item.ticket.awayteam_name }}</div>
+              </a>
+              <small class="text-muted">장소: {{ item.ticket.sub_category }} | 등급: {{ item.ticket.seat_grade }}</small>
+            </td>
+            <td><strong>{{ item.ticket.quantity }}</strong> 매</td>
+            <td>{{ "{:,}".format(item.ticket.price * item.ticket.quantity) }}원</td>
+            <td>
+              <button class="btn btn-sm btn-outline-danger" onclick="deleteItem('{{ item.ticket.id }}')">삭제</button>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
-    {% else %}
+
     <div id="cart-content">
-        <div class="table-responsive shadow-sm rounded">
-            <table class="table table-hover align-middle text-center mb-0 bg-white">
-                <thead class="table-light">
-                    <tr>
-                        <th style="width: 50px;"><input type="checkbox" id="check-all" onclick="toggleAll(this)"></th>
-                        <th>경기 정보</th>
-                        <th>수량</th>
-                        <th>가격</th>
-                        <th>관리</th>
-                    </tr>
-                </thead>
-                <tbody id="cart-tbody">
-                    {% for item in cart_items %}
-                    <tr>
-                        <td>
-                            <input type="checkbox" class="item-checkbox" value="{{ item.id }}"
-                                data-ticket-id="{{ item.ticket.id }}"
-                                data-price="{{ item.ticket.price * item.quantity }}"
-                                data-name="{{ item.ticket.hometeam_name }} vs {{ item.ticket.awayteam_name }}" checked>
-                        </td>
-                        <td class="text-start ps-4">
-                            <a href="{{ url_for('ticket.ticket_detail', ticket_id=item.ticket.id) }}"
-                                class="text-decoration-none text-dark custom-hover-link">
-                                <div class="fw-bold fs-5">
-                                    {{ item.ticket.hometeam_name }} vs {{ item.ticket.awayteam_name }}
-                                </div>
-                            </a>
-                            <small class="text-muted">장소: {{ item.ticket.sub_category }} | 등급: {{ item.ticket.seat_grade
-                                }}</small>
-                        </td>
-                        <td><strong>{{ item.quantity }}</strong> 매</td>
-                        <td>{{ "{:,}".format(item.ticket.price * item.quantity) }}원</td>
-                        <td>
-                            <button class="btn btn-sm btn-outline-danger"
-                                onclick="deleteItem('{{ item.ticket.id }}')">삭제</button>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+      <div class="mt-4 shadow-sm p-4 bg-white rounded">
+        <div id="payment-method" class="mb-3"></div>
+        <div id="agreement" class="mb-4"></div>
+
+        <div class="text-end mb-3">
+          <div class="fs-5 mb-1">총 <span id="total-count" class="fw-bold">0</span>개 항목 선택</div>
+          <div class="fs-3 fw-bold">총 결제 금액: <span id="total-price" style="color: #e53e3e">0</span>원</div>
         </div>
 
-        <div id="cart-content">
-            <div class="mt-4 shadow-sm p-4 bg-white rounded">
-                <div id="payment-method" class="mb-3"></div>
-                <div id="agreement" class="mb-4"></div>
-
-                <div class="text-end mb-3">
-                    <div class="fs-5 mb-1">총 <span id="total-count" class="fw-bold">0</span>개 항목 선택</div>
-                    <div class="fs-3 fw-bold">총 결제 금액: <span id="total-price" style="color: #e53e3e;">0</span>원</div>
-                </div>
-
-                <div class="d-flex justify-content-between">
-                    <a href="{{ url_for('ticket.ticket_list') }}" class="btn btn-outline-secondary">← 쇼핑 계속하기</a>
-                    <div class="d-flex gap-2">
-                        <button type="button" class="btn btn-outline-danger" onclick="deleteSelected()">선택한 항목
-                            삭제하기</button>
-                        <button type="button" id="payment-button" class="btn-pay-selected">선택한 항목 결제하기</button>
-                    </div>
-                </div>
-            </div>
+        <div class="d-flex justify-content-between">
+          <a href="{{ url_for('ticket.ticket_list') }}" class="btn btn-outline-secondary">← 쇼핑 계속하기</a>
+          <div class="d-flex gap-2">
+            <button type="button" class="btn btn-outline-danger" onclick="deleteSelected()">선택한 항목 삭제하기</button>
+            <button type="button" id="payment-button" class="btn-pay-selected">선택한 항목 결제하기</button>
+          </div>
         </div>
-        {% endif %}
+      </div>
     </div>
+    {% endif %}
+  </div>
 
-    <script src="https://js.tosspayments.com/v1/payment-widget"></script>
+  <script src="https://js.tosspayments.com/v1/payment-widget"></script>
 
-    <script>
-        // 1. 토스페이먼츠 초기 설정
-        const clientKey = "test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm";
-        const customerKey = "USER_{{ session.get('user_id', 'GUEST') }}";
-        const paymentWidget = PaymentWidget(clientKey, customerKey);
+  <script>
+    // 1. 토스페이먼츠 초기 설정
+    const clientKey = "test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm";
+    const customerKey = "USER_{{ session.get('user_id', 'GUEST') }}";
+    const paymentWidget = PaymentWidget(clientKey, customerKey);
 
-        // 2. 결제 위젯 렌더링 (화면에 카드/계좌이체 선택창을 그립니다)
-        // 초기 금액은 0원 또는 현재 선택된 금액으로 설정
-        const paymentMethodWidget = paymentWidget.renderPaymentMethods(
-            "#payment-method",
-            { value: 0 },
-            { variantKey: "DEFAULT" }
-        );
+    // 2. 결제 위젯 렌더링 (화면에 카드/계좌이체 선택창을 그립니다)
+    // 초기 금액은 0원 또는 현재 선택된 금액으로 설정
+    const paymentMethodWidget = paymentWidget.renderPaymentMethods("#payment-method", { value: 0 }, { variantKey: "DEFAULT" });
 
-        // 3. 약관 위젯 렌더링
-        paymentWidget.renderAgreement("#agreement");
+    // 3. 약관 위젯 렌더링
+    paymentWidget.renderAgreement("#agreement");
 
-        // 총 금액 및 개수 업데이트 함수
-        function updateTotalPrice() {
-            let total = 0;
-            let count = 0;
-            const checkedBoxes = document.querySelectorAll('.item-checkbox:checked');
+    // 총 금액 및 개수 업데이트 함수
+    function updateTotalPrice() {
+      let total = 0;
+      let count = 0;
+      const checkedBoxes = document.querySelectorAll(".item-checkbox:checked");
 
-            checkedBoxes.forEach(checkbox => {
-                const price = parseInt(checkbox.getAttribute('data-price')) || 0;
-                total += price;
-                count++;
-            });
+      checkedBoxes.forEach((checkbox) => {
+        const price = parseInt(checkbox.getAttribute("data-price")) || 0;
+        total += price;
+        count++;
+      });
 
-            document.getElementById('total-count').innerText = count;
-            document.getElementById('total-price').innerText = total.toLocaleString();
+      document.getElementById("total-count").innerText = count;
+      document.getElementById("total-price").innerText = total.toLocaleString();
 
-            // [중요] 금액이 변경될 때마다 토스 위젯에도 알려줍니다.
-            paymentMethodWidget.updateAmount(total);
+      // [중요] 금액이 변경될 때마다 토스 위젯에도 알려줍니다.
+      paymentMethodWidget.updateAmount(total);
 
-            window.currentOrderData = {
-                ticketIds: Array.from(checkedBoxes).map(cb => cb.getAttribute('data-ticket-id')),
-                totalPrice: total,
-                orderName: count > 1 ?
-                    `${checkedBoxes[0].getAttribute('data-name')} 외 ${count - 1}건` :
-                    (count === 1 ? checkedBoxes[0].getAttribute('data-name') : "")
-            };
-        }
+      window.currentOrderData = {
+        ticketIds: Array.from(checkedBoxes).map((cb) => cb.getAttribute("data-ticket-id")),
+        totalPrice: total,
+        orderName:
+          count > 1 ? `${checkedBoxes[0].getAttribute("data-name")} 외 ${count - 1}건` : count === 1 ? checkedBoxes[0].getAttribute("data-name") : "",
+      };
+    }
 
-        // --- 삭제 및 체크박스 제어 로직 (기존 유지) ---
-        function toggleAll(mainCheckbox) {
-            const checkboxes = document.querySelectorAll('.item-checkbox');
-            checkboxes.forEach(cb => { cb.checked = mainCheckbox.checked; });
-            updateTotalPrice();
-        }
+    // --- 삭제 및 체크박스 제어 로직 (기존 유지) ---
+    function toggleAll(mainCheckbox) {
+      const checkboxes = document.querySelectorAll(".item-checkbox");
+      checkboxes.forEach((cb) => {
+        cb.checked = mainCheckbox.checked;
+      });
+      updateTotalPrice();
+    }
 
-        document.addEventListener('change', function (e) {
-            if (e.target.classList.contains('item-checkbox') || e.target.id === 'check-all') {
-                updateTotalPrice();
-            }
-        });
-
-        function sendDeleteRequest(ticketIds) {
-            fetch("{{ url_for('ticket.remove_selected_cart') }}", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ ticket_ids: ticketIds })
-            })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.status === "success") {
-                        location.reload();
-                    } else {
-                        alert("삭제 실패");
-                    }
-                });
-        }
-
-        function deleteItem(ticketId) {
-            if (confirm("이 티켓을 삭제하시겠습니까?")) sendDeleteRequest([ticketId]);
-        }
-
-        function deleteSelected() {
-            const selected = document.querySelectorAll('.item-checkbox:checked');
-            const ids = Array.from(selected).map(cb => cb.getAttribute('data-ticket-id'));
-            if (ids.length === 0) return alert("항목을 선택해주세요.");
-            if (confirm(`선택한 ${ids.length}개를 삭제하시겠습니까?`)) sendDeleteRequest(ids);
-        }
-
-        // 페이지 로드 시 초기 실행
+    document.addEventListener("change", function (e) {
+      if (e.target.classList.contains("item-checkbox") || e.target.id === "check-all") {
         updateTotalPrice();
+      }
+    });
 
-        // --- 결제하기 버튼 클릭 이벤트 ---
-        const paymentButton = document.getElementById("payment-button");
-
-        paymentButton.addEventListener("click", function () {
-            const data = window.currentOrderData;
-
-            if (!data || data.ticketIds.length === 0 || data.totalPrice === 0) {
-                alert("결제할 항목을 선택해주세요.");
-                return;
-            }
-
-            const ticketIdsParam = data.ticketIds.join(',');
-            const generateOrderId = "CART_" + new Date().getTime();
-
-            // 최종 결제 요청
-            paymentWidget.requestPayment({
-                orderId: generateOrderId,
-                orderName: data.orderName,
-                amount: data.totalPrice,
-                successUrl: window.location.origin + "/ticket/pay/success?ticket_ids=" + ticketIdsParam,
-                failUrl: window.location.origin + "/ticket/pay/fail",
-            });
+    function sendDeleteRequest(ticketIds) {
+      fetch("{{ url_for('ticket.remove_selected_cart') }}", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ticket_ids: ticketIds }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.status === "success") {
+            location.reload();
+          } else {
+            alert("삭제 실패");
+          }
         });
-    </script>
-    {% endblock %}
+    }
+
+    function deleteItem(ticketId) {
+      if (confirm("이 티켓을 삭제하시겠습니까?")) sendDeleteRequest([ticketId]);
+    }
+
+    function deleteSelected() {
+      const selected = document.querySelectorAll(".item-checkbox:checked");
+      const ids = Array.from(selected).map((cb) => cb.getAttribute("data-ticket-id"));
+      if (ids.length === 0) return alert("항목을 선택해주세요.");
+      if (confirm(`선택한 ${ids.length}개를 삭제하시겠습니까?`)) sendDeleteRequest(ids);
+    }
+
+    // 페이지 로드 시 초기 실행
+    updateTotalPrice();
+
+    // --- 결제하기 버튼 클릭 이벤트 ---
+    const paymentButton = document.getElementById("payment-button");
+
+    paymentButton.addEventListener("click", function () {
+      const data = window.currentOrderData;
+
+      if (!data || data.ticketIds.length === 0 || data.totalPrice === 0) {
+        alert("결제할 항목을 선택해주세요.");
+        return;
+      }
+
+      const ticketIdsParam = data.ticketIds.join(",");
+      const generateOrderId = "CART_" + new Date().getTime();
+
+      // 최종 결제 요청
+      paymentWidget.requestPayment({
+        orderId: generateOrderId,
+        orderName: data.orderName,
+        amount: data.totalPrice,
+        successUrl: window.location.origin + "/ticket/pay/success?ticket_ids=" + ticketIdsParam,
+        failUrl: window.location.origin + "/ticket/pay/fail",
+      });
+    });
+  </script>
+  {% endblock %}
+</div>

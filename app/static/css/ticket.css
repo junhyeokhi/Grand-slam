@@ -319,3 +319,21 @@
     margin-bottom: 15px; 
     box-shadow: 0 .125rem .25rem rgba(0,0,0,.075);
 }
+
+
+/* 최근 본 상품 사이드바 스타일 */
+#recentViewedDrawer {
+    width: 350px; /* 팝업 너비 조절 */
+}
+
+.offcanvas-body .list-group-item:hover {
+    background-color: #f8f9fa;
+    transition: background 0.2s;
+}
+
+/* 오른쪽 사이드 박스에 있는 '더보기' 버튼 스타일 */
+.side-box .small {
+    color: #007bff;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}

@@ -305,15 +305,33 @@ def ticket_create():
     # GET 요청 시 폼 렌더링
     return render_template('ticket/ticket_create.html')
 
-# 티켓 상세정보 페이지 연결 (주소: /ticket/ticket_detail/<int:ticket_id>)
+
 @bp.route('/ticket_detail/<int:ticket_id>/')
 @login_required
 def ticket_detail(ticket_id):
-    # DB에서 해당 티켓을 찾기
     ticket = Ticket.query.get_or_404(ticket_id)
-    # 찾은 ticket 데이터를 HTML로 리턴
+    
+    # 1. [추가] 최근 본 상품 세션 저장 로직
+    if 'recent_views' not in session:
+        session['recent_views'] = []
+    
+    recent = session['recent_views']
+    if ticket_id in recent:
+        recent.remove(ticket_id) # 중복 제거 (순서 최신화)
+    
+    recent.insert(0, ticket_id)  # 리스트 맨 앞에 추가
+    session['recent_views'] = recent[:10] # 최대 10개까지 기억
+    session.modified = True      # 세션 변경사항 강제 적용
 
-    return render_template('ticket/ticket_detail.html', ticket=ticket)
+    # 2. 장바구니 담김 여부 체크
+    is_in_cart = False
+    if g.user:
+        cart_item = Cart.query.filter_by(user_id=g.user.id, ticket_id=ticket_id).first()
+        is_in_cart = True if cart_item else False
+
+    return render_template('ticket/ticket_detail.html', 
+                           ticket=ticket, 
+                           is_in_cart=is_in_cart)
 
 # 구매/판매 완료된 티켓 상세 정보 확인 페이지 (새로 추가)
 @bp.route('/view_detail/<int:ticket_id>/')
@@ -498,18 +516,36 @@ def recent_ticket(ticket_id):
         recent.remove(ticket_id) # 이미 있으면 순서 최신화를 위해 제거
     
     recent.insert(0, ticket_id) # 가장 앞에 추가
-    session['recent_views'] = recent[:5] # 최근 5개만 유지
+    session['recent_views'] = recent[:10] # 최근 5개만 유지
     session.modified = True
     
     ticket = Ticket.query.get_or_404(ticket_id)
     return render_template('ticket/detail.html', ticket=ticket)
 
 # 5. 모든 페이지에서 장바구니 숫자를 쓸 수 있게 해주는 기능 (추가할 부분)
+
 @bp.app_context_processor
-def inject_cart_count():
+def inject_common_data():
+    # 1. 장바구니 개수 로직 (기존 유지)
+    cart_count = 0
     if g.user:
-        # 로그인했다면 DB에서 이 유저의 장바구니 개수를 세어옴
-        count = Cart.query.filter_by(user_id=g.user.id).count()
-    else:
-        count = 0
-    return dict(current_cart_count=count)
+        cart_count = Cart.query.filter_by(user_id=g.user.id).count()
+
+    # 2. 최근 본 상품 리스트 로직 (새로 추가)
+    recently_viewed_items = []
+    # 세션 키 이름을 확인하세요. (최근 본 티켓 저장 시 사용한 이름)
+    recent_ids = session.get('recent_views', []) 
+    
+    if recent_ids:
+        # DB에서 세션에 저장된 ID들에 해당하는 티켓 정보만 가져오기
+        # 순서를 유지하기 위해 반복문 사용
+        for tid in recent_ids:
+            ticket = Ticket.query.get(tid)
+            if ticket:
+                recently_viewed_items.append(ticket)
+
+    # 3. 템플릿으로 보낼 변수들을 딕셔너리에 담기
+    return dict(
+        current_cart_count=cart_count,
+        recently_viewed_items=recently_viewed_items
+    )

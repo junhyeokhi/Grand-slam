@@ -272,19 +272,30 @@
       </ul>
     </nav>
   </div>
-  
+
+  <!-- 최근 본 상품 -->
   <div class="offcanvas offcanvas-end" tabindex="-1" id="recentViewedDrawer" aria-labelledby="recentViewedDrawerLabel">
-    <div class="offcanvas-header border-bottom">
+    <div class="offcanvas-header border-bottom d-flex justify-content-between align-items-center">
       <h5 class="offcanvas-title fw-bold" id="recentViewedDrawerLabel">최근 본 상품</h5>
-      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+
+      <div>
+        <button type="button" class="btn btn-sm btn-outline-danger me-2" onclick="clearAllRecent()">전체 삭제</button>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+      </div>
     </div>
+
 
     <div class="offcanvas-body p-0">
       {% if recently_viewed_items %}
       <div class="list-group list-group-flush">
         {% for item in recently_viewed_items %}
-        <div class="list-group-item p-3 position-relative border-bottom">
+        <div class="list-group-item p-3 position-relative border-bottom" id="recent-item-{{ item.id }}">
           <div class="d-flex align-items-center">
+
+            <button type="button" class="btn-close position-absolute top-0 end-0 m-2"
+              style="z-index: 10; font-size: 0.7rem;" onclick="removeRecentItem('{{ item.id }}')">
+            </button>
+
             <div class="flex-shrink-0 me-3 bg-light rounded-3 d-flex align-items-center justify-content-center"
               style="width: 50px; height: 50px;">
               <span class="small fw-bold">{{ item.Hometeam_name[:1] }}</span>
@@ -298,6 +309,7 @@
               </h6>
               <div class="small text-danger fw-bold">{{ "{:,}원".format(item.price) }}</div>
             </div>
+
             <a href="{{ url_for('ticket.ticket_detail', ticket_id=item.id) }}" class="stretched-link"></a>
           </div>
         </div>
@@ -311,6 +323,61 @@
       {% endif %}
     </div>
   </div>
+
+  <script>
+    // 1. 최근 본 상품 개별 삭제 (X 버튼 클릭 시)
+    function removeRecentItem(ticketId) {
+      // 이벤트 전파 방지 (부모 a 태그 클릭 방지)
+      event.preventDefault();
+      event.stopPropagation();
+
+      if (!confirm("이 항목을 최근 본 내역에서 삭제하시겠습니까?")) return;
+
+      fetch(`/ticket/recent/delete/${ticketId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" }
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.status === "success") {
+            // 화면에서 해당 아이템 제거
+            const element = document.getElementById(`recent-item-${ticketId}`);
+            if (element) element.remove();
+
+            // 우측 사이드바의 숫자 카운트 업데이트
+            const countBadge = document.querySelector('.side-box .text-danger.fw-bold');
+            if (countBadge) {
+              let currentCount = parseInt(countBadge.innerText);
+              countBadge.innerText = Math.max(0, currentCount - 1);
+            }
+
+            // 모든 아이템이 삭제되었다면 '내역 없음' 표시를 위해 새로고침
+            const remainingItems = document.querySelectorAll('.list-group-item');
+            if (remainingItems.length === 0) {
+              location.reload();
+            }
+          }
+        })
+        .catch(err => console.error("삭제 중 에러 발생:", err));
+    }
+
+    // 2. 최근 본 상품 전체 삭제 (전체 삭제 버튼 클릭 시)
+    function clearAllRecent() {
+      if (!confirm("최근 본 모든 내역을 삭제하시겠습니까?")) return;
+
+      fetch("/ticket/recent/delete/all", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" }
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.status === "success") {
+            location.reload(); // 전체 삭제 후 UI 갱신
+          }
+        })
+        .catch(err => console.error("전체 삭제 중 에러 발생:", err));
+    }
+  </script>
 
 
   {% endblock %}

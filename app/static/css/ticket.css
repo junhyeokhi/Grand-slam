@@ -6,7 +6,7 @@
   max-width: 1280px;
 }
 
-/* 상단 */
+/* 헤더 */
 .ticket-page .mb-4 h3 {
   font-size: 28px;
   font-weight: 800;
@@ -337,3 +337,21 @@
     text-decoration: underline;
     text-underline-offset: 3px;
 }
+
+/* ticket-link 클래스를 가진 a 태그의 밑줄과 색상 고정 */
+.ticket-link {
+    text-decoration: none !important; 
+    color: inherit;                 
+    display: block;                  
+}
+
+/* 1. 최근 본 상품 사이드바를 모든 요소보다 위로 (z-index 대폭 상향) */
+.offcanvas.offcanvas-end {
+    z-index: 3000 !important;
+}
+
+/* 2. 사이드바가 열릴 때 화면을 어둡게 만드는 배경막도 같이 올리기 */
+.offcanvas-backdrop {
+    z-index: 2990 !important;
+}
+

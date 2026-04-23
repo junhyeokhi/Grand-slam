@@ -524,6 +524,7 @@ def recent_ticket(ticket_id):
 
 # 5. 모든 페이지에서 장바구니 숫자를 쓸 수 있게 해주는 기능 (추가할 부분)
 
+
 @bp.app_context_processor
 def inject_common_data():
     # 1. 장바구니 개수 로직 (기존 유지)
@@ -549,3 +550,20 @@ def inject_common_data():
         current_cart_count=cart_count,
         recently_viewed_items=recently_viewed_items
     )
+
+# 최근 본 상품 개별 삭제
+@bp.route('/recent/delete/<int:ticket_id>', methods=['POST'])
+def delete_recent_item(ticket_id):
+    recent = session.get('recent_views', [])
+    if ticket_id in recent:
+        recent.remove(ticket_id)
+        session['recent_views'] = recent
+        session.modified = True
+    return jsonify({"status": "success"})
+
+# 최근 본 상품 전체 삭제
+@bp.route('/recent/delete/all', methods=['POST'])
+def delete_recent_all():
+    session['recent_views'] = []
+    session.modified = True
+    return jsonify({"status": "success"})

@@ -79,8 +79,14 @@ def login():
                     flash("탈퇴 후 30일이 경과하여 완전히 삭제된 계정입니다.", "danger")
                     return redirect(url_for('auth.login'))
             
+            # (추가) 소셜 로그인 후 추가 정보가 입력되지 않은 경우
+            if user.phone == "010-0000-0000" or user.address == "카카오 로그인 유저":
+                flash("정확한 서비스 이용을 위해 추가 정보를 입력해주세요.", "info")
+                return redirect(url_for('auth.additional_info'))
+
             # 이전 페이지 정보(next)가 있으면 그곳으로, 없으면 메인으로 리다이렉트
             _next = request.args.get('next', '')
+            flash(f"{user.nickname}님, 환영합니다!")
             return redirect(_next) if _next else redirect(url_for('main.index'))
             
         flash(error)
@@ -132,7 +138,26 @@ def signup():
         user_by_nick = User.query.filter_by(nickname=form.nickname.data).first()
         
         if user_by_email:
-            flash('이미 가입된 이메일입니다.')
+            # 카카오로 이미 가입한 유저의 계정 통합 로직
+            # kakao_id가 있고, 이름이 같으며, 전화번호가 같거나 임시 번호(010-0000-0000)인 경우 통합을 허용합니다.
+            if user_by_email.kakao_id and user_by_email.username == form.username.data and (user_by_email.phone == form.phone.data or user_by_email.phone == "010-0000-0000"):
+                # 닉네임을 새로 입력했는데, 다른 사람이 이미 쓰고 있는 닉네임일 경우 방지
+                if user_by_nick and user_by_nick.id != user_by_email.id:
+                    flash('이미 사용 중인 닉네임입니다.', 'danger')
+                    return render_template('auth/signup.html', form=form)
+                
+                # 기존 카카오 계정에 비밀번호 및 새 정보 업데이트 (통합 처리)
+                full_address = f"{form.address.data} {request.form.get('detailAddress', '')}".strip()
+                user_by_email.password = generate_password_hash(form.password1.data)
+                user_by_email.nickname = form.nickname.data
+                user_by_email.phone = form.phone.data
+                user_by_email.address = full_address
+                db.session.commit()
+                
+                flash('기존 카카오 계정과 통합되었습니다. 이제 이메일/비밀번호로도 로그인할 수 있습니다.', 'success')
+                return redirect(url_for('auth.login'))
+            else:
+                flash('이미 가입된 이메일입니다.')
         elif user_by_nick:
             flash('이미 사용 중인 닉네임입니다.')
         else:
@@ -225,6 +250,28 @@ def edit_profile():
     detail_address_value = request.form.get('detailAddress', '')
     return render_template('auth/edit_profile.html', form=form, detail_address_value=detail_address_value)
 
+# 소셜 로그인 유저 추가 정보 입력 페이지
+@bp.route('/additional_info/', methods=['GET', 'POST'])
+@login_required
+def additional_info():
+    from app.form import AdditionalInfoForm
+    form = AdditionalInfoForm()
+
+    if request.method == 'POST' and form.validate_on_submit():
+        # 주소 합치기 (기본주소 + 상세주소)
+        full_address = f"{form.address.data} {request.form.get('detailAddress', '')}".strip()
+        
+        g.user.phone = form.phone.data
+        g.user.address = full_address
+        db.session.commit()
+        
+        flash('추가 정보가 성공적으로 저장되었습니다. 서비스를 이용하실 수 있습니다.', 'success')
+        return redirect(url_for('main.index'))
+    
+    # GET 요청 시에는 추가 정보 입력 폼을 렌더링합니다.
+    # 템플릿에서 g.user를 통해 기존 값을 보여주거나 비워둘 수 있습니다.
+    return render_template('auth/additional_info.html', form=form)
+
 
 # 회원탈퇴기능
 @bp.route('/delete_user/')
@@ -278,12 +325,19 @@ def kakao_callback():
 
     # 카카오가 준 정보 추출
     kakao_id = str(user_res.get("id")) 
-    kakao_email = user_res.get("kakao_account", {}).get("email")
+    kakao_account = user_res.get("kakao_account", {})
+    kakao_email = kakao_account.get("email")
     kakao_nickname = user_res.get("properties", {}).get("nickname", "카카오유저")
+
+    # 이메일 정보는 필수이므로, 없는 경우 회원가입/로그인 불가
+    if not kakao_email:
+        flash("카카오 계정의 이메일 정보 제공에 동의가 필요합니다.", "danger")
+        return redirect(url_for('auth.login'))
 
     # 세션 비우고 시작
     session.clear()
-    # DB에서 'kakao_id'로 사용자 찾기
+
+    # 1. DB에서 'kakao_id'로 사용자 찾기
     user = User.query.filter_by(kakao_id=kakao_id).first()
 
     if not user:
@@ -296,29 +350,43 @@ def kakao_callback():
             db.session.commit()
             flash(f"{user.nickname}님의 기존 계정에 카카오 로그인이 연결되었습니다.")
         else:
-            # 처음 온 사람이면 새로 가입 DB추가
+            # 3. 신규 사용자 생성 (닉네임 중복 처리 포함)
+            final_nickname = kakao_nickname
+            counter = 1
+            while User.query.filter_by(nickname=final_nickname).first():
+                final_nickname = f"{kakao_nickname}_{counter}"
+                counter += 1
+
+            # DB추가
             user = User(
-                username=kakao_nickname,
-                nickname=kakao_nickname,
+                username=kakao_nickname, # 이름은 중복 가능
+                nickname=final_nickname, # 닉네임은 중복 불가 처리
                 email=kakao_email,
-                kakao_id=kakao_id,  # 새로 만든 컬럼에 저장!
-                password=generate_password_hash(f"kakao_{kakao_id}"),
-                phone="010-0000-0000",
-                address="카카오 로그인 유저"
+                kakao_id=kakao_id,
+                password=generate_password_hash(f"kakao_{kakao_id}"), # 비밀번호는 임의의 값으로 설정
+                phone="010-0000-0000", # 필수값이므로 임시값 설정
+                address="카카오 로그인 유저" # 필수값이므로 임시값 설정
             )
             db.session.add(user)
             db.session.commit()
-            flash(f"{kakao_nickname}님, 카카오 계정으로 첫 가입을 축하합니다!")
+            flash(f"{final_nickname}님, 카카오 계정으로 첫 가입을 축하합니다!")
     else:
+        # kakao_id로 사용자를 찾은 경우
         flash(f"{user.nickname}님, 환영합니다!")
 
     # 4. 세션에 로그인 정보 저장
     session['user_id'] = user.id
 
-    # 5. 메인 페이지로 이동!
+    # 5. 추가 정보(전화번호, 주소)가 기본값인지 확인
+    if user.phone == "010-0000-0000" or user.address == "카카오 로그인 유저":
+        flash("정확한 서비스 이용을 위해 추가 정보를 입력해주세요.", "info")
+        return redirect(url_for('auth.additional_info'))
+
+    # 6. 메인 페이지로 이동!
     return redirect(url_for('main.index'))
   
 @bp.route('/ticket/<int:ticket_id>/')
+@login_required
 def detail(ticket_id):
     ticket = Ticket.query.get_or_404(ticket_id)
     return render_template('auth/subpage.html', ticket=ticket)

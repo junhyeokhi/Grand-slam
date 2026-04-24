@@ -46,3 +46,30 @@ def auto_confirm_purchases():
         except Exception as e:
             db.session.rollback()
             print(f"스케줄러 DB 저장 에러: {e}")
+
+# 경기 날짜가 지난 방치된 티켓을 '기간만료'로 변경하는 스케줄러
+@scheduler.task('interval', id='expire_tickets_job', seconds=60)
+def expire_past_tickets():
+    with scheduler.app.app_context():
+        now = datetime.now()
+        
+        # 현재 시간보다 game_date가 과거이고, 아직 '판매중'인 티켓 조회
+        expired_tickets = Ticket.query.filter(
+            Ticket.game_date < now,
+            Ticket.status == '판매중'
+        ).all()
+
+        if not expired_tickets:
+            return
+        
+        count = 0
+        for ticket in expired_tickets:
+            ticket.status = '기간만료'
+            count += 1
+        
+        try:
+            db.session.commit()
+            print(f"[{now}] 총 {count}건의 지난 경기 티켓이 '기간만료' 처리되었습니다.")
+        except Exception as e:
+            db.session.rollback()
+            print(f"스케줄러 DB 저장 에러 (기간만료 처리): {e}")

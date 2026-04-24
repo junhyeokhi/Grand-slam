@@ -68,7 +68,7 @@
             <h5 class="card-title fw-bold text-dark mb-1">최근 판매 현황 <span class="text-muted fw-normal fs-6">(전체 기준)</span></h5>
           </div>
           <div class="card-body">
-            <div class="row text-center">
+            <div class="row text-center g-3 row-cols-3 row-cols-xl-5 justify-content-center">
               <div class="col">
                 <div class="status-value fs-2 fw-bold text-dark">
                   {{ g.user.ticket_set | selectattr('status', 'equalto', '판매중') | list | length }}
@@ -86,6 +86,18 @@
                   {{ g.user.ticket_set | selectattr('status', 'equalto', '거래완료') | list | length }}
                 </div>
                 <div class="status-label text-muted small">거래완료</div>
+              </div>
+              <div class="col">
+                <div class="status-value fs-2 fw-bold text-dark">
+                  {{ g.user.ticket_set | selectattr('status', 'equalto', '삭제됨') | list | length }}
+                </div>
+                <div class="status-label text-muted small">삭제됨</div>
+              </div>
+              <div class="col">
+                <div class="status-value fs-2 fw-bold text-dark">
+                  {{ g.user.ticket_set | selectattr('status', 'equalto', '기간만료') | list | length }}
+                </div>
+                <div class="status-label text-muted small">기간만료</div>
               </div>
             </div>
           </div>

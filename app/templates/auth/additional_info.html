@@ -1,0 +1,83 @@
+{% extends "base.html" %} {% block content %}
+<div class="container my-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card shadow-sm">
+        <div class="card-header bg-dark text-white">
+          <h4 class="mb-0">추가 정보 입력</h4>
+        </div>
+        <div class="card-body p-4">
+          <p class="card-text text-muted mb-4">원활한 서비스 이용을 위해 전화번호와 주소를 입력해주세요.</p>
+          <form method="post" class="post-form">
+            {{ form.csrf_token }}
+
+            <!-- form_errors -->
+            {% if form.errors %}
+            <div class="alert alert-danger" role="alert">
+              {% for field, errors in form.errors.items() %}
+              <strong>{{ form[field].label }}</strong>
+              <ul>
+                {% for error in errors %}
+                <li>{{ error }}</li>
+                {% endfor %}
+              </ul>
+              {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- 전화번호 -->
+            <div class="mb-3">
+              <label for="phone" class="form-label fw-bold">전화번호</label>
+              <input
+                type="tel"
+                class="form-control"
+                name="phone"
+                id="phone"
+                value="{{ g.user.phone if g.user.phone != '010-0000-0000' else '' }}"
+                required
+              />
+            </div>
+
+            <!-- 주소 -->
+            <div class="mb-4">
+              <label for="address" class="form-label fw-bold">주소</label>
+              <div class="input-group">
+                <input
+                  type="text"
+                  name="address"
+                  id="address"
+                  class="form-control"
+                  value="{{ g.user.address if g.user.address != '카카오 로그인 유저' else '' }}"
+                  readonly
+                  required
+                />
+                <button type="button" class="btn btn-outline-secondary" onclick="execDaumPostcode()">주소 검색</button>
+              </div>
+            </div>
+            <div class="mb-4">
+              <label for="detailAddress" class="form-label fw-bold">상세주소</label>
+              <input type="text" name="detailAddress" id="detailAddress" class="form-control" placeholder="상세주소를 입력하세요" />
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 btn-lg">저장하고 시작하기</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Daum 우편번호 서비스 스크립트 -->
+<script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+<script>
+  function execDaumPostcode() {
+    new daum.Postcode({
+      oncomplete: function (data) {
+        var addr = data.userSelectedType === "R" ? data.roadAddress : data.jibunAddress;
+        document.getElementById("address").value = addr;
+        document.getElementById("detailAddress").focus();
+      },
+    }).open();
+  }
+</script>
+{% endblock %}

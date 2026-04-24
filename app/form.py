@@ -42,3 +42,7 @@ class ResetPasswordForm(FlaskForm):
         DataRequired('비밀번호 확인을 입력해주세요.'),
         EqualTo('new_password', message='새 비밀번호와 일치하지 않습니다.')
     ])
+
+class AdditionalInfoForm(FlaskForm):
+    phone = TelField('전화번호', validators=[DataRequired('전화번호는 필수 항목입니다.'), Length(min=10, max=20)])
+    address = StringField('주소', validators=[DataRequired('주소는 필수 항목입니다.')])

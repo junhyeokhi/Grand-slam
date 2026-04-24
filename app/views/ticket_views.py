@@ -48,9 +48,7 @@ def ticket_list():
     kw = request.args.get('kw', '').strip()
     
     if kw:
-        teams = ["두산베어스", "LG트윈스", "한화이글스", "SSG랜더스", "삼성라이온즈", 
-                 "NC다이노스", "KTwiz", "롯데자이언츠", "KIA타이거즈", "키움히어로즈"]
-        
+        teams = list(TEAM_SHORT_NAMES.keys())
         found_team = next((t for t in teams if kw.upper() in t.upper()), None)
         
         if found_team:
@@ -117,22 +115,9 @@ def ticket_list():
             selected_team_data = t
             break
 
-    # 카드에서 쓸 짧은 팀명 붙여주기
-    team_short_map = {
-        '두산베어스': '두산',
-        'LG트윈스': 'LG',
-        '한화이글스': '한화',
-        'SSG랜더스': 'SSG',
-        '삼성라이온즈': '삼성',
-        'NC다이노스': 'NC',
-        'KT위즈': 'KT',
-        '롯데자이언츠': '롯데',
-        'KIA타이거즈': 'KIA',
-        '키움히어로즈': '키움'
-    }
-
     for ticket in tickets.items:
-        ticket.awayteam_short = team_short_map.get(ticket.awayteam_name, ticket.awayteam_name)
+        ticket.hometeam_short = TEAM_SHORT_NAMES.get(ticket.Hometeam_name, ticket.Hometeam_name)
+        ticket.awayteam_short = TEAM_SHORT_NAMES.get(ticket.awayteam_name, ticket.awayteam_name)
 
     return render_template(
         'ticket.html',
@@ -259,9 +244,11 @@ def pay_fail():
 def ticket_create():
     if request.method == 'POST':
         # 폼 데이터 추출
-        hometeam_name = request.form.get('hometeam')
+        hometeam_raw = request.form.get('hometeam')
+        hometeam_name = TEAM_NORMALIZE.get(hometeam_raw, hometeam_raw)
         sub_category = request.form.get('sub_category') # 경기 정보 (장소 및 요일)
-        awayteam_name = request.form.get('awayteam')
+        awayteam_raw = request.form.get('awayteam')
+        awayteam_name = TEAM_NORMALIZE.get(awayteam_raw, awayteam_raw)
         game_date_str = request.form.get('game_date') # YYYY-MM-DD
         game_time_hour = request.form.get('game_time_hour') # HH
         game_time_minute = request.form.get('game_time_minute') # MM
@@ -463,9 +450,11 @@ def ticket_modify(ticket_id):
             flash('티켓 가격은 0원 이상이어야 합니다.', 'danger')
             return render_template('ticket/ticket_create.html', ticket=ticket)
 
-        ticket.Hometeam_name = request.form.get('hometeam')
+        hometeam_raw = request.form.get('hometeam')
+        ticket.Hometeam_name = TEAM_NORMALIZE.get(hometeam_raw, hometeam_raw)
         ticket.sub_category = request.form.get('sub_category')
-        ticket.awayteam_name = request.form.get('awayteam')
+        awayteam_raw = request.form.get('awayteam')
+        ticket.awayteam_name = TEAM_NORMALIZE.get(awayteam_raw, awayteam_raw)
         ticket.seat_grade = request.form.get('seat_grade')
         ticket.seat = request.form.get('seat')
         ticket.quantity = new_quantity

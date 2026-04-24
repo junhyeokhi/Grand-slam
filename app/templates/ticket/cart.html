@@ -53,15 +53,21 @@
           {% for item in cart_items %}
           <tr>
             <td>
-              <input type="checkbox" class="item-checkbox" onchange="updateCheckAll()" value="{{ item.id }}"
-                data-ticket-id="{{ item.ticket.id }}" data-price="{{ item.ticket.price * item.ticket.quantity }}"
-                data-name="{{ item.ticket.hometeam_name }} vs {{ item.ticket.awayteam_name }}" checked />
+              <input
+                type="checkbox"
+                class="item-checkbox"
+                onchange="updateCheckAll()"
+                value="{{ item.id }}"
+                data-ticket-id="{{ item.ticket.id }}"
+                data-price="{{ item.ticket.price * item.ticket.quantity }}"
+                data-name="{{ item.ticket.hometeam_name }} vs {{ item.ticket.awayteam_name }}"
+                checked
+              />
             </td>
 
             <td class="text-start ps-4">
-              <a href="{{ url_for('ticket.ticket_detail', ticket_id=item.ticket.id) }}"
-                class="text-decoration-none text-dark custom-hover-link">
-                <div class="fw-bold fs-5">{{ item.ticket.hometeam_name }} vs {{ item.ticket.awayteam_name }}</div>
+              <a href="{{ url_for('ticket.ticket_detail', ticket_id=item.ticket.id) }}" class="text-decoration-none text-dark custom-hover-link">
+                <div class="fw-bold fs-5">{{ item.ticket.Hometeam_name }} vs {{ item.ticket.awayteam_name }}</div>
               </a>
               <small class="text-muted">장소: {{ item.ticket.sub_category }} | 등급: {{ item.ticket.seat_grade }}</small>
             </td>
@@ -140,7 +146,7 @@
     }
 
     // 1. [추가] 전체 선택/해제 (상단 체크박스 클릭 시)
-    document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener("DOMContentLoaded", function () {
       // 1. 페이지 로드 시 초기 상태 설정
       // 모두 체크된 상태로 시작하고 싶다면 true, 해제 상태는 false
       const initialState = true;
@@ -177,7 +183,7 @@
 
       if (checkAll) {
         // 모든 항목이 체크되어 있다면 전체 선택 박스도 체크, 아니면 해제
-        checkAll.checked = (totalItems > 0 && totalItems === checkedItems);
+        checkAll.checked = totalItems > 0 && totalItems === checkedItems;
       }
 
       // 금액 업데이트도 함께 실행
@@ -237,8 +243,6 @@
         failUrl: window.location.origin + "/ticket/pay/fail",
       });
     });
-
-
   </script>
   {% endblock %}
 </div>

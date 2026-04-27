@@ -20,7 +20,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Flask 환경변수 설정
-ENV FLASK_APP=pybo:create_app
+ENV FLASK_APP=app:create_app
 ENV FLASK_ENV=production
 
 # 포트 오픈
